@@ -1,0 +1,106 @@
+Propuesta del Software
+
+1. Resumen del Software
+El sistema es una plataforma digital orientada a empresas constructoras para gestionar los residuos generados en sus proyectos. Permite registrar residuos, controlar su trazabilidad mediante QR y generar reportes con indicadores ambientales (CO₂, agua, materiales). Se ofrecen tres planes de uso (soft, intermedio y profesional) que escalan en funcionalidad.
+
+2. Funcionalidades Principales
+
+Plan Soft:
+
+Registro de residuos.
+
+Dashboard básico con gráfico circular (porcentaje reutilizado vs. desechado).
+
+Reportes simples de residuos.
+
+Plan Intermedio:
+
+Todo lo del plan Soft.
+
+Visualización en mapa de vertederos y recicladoras cercanas.
+
+Dashboard ampliado con métricas de impacto ambiental.
+
+Plan Profesional:
+
+Todo lo del plan Intermedio.
+
+Generación de documentos de respaldo para validar procesos de reciclaje.
+
+Reportes avanzados con comparativas entre proyectos.
+
+Informes personalizables por fecha, tipo de residuo, proveedor y costo.
+
+3. Diseño de la Interfaz (pantallas clave)
+
+Inicio de Sesión: Minimalista, fondo neutro, campos de usuario y contraseña, opción de recuperación de credenciales.
+
+Dashboard: Vista principal con:
+
+Resumen del proyecto (nombre, ubicación, fecha de inicio).
+
+Gráfico circular de residuos.
+
+Indicadores ambientales (CO₂, agua, energía ahorrada).
+
+Registro resumido de residuos activos.
+
+Barra Superior: Menú con opciones de Perfil, Dashboard, Añadir Residuos, Registros, Mapa e Informes.
+
+Perfil: Información de empresa, obra activa, opciones de edición.
+
+Añadir Residuos: Flujo guiado con pasos (tipo de residuo, reciclable/no, cantidad, generación de QR, emisión de ticket).
+
+Registros: Lista con historial completo de residuos con trazabilidad.
+
+Informes: Sección avanzada para reportes visuales, tablas y comparativas.
+
+4. Flujo de Usuario
+
+Registro con RUT de empresa y datos del encargado/gerente.
+
+Inicio de sesión en hasta 3 dispositivos autorizados.
+
+Ingreso a dashboard con resumen del proyecto y métricas.
+
+Adición de residuos siguiendo el flujo guiado (incluye QR y ticket).
+
+Consulta de registros en cualquier momento.
+
+Generación de informes y exportación de resultados.
+
+5. Propuesta de Base de Datos
+
+Usuarios: ID_usuario, nombre, rol, empresa, credenciales.
+
+Empresas: RUT, razón social, dirección, proyectos asociados.
+
+Proyectos: ID_proyecto, nombre, ubicación, fecha inicio/fin.
+
+Residuos: ID_residuo, tipo, cantidad, unidad, reciclable, estado, ID_proyecto.
+
+Trazabilidad: ID_trazabilidad, ID_residuo, QR, ticket, fecha.
+
+Reportes: ID_reporte, tipo, fecha, parámetros de filtrado, resultados.
+
+Relaciones principales:
+
+Un usuario pertenece a una empresa.
+
+Una empresa tiene múltiples proyectos.
+
+Un proyecto genera múltiples residuos.
+
+Cada residuo tiene su trazabilidad.
+
+Los reportes se generan sobre proyectos y residuos.
+
+6. Valor Agregado
+
+Permite demostrar el impacto positivo en sostenibilidad (CO₂ y agua ahorrada).
+
+Funciona como herramienta de marketing para constructoras al validar compromiso ambiental.
+
+Ofrece trazabilidad en tiempo real mediante QR y tickets digitales.
+
+Escalable: desde un plan básico hasta soluciones profesionales con auditoría documental.

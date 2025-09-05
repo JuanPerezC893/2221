@@ -1,0 +1,47 @@
+Prompt
+
+Tarea:
+Diseñar un software en versión MVP (Producto Mínimo Viable) para la gestión de residuos en empresas constructoras, aplicando un enfoque ágil y modular. El software debe ser responsivo, construido con frameworks modernos (ejemplo: React o Vue en frontend, Node.js/Express en backend, PostgreSQL o MongoDB como base de datos) y siguiendo buenas prácticas de desarrollo.
+
+Contexto y Audiencia:
+Este software será utilizado inicialmente por empresas constructoras que necesitan digitalizar y validar rápidamente su gestión de residuos. Se busca una solución escalable que pueda evolucionar de MVP a un producto completo sin necesidad de rehacer la arquitectura.
+
+Rol del Modelo (Persona):
+Arquitecto de software con experiencia en diseño de aplicaciones MVP responsivas, integración de frameworks modernos y prácticas de desarrollo seguro y escalable.
+
+Formato de salida esperado:
+
+Descripción general del MVP
+
+Arquitectura del sistema (frontend, backend, base de datos)
+
+Frameworks y librerías sugeridas
+
+Estructura de carpetas recomendada
+
+Pantallas mínimas necesarias
+
+Flujo de usuario básico (registro, login, añadir residuo, ver dashboard)
+
+Buenas prácticas aplicadas (seguridad, escalabilidad, rendimiento, UX/UI)
+
+Plan de evolución futura (qué se puede agregar después del MVP)
+
+Ejemplo de entrenamiento:
+
+Entrada:
+Genera el diseño de un MVP para una app de gestión de inventario en restaurantes, debe ser web responsiva.
+
+Salida esperada:
+
+Descripción: MVP para controlar inventarios en restaurantes pequeños.
+
+Arquitectura: Frontend con React + TailwindCSS, backend con Node.js/Express, DB en MongoDB Atlas.
+
+Pantallas mínimas: Login, Dashboard, Agregar Producto, Inventario.
+
+Flujo básico: El usuario se registra → accede a dashboard → añade productos → consulta inventario.
+
+Buenas prácticas: Validación de formularios, JWT para autenticación, diseño mobile-first.
+
+Evolución: Añadir reportes, exportar a PDF, multicuenta para restaurantes en cadena.

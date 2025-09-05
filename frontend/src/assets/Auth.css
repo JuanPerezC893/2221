@@ -1,0 +1,148 @@
+
+/* Centrado del layout */
+.auth-layout {
+  display: flex;
+  flex-direction: column; /* organiza en columna */
+  min-height: 100vh;
+  background: linear-gradient(135deg, #3b5998, #8b9dc3); /* Fondo degradado */
+}
+
+.auth-main {
+  flex: 1;
+  display: flex;
+  align-items: center;   /* Centrado vertical */
+  justify-content: center; /* Centrado horizontal */
+  padding: 1rem;
+}
+
+/* Tarjeta de login estilo Facebook */
+.login-card-facebook {
+  background: #fff;
+  width: 360px;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  animation: fadeIn 0.6s ease-in-out;
+}
+
+.login-card-facebook .card-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: #000000!important;
+}
+
+.login-card-facebook p {
+  font-size: 0.9rem;
+  color: #000000!important;
+  margin-bottom: 1.5rem;
+}
+
+/* Inputs */
+.login-card-facebook .form-control {
+  background-color: #fff !important; /* White background */
+  border: 1px solid rgba(0, 0, 0, 0.2) !important;
+  color: #000 !important;
+}
+
+.login-card-facebook .form-control:focus {
+  background-color: #fff !important; /* mantiene blanco al escribir */
+  border: 1px solid #3C5898 !important; /* borde azul estilo Facebook */
+  box-shadow: 0 0 4px rgba(60, 88, 152, 0.5) !important; /* brillo suave */
+  outline: none !important;
+}
+
+/* Botón principal */
+.login-card-facebook .btn-login {
+  width: 100%;
+  padding: 0.8rem;
+  border: none;
+  border-radius: 6px;
+  background-color: #3b5998;
+  color: #fff!important;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.login-card-facebook .btn-login:hover {
+  background-color: #2d4373;
+}
+
+/* Link extra */
+.login-card-facebook a {
+  display: inline-block;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: #3b5998!important;
+  text-decoration: none;
+}
+
+.login-card-facebook a:hover {
+  text-decoration: underline;
+}
+
+.login-card-facebook .btn-light {
+  background-color: #0d6efd !important;
+  color: #000000 !important;
+  border-color: #9c9c9c !important;
+}
+/* Footer */
+.auth-footer {
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.8rem;
+  color: #fff;
+  background: transparent!important;
+}
+
+
+/* Animación */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.card {
+  width: 100%;
+  max-width: 400px;   /* ancho fijo y proporcionado */
+  margin: 0 auto;
+}
+
+.register-card {
+  background: #fff;
+  width: 360px;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  animation: fadeIn 0.6s ease-in-out;
+}
+
+.register-card .card-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: #000 !important;
+}
+
+.register-card .form-control {
+  background-color: #fff !important;
+  border: 1px solid rgba(0, 0, 0, 0.2) !important;
+  color: #000 !important;
+}
+
+.register-card .form-control:focus {
+  border: 1px solid #3C5898 !important;
+  box-shadow: 0 0 4px rgba(60, 88, 152, 0.5) !important;
+  outline: none !important;
+}
+
+.register-card .btn-primary {
+  width: 100%;
+  padding: 0.8rem;
+  border-radius: 6px;
+  font-weight: bold;
+}

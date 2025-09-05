@@ -1,0 +1,167 @@
+# Guía de Edición de CSS para la Aplicación EcObra
+
+Este documento te guiará sobre dónde y cómo editar los estilos CSS principales de la aplicación. Todos los cambios deben realizarse en el archivo `frontend/src/App.css`.
+
+---
+
+## 1. Estilos para las Páginas de Inicio de Sesión y Registro (AuthLayout)
+
+Estas páginas utilizan el componente `AuthLayout`. Sus estilos principales se definen en `frontend/src/App.css` bajo las siguientes clases:
+
+*   `.auth-layout`: Controla el diseño general de la página de inicio/registro (fondo, altura, alineación principal).
+    ```css
+    /* Ejemplo en App.css */
+    .auth-layout {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      background-color: #fff; /* Fondo blanco para las páginas de autenticación */
+    }
+    ```
+
+*   `.auth-main`: Controla el área principal donde se centran los formularios de inicio de sesión/registro.
+    ```css
+    /* Ejemplo en App.css */
+    .auth-main {
+      flex-grow: 1;
+      display: flex;
+      justify-content: center; /* Centrado horizontal */
+      align-items: center;   /* Centrado vertical */
+    }
+    ```
+
+*   `.auth-footer`: Controla el pie de página en las páginas de inicio de sesión/registro.
+    ```css
+    /* Ejemplo en App.css */
+    .auth-footer {
+      padding: 1rem;
+      text-align: center;
+      color: #000; /* Color del texto del pie de página */
+      background-color: transparent; /* Fondo transparente */
+    }
+    ```
+
+*   **Estilos específicos del formulario de inicio de sesión/registro:**
+    El recuadro azul del formulario de inicio de sesión (`Login.jsx` y `Register.jsx`) utiliza la clase `.login-card-facebook`. Aquí puedes ajustar su tamaño, color de fondo, y los estilos de los campos de entrada y botones.
+
+    ```css
+    /* Ejemplo en App.css */
+    .login-card-facebook {
+      background-color: #3C5898 !important; /* Color de fondo del recuadro */
+      color: #fff !important;
+      width: 350px;  /* Ancho fijo del recuadro */
+      height: 350px; /* Alto fijo del recuadro (para que sea cuadrado) */
+    }
+
+    .login-card-facebook .form-control {
+      background-color: #fff !important; /* Fondo de los campos de entrada */
+      border: 1px solid rgba(0, 0, 0, 0.2) !important;
+      color: #000 !important; /* Color del texto que se escribe */
+    }
+
+    .login-card-facebook .form-control::placeholder {
+      color: rgba(0, 0, 0, 0.5) !important; /* Color del texto de marcador de posición */
+    }
+
+    .login-card-facebook .btn-light {
+      background-color: #fff !important; /* Color del botón de "Iniciar Sesión" */
+      color: #3C5898 !important;
+      border-color: #fff !important;
+    }
+    ```
+    **Para ajustar la posición horizontal del recuadro de inicio/registro:**
+    Si el recuadro no está perfectamente centrado horizontalmente, puedes añadir un `margin-left` negativo o positivo a la clase `.login-card-facebook` para ajustarlo manualmente.
+
+    ```css
+    /* Ejemplo en App.css */
+    .login-card-facebook {
+      /* ... otros estilos ... */
+      /* Ajusta este valor para mover el recuadro horizontalmente */
+      /* margin-left: -10px;  // Mover 10px a la izquierda */
+      /* margin-left: 10px;   // Mover 10px a la derecha */
+    }
+    ```
+
+---
+
+## 2. Estilos para la Barra de Navegación (Navbar)
+
+La barra de navegación se encuentra en `frontend/src/components/Navbar.jsx`. Sus estilos se definen en `frontend/src/App.css` bajo las siguientes reglas:
+
+*   `nav`: Controla el estilo general de la barra de navegación.
+    ```css
+    /* Ejemplo en App.css */
+    nav {
+      background-color: #3b5998; /* Color de fondo de la barra de navegación */
+      padding: 1rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      width: 100%;
+    }
+    ```
+
+*   `nav ul li a`: Controla el estilo de los enlaces de navegación.
+    ```css
+    /* Ejemplo en App.css */
+    nav ul li a {
+      text-decoration: none;
+      color: #fff; /* Color del texto de los enlaces */
+      font-weight: bold;
+    }
+    ```
+
+---
+
+## 3. Estilos para el Cuerpo Principal del Software (Main Content Body)
+
+El contenido principal de las páginas autenticadas (Dashboard, Residuos, etc.) se renderiza dentro del componente `Layout` (en `frontend/src/components/Layout.jsx`). El `main` elemento dentro de `Layout` es el que contiene el contenido específico de cada página.
+
+Los estilos generales que afectan el cuerpo principal se encuentran en `frontend/src/App.css`:
+
+*   `html, body, #root`: Aseguran que la página ocupe el 100% de la altura de la ventana.
+    ```css
+    /* Ejemplo en App.css */
+    html, body, #root {
+      height: 100%;
+      margin: 0;
+    }
+    ```
+
+*   `body`: Define el color de fondo general de la aplicación y la fuente.
+    ```css
+    /* Ejemplo en App.css */
+    body {
+      font-family: sans-serif;
+      background-color: #fff; /* Color de fondo general de la aplicación */
+      color: #343a40;
+    }
+    ```
+
+*   `main`: Este selector controla cómo el área de contenido principal se expande para empujar el pie de página hacia abajo.
+    ```css
+    /* Ejemplo en App.css */
+    main {
+      flex-grow: 1; /* Permite que el contenido principal ocupe el espacio disponible */
+    }
+    ```
+
+*   `footer`: Controla el pie de página general de la aplicación (visible en páginas autenticadas).
+    ```css
+    /* Ejemplo en App.css */
+    footer {
+      margin-top: auto;
+      padding: 1rem;
+      background-color: #f0f0f0; /* Color de fondo del pie de página */
+      width: 100%;
+      text-align: center;
+      color: #666;
+      font-size: 0.8rem;
+    }
+    ```
+
+---
+
+**Consideraciones Generales:**
+
+*   **`!important`:** Se ha utilizado `!important` en algunos estilos para asegurar que sobrescriban las reglas de Bootstrap. Úsalo con precaución, ya que puede dificultar la depuración.
+*   **Clases de Bootstrap:** Muchas de las clases (`mb-3`, `form-control`, `card`, `btn`, etc.) provienen de Bootstrap. Consulta la documentación de Bootstrap para entender su comportamiento.
+*   **Depuración:** Utiliza las herramientas de desarrollador de tu navegador (F12) para inspeccionar elementos y ver qué reglas CSS se están aplicando. Esto te ayudará a identificar conflictos o a ajustar valores.

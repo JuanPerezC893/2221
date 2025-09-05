@@ -1,0 +1,52 @@
+/* Estilos para el Layout Principal */
+
+.layout-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* Estilos para la Barra de Navegación */
+.navbar-custom {
+  position: fixed; /* Fija la barra en la parte superior */
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1030; /* Asegura que esté por encima de otro contenido */
+  background-color: #3b5998; /* Color fijo */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra suave */
+}
+
+.navbar-custom .nav-link,
+.navbar-custom .navbar-brand {
+  color: #fff !important; /* Texto blanco para mayor legibilidad */
+  font-weight: 600; /* Un poco más de grosor */
+}
+
+.navbar-custom .nav-link:hover {
+  color: rgba(255, 255, 255, 0.8) !important; /* Ligero cambio al pasar el ratón */
+}
+
+/* Estilos para el Contenido Principal */
+.main-content {
+  flex: 1; /* Ocupa el espacio restante */
+  padding: 2rem;
+  padding-top: 70px; /* Espacio para la barra de navegación fija */
+  background-color: #f4f6f9; /* Gris claro para el fondo */
+  width: 100%;
+}
+
+.main-content h1 {
+  text-align: center;
+  margin-bottom: 1.5rem; /* Espacio debajo del título */
+}
+
+/* Estilos para el Footer */
+.footer-custom {
+  text-align: center;
+  padding: 1rem;
+  background-color: #343a40;
+  color: white;
+  width: 100%;
+}

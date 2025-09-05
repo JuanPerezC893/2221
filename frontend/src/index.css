@@ -1,0 +1,106 @@
+/* Global Reset & Box Sizing */
+* {
+  box-sizing: border-box;
+}
+
+/* Custom Color Palette as CSS Variables */
+:root {
+  /* Primary Brand Colors */
+  --bs-primary: #2f5bb6; /* Darker Blue for better contrast */
+  --bs-secondary: #7F8C8D; /* Medium Grey */
+  --bs-success: #27AE60; /* Emerald Green */
+  --bs-danger: #E74C3C; /* Red */
+  --bs-info: #3498DB; /* Bright Blue */
+
+  /* Text Colors */
+  --text-color-dark: #34495E; /* Darker Grey for body text */
+  --text-color-light: #ECF0F1; /* Light Grey/Off-white for light text on dark backgrounds */
+
+  /* Background Colors */
+  --background-color-light: #ECF0F1; /* Light Grey/Off-white for general background */
+  --background-color-card: #FFFFFF; /* White for card backgrounds */
+
+  /* Bootstrap Overrides (optional, but good practice if not using SASS) */
+  --bs-blue: var(--bs-info); /* Map Bootstrap's default blue to our info color */
+  --bs-gray: var(--bs-secondary); /* Map Bootstrap's default gray to our secondary color */
+}
+
+/* Global Typography */
+body {
+  font-family: 'Roboto', sans-serif; /* Body text font */
+  background-color: var(--background-color-light); /* Apply custom background */
+  color: var(--text-color-dark); /* Apply custom text color */
+  height: 100%; /* From App.css */
+  margin: 0; /* From App.css */
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Lato', sans-serif; /* Headings font */
+  color: var(--text-color-dark); /* Default heading color */
+}
+
+/* Basic HTML/Body Height (from App.css) */
+html, body, #root {
+  height: 100%;
+  width: 100%;
+}
+
+/* General Link Styling */
+a {
+  font-weight: 500;
+  color: var(--bs-info); /* Use custom info color for links */
+  text-decoration: none; /* Remove underline by default */
+}
+a:hover {
+  color: var(--bs-primary); /* Hover effect */
+  text-decoration: underline;
+}
+
+/* Button Styling (simplified, Bootstrap handles most of this) */
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+/* Navbar Hover Effect */
+.navbar-nav .nav-item .nav-link {
+  transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition */
+}
+
+.navbar-nav .nav-item .nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.1); /* Subtle white background on hover */
+  border-radius: 0.25rem; /* Slightly rounded corners */
+}
+
+/* Force Bootstrap's bg-primary to use our custom variable */
+.bg-primary {
+  background-color: var(--bs-primary) !important;
+}
+
+/* Ensure navbar text is white */
+.navbar-dark .navbar-nav .nav-link {
+  color: white;
+}
+
+/* Remove Vite's default color-scheme and background-color for :root */
+:root {
+  color-scheme: light; /* Force light scheme unless dark mode is explicitly implemented */
+  background-color: transparent; /* Let body handle background */
+  color: initial; /* Let body handle default text color */
+}
+
+/* Remove Vite's default h1 font-size, let Bootstrap handle it */
+h1 {
+  font-size: initial;
+  line-height: initial;
+}
