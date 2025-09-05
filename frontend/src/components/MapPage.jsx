@@ -23,7 +23,7 @@ const MapPage = () => {
       if (auth.user) {
         try {
           setLoading(true);
-          const res = await api.get(`/proyectos?empresa_rut=${auth.user.rut}`);
+          const res = await api.get('/proyectos');
           setProyectos(res.data);
         } catch (err) {
           console.error('Error fetching projects:', err.response?.data || err.message);

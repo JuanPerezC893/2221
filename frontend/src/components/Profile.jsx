@@ -27,8 +27,8 @@ const Profile = () => {
       setLoading(true);
       try {
         const [projectsRes, wastesRes] = await Promise.all([
-          api.get(`/proyectos?empresa_rut=${auth.user.empresa_rut}`),
-          api.get(`/residuos/by-company?empresa_rut=${auth.user.empresa_rut}`)
+          api.get('/proyectos'),
+          api.get('/residuos')
         ]);
         setProjects(projectsRes.data);
         setWastes(wastesRes.data);
@@ -59,7 +59,7 @@ const Profile = () => {
 
   const handleSave = async () => {
     try {
-      const res = await api.put(`/users/${auth.user.id_usuario}`, formData);
+      const res = await api.put('/users/me', formData);
       updateUser(res.data);
       setIsEditing(false);
     } catch (err) {

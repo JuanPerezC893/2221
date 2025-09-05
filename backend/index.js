@@ -8,6 +8,7 @@ const port = process.env.PORT || 5000;
 // Configuración CORS para desarrollo y producción
 const allowedOrigins = [
   'http://localhost:5173',
+  'http://localhost:5174',
   'http://localhost:3000', 
   'https://2221-six.vercel.app',
   process.env.FRONTEND_URL

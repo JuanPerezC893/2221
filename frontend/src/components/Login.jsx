@@ -2,7 +2,6 @@ import React, { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthContext from '../context/AuthContext.jsx';
 import { useForm } from '../hooks/useForm';
-import { login as loginService } from '../api/auth';
 
 const Login = () => {
   const { login } = useContext(AuthContext);
@@ -21,8 +20,7 @@ const Login = () => {
     setLoading(true); // Set loading to true
     setErrorMessage(''); // Clear previous errors
     try {
-      const res = await loginService(email, password);
-      login(res.data.token);
+      await login(email, password); // Usar directamente la función del contexto
       navigate('/dashboard');
     } catch (err) {
       console.error(err);
