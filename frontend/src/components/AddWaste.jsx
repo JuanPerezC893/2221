@@ -97,7 +97,7 @@ const AddWaste = () => {
     try {
       const res = await createResiduo(formData);
       setSavedWasteData(res.data);
-      const qrValue = `http://localhost:5173/waste/${res.data.id_residuo}`;
+      const qrValue = `${import.meta.env.VITE_FRONTEND_URL || window.location.origin}/waste/${res.data.id_residuo}`;
       setQrCodeValue(qrValue);
       setStep(2); // Move to confirmation step
     } catch (err) {

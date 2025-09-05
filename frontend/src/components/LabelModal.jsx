@@ -7,7 +7,7 @@ const LabelModal = ({ residuo, onClose }) => {
     window.print();
   };
 
-  const qrCodeValue = `http://localhost:5173/waste/${residuo.id_residuo}`;
+  const qrCodeValue = `${import.meta.env.VITE_FRONTEND_URL || window.location.origin}/waste/${residuo.id_residuo}`;
 
   return (
     <>
