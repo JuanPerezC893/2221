@@ -83,15 +83,8 @@ const WasteForm = ({ formData, handleInputChange, handleWasteTypeChange, showSug
             required
           >
             <option value="kg">kg (kilogramos)</option>
-            <option value="toneladas">toneladas</option>
-            <option value="g">g (gramos)</option>
             <option value="ton">ton (toneladas)</option>
-            <option value="t">t (toneladas)</option>
-            <option value="lb">lb (libras)</option>
           </select>
-          <div className="form-text">
-            💡 <strong>Tip:</strong> Si ingresas toneladas, se convertirá automáticamente a kg para mantener consistencia en los cálculos.
-          </div>
         </div>
       </div>
 
