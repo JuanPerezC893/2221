@@ -61,9 +61,6 @@ cd GestionDeResiduos
 
 # 3. Ejecutar script automático
 iniciar-local-windows.bat
-
-# 4. Acceder a http://localhost:5173
-# Usuario: test-windows@local.com / TestWindows123!
 ```
 
 ---
@@ -97,14 +94,16 @@ iniciar-local-windows.bat
 1. Ve a [postgresql.org/download/windows](https://www.postgresql.org/download/windows/)
 2. Descarga e instala PostgreSQL
 3. Durante la instalación:
+   - **Recomendacion** no instalar "pgAdmin 4"
    - 🔐 **Recuerda la contraseña** del usuario `postgres`
    - 📡 **Puerto:** Mantén el puerto por defecto `5432`
-4. ✅ **Verifica:** Busca "pgAdmin 4" en el menú de inicio
-
+   
 ### 4️⃣ Configurar la Base de Datos
 
-Abre **pgAdmin 4** o **psql** y ejecuta estos comandos:
+Abre ** SQL SHELL (psql)** en el menu de inicio:
+1. Presiona ENTER hasta que te pida la contraseña del usuario `postgres`.
 
+2. Ejecuta estos comandos:
 ```sql
 -- 1. Crear usuario para la aplicación
 CREATE USER gestion_residuos WITH PASSWORD 'residuos123';
@@ -124,13 +123,13 @@ Si el proyecto está en un repositorio Git (GitHub, GitLab, etc.):
 2. **Navega a donde quieres el proyecto:**
 3. **Clona el repositorio:**
    ```cmd
-   git clone https://github.com/tuusuario/GestionDeResiduos.git
+   git clone https://github.com/JuanPerezC893/2221.git
    ```
    > ⚠️ **Nota:** Reemplaza la URL con la URL real de tu repositorio
 
 4. **Entra a la carpeta del proyecto:**
    ```cmd
-   cd GestionDeResiduos
+   cd 2221
    ```
 
 ---
@@ -144,7 +143,7 @@ El proyecto incluye un script que **automatiza todo el proceso**:
 1. **Abre Símbolo del sistema** como Administrador
 2. **Navega a la carpeta del proyecto clonado:**
    ```cmd
-   cd "C:\ruta\donde\clonaste\GestionDeResiduos"
+   cd "C:\ruta\donde\clonaste\2221"
    ```
 3. **Ejecuta el script automático:**
    ```cmd
@@ -176,16 +175,11 @@ Al finalizar verás:
 🔗 Backend API:   http://localhost:5000/api  
 🗃️ Base de datos: PostgreSQL (localhost:5432)
 
-👤 Usuario de prueba creado:
-   📧 Email:    test-windows@local.com
-   🔐 Password: TestWindows123!
-
-🌍 Geocodificación automática habilitada
 ```
 
 ---
 
-## ⚙️ Ejecución Manual (Alternativa)
+## ⚙️ Ejecución Manual (Alternativa) sin el script `iniciar-local-windows.bat`
 
 Si prefieres ejecutar paso a paso manualmente:
 
@@ -262,119 +256,3 @@ El script automático crea un usuario de prueba:
 - 📧 **Email:** `test-windows@local.com`
 - 🔐 **Contraseña:** `TestWindows123!`
 
----
-
-## ⚙️ Configuración Avanzada
-
-### 🔧 Variables de Entorno Personalizadas
-
-**Backend (.env):**
-```env
-# Base de datos
-DATABASE_URL=postgresql://usuario:password@host:puerto/database
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=gestion_residuos_db
-DB_USER=gestion_residuos
-DB_PASSWORD=residuos123
-
-# Servidor
-PORT=5000
-NODE_ENV=development
-FRONTEND_URL=http://localhost:5173
-
-# Seguridad
-JWT_SECRET=tu_clave_secreta_muy_segura_aqui
-JWT_EXPIRES_IN=24h
-
-# Geocodificación (opcional)
-GEOCODING_API_KEY=tu_api_key_si_tienes_una
-
-# Logging
-LOG_LEVEL=info
-```
-
-**Frontend (.env):**
-```env
-# URLs de conexión
-VITE_API_URL=http://localhost:5000/api
-VITE_FRONTEND_URL=http://localhost:5173
-
-# Configuración de la app
-VITE_APP_NAME=Sistema de Gestión de Residuos
-VITE_APP_VERSION=1.0.0
-
-# Mapa (opcional)
-VITE_MAP_DEFAULT_LAT=-33.4489
-VITE_MAP_DEFAULT_LNG=-70.6693
-VITE_MAP_DEFAULT_ZOOM=13
-```
-
-### 📁 Estructura Completa del Proyecto
-
-```
-GestionDeResiduos/                    # ← Carpeta creada al clonar
-├── 📄 iniciar-local-windows.bat      # Script de inicio automático
-├── 📄 GUIA_INSTALACION_WINDOWS.md    # Esta guía
-├── 📄 README.md                      # Documentación general
-├── 📄 package.json                   # Dependencias raíz
-├── 📁 .git/                          # Carpeta de Git (oculta)
-│
-├── 🌐 backend/                       # Servidor Node.js
-│   ├── 📄 .env                       # Variables de entorno
-│   ├── 📄 package.json               # Dependencias backend
-│   ├── 📄 index.js                   # Servidor principal
-│   ├── 📄 db.js                      # Conexión a base de datos
-│   ├── 📄 database.sql               # Estructura de BD
-│   ├── 📁 routes/                    # Rutas de la API
-│   │   ├── auth.js                   # Autenticación
-│   │   ├── proyectos.js              # Gestión de proyectos
-│   │   └── residuos.js               # Gestión de residuos
-│   └── 📁 utils/                     # Utilidades
-│
-├── 🎨 frontend/                      # Aplicación React
-│   ├── 📄 .env                       # Variables de entorno
-│   ├── 📄 package.json               # Dependencias frontend
-│   ├── 📄 vite.config.js             # Configuración Vite
-│   ├── 📄 index.html                 # HTML principal
-│   └── 📁 src/                       # Código fuente
-│       ├── 📄 App.jsx                # Componente principal
-│       ├── 📄 main.jsx               # Punto de entrada
-│       ├── 📁 components/            # Componentes React
-│       │   ├── Dashboard.jsx         # Panel principal
-│       │   ├── Login.jsx             # Inicio de sesión
-│       │   ├── Register.jsx          # Registro
-│       │   ├── Layout.jsx            # Diseño general
-│       │   └── ...                   # Otros componentes
-│       └── 📁 context/               # Contextos React
-│           └── AuthContext.jsx       # Contexto de autenticación
-│
-└── 📁 docs/                          # Documentación adicional
-```
-
----
-
-## ✅ Lista de Verificación Final
-
-Antes de considerar que la instalación está completa, verifica:
-
-- [ ] ✅ Git instalado y funcionando
-- [ ] ✅ Proyecto clonado o descargado correctamente
-- [ ] ✅ Node.js instalado y funcionando
-- [ ] ✅ PostgreSQL instalado y ejecutándose
-- [ ] ✅ Base de datos creada con usuario `gestion_residuos`
-- [ ] ✅ Script `iniciar-local-windows.bat` ejecutado sin errores
-- [ ] ✅ Backend responde en http://localhost:5000/api
-- [ ] ✅ Frontend carga en http://localhost:5173
-- [ ] ✅ Login funciona con credenciales de prueba
-- [ ] ✅ Crear proyecto funciona con geocodificación
-- [ ] ✅ Mapa muestra el proyecto creado
-- [ ] ✅ Dashboard muestra estadísticas
-
-### 🎉 ¡Felicidades!
-
-Si todos los puntos están marcados, tienes el **Sistema de Gestión de Residuos** funcionando completamente en tu Windows local.
-
----
-
-> **💡 Consejo:** Guarda esta guía como referencia para futuras instalaciones o si necesitas ayudar a otros usuarios.
