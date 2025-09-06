@@ -28,7 +28,7 @@ CREATE TABLE proyectos (
 CREATE TABLE residuos (
     id_residuo SERIAL PRIMARY KEY,
     tipo VARCHAR(255) NOT NULL,
-    cantidad INT NOT NULL,
+    cantidad DECIMAL NOT NULL,
     unidad VARCHAR(50),
     reciclable BOOLEAN,
     estado VARCHAR(255),
