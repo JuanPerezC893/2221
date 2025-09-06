@@ -1,150 +1,189 @@
-# Waste Management System (MVP)
+# 🗂️ Sistema de Gestión de Residuos
 
-This document provides instructions on how to setup and run the development environment for the Waste Management System MVP, including the backend, frontend, and database.
+> **Sistema completo de gestión y seguimiento de residuos con geocodificación automática**
 
-## Table of Contents
-1. [Project Structure](#project-structure)
-2. [System Architecture](#system-architecture)
-3. [Prerequisites](#prerequisites)
-4. [Database Setup](#database-setup)
-5. [Backend Setup and Run](#backend-setup-and-run)
-6. [Frontend Setup and Run](#frontend-setup-and-run)
-7. [CSS Modification](#css-modification)
+[![Node.js](https://img.shields.io/badge/Node.js-16+-green.svg)](https://nodejs.org/)
+[![React](https://img.shields.io/badge/React-19+-blue.svg)](https://reactjs.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-12+-blue.svg)](https://postgresql.org/)
+[![Express](https://img.shields.io/badge/Express-5+-lightgrey.svg)](https://expressjs.com/)
 
-## 1. Project Structure
+## 🚀 Inicio Rápido
+
+### Para Windows:
+
+```cmd
+# 1. Clonar repositorio
+git clone https://github.com/JuanPerezC893/2221.git
+cd 2221
+
+# 2. Configurar PostgreSQL
+# Crear usuario: gestion_residuos / residuos123
+# Crear BD: gestion_residuos_db
+
+# 3. Ejecutar script automático
+iniciar-local-windows.bat
+
+# 4. Acceder a http://localhost:5173
+# Usuario: test-windows@local.com / TestWindows123!
+```
+
+📋 **[Guía completa para Windows →](docs/guias/GUIA_INSTALACION_WINDOWS.md)**
+
+## 📁 Estructura del Proyecto
 
 ```
-C:\Users\albon\OneDrive\Escritorio\Gestion de residuos\
-├───PromptP.txt
-├───Propuesta.txt
-├───backend\
-│   ├───database.sql
-│   ├───db.js
-│   ├───index.js
-│   ├───package-lock.json
-│   ├───package.json
-│   ├───node_modules\...
-│   └───routes\
-│       ├───auth.js
-│       ├───proyectos.js
-│       └───residuos.js
-└───frontend\
-    ├───.gitignore
-    ├───eslint.config.js
-    ├───index.html
-    ├───package-lock.json
-    ├───package.json
-    ├───README.md
-    ├───vite.config.js
-    ├───node_modules\...
-    ├───public\
-    │   └───vite.svg
-    └───src\
-        ├───App.css
-        ├───App.jsx
-        ├───index.css
-        ├───main.jsx
-        ├───assets\
-        │   └───react.svg
-        ├───components\
-        │   ├───AddWaste.jsx
-        │   ├───Dashboard.jsx
-        │   ├───EditProject.jsx
-        │   ├───EditWaste.jsx
-        │   ├───Layout.jsx
-        │   ├───Login.jsx
-        │   ├───Navbar.jsx
-        │   ├───PrivateRoute.jsx
-        │   ├───Register.jsx
-        │   └───WasteList.jsx
-        └───context\
-            └───AuthContext.jsx
+GestionDeResiduos/
+├── 📄 iniciar-local-windows.bat          # Script de inicio automático para Windows
+├── 📄 README.md                          # Este archivo
+├── 📄 package.json                       # Dependencias raíz
+│
+├── 🌐 backend/                           # Servidor Node.js + Express
+│   ├── 📄 index.js                       # Servidor principal
+│   ├── 📄 db.js                          # Conexión PostgreSQL
+│   ├── 📄 database.sql                   # Estructura de base de datos
+│   ├── 📄 package.json                   # Dependencias backend
+│   ├── 📁 routes/                        # Rutas de la API
+│   │   ├── auth.js                       # Autenticación JWT
+│   │   ├── proyectos.js                  # Gestión de proyectos
+│   │   ├── residuos.js                   # Gestión de residuos
+│   │   └── trazabilidad.js               # Trazabilidad
+│   ├── 📁 services/                      # Servicios
+│   │   └── geocoding.js                  # Geocodificación automática
+│   └── 📁 utils/                         # Utilidades
+│
+├── 🎨 frontend/                          # Aplicación React + Vite
+│   ├── 📄 index.html                     # HTML principal
+│   ├── 📄 vite.config.js                 # Configuración Vite
+│   ├── 📄 package.json                   # Dependencias frontend
+│   └── 📁 src/                           # Código fuente
+│       ├── App.jsx                       # Componente principal
+│       ├── main.jsx                      # Punto de entrada
+│       ├── 📁 components/                # Componentes React
+│       │   ├── Dashboard.jsx             # Panel principal
+│       │   ├── Login.jsx & Register.jsx  # Autenticación
+│       │   ├── Layout.jsx & Navbar.jsx   # Diseño
+│       │   └── ...                       # Otros componentes
+│       └── 📁 context/                   # Contextos React
+│           └── AuthContext.jsx           # Contexto de autenticación
+│
+└── 📁 docs/                              # Documentación organizada
+    ├── 📁 analisis/                      # Análisis técnicos
+    ├── 📁 guias/                         # Guías de instalación
+    ├── 📁 configuracion/                 # Configuraciones de deploy
+    └── 📁 reportes/                      # Reportes y propuestas
+```
 
-*   **Node.js** (LTS version recommended)
-*   **npm** (comes with Node.js)
-*   **PostgreSQL**
-*   **Git** (optional, for version control)
+## 🎯 Características
 
-## 3. Database Setup
+- 👥 **Gestión de usuarios** con autenticación JWT
+- 🏗️ **Administración de proyectos** con ubicaciones geocodificadas
+- ♻️ **Registro y seguimiento de residuos** por tipo y cantidad
+- 📊 **Dashboard con métricas** y gráficos interactivos
+- 🗺️ **Mapas interactivos** con ubicaciones de proyectos
+- 📱 **Interfaz responsive** para todos los dispositivos
+- 🌍 **Geocodificación automática** de direcciones
 
-1.  **Create a PostgreSQL database:**
-    ```bash
-    psql -U your_username -c "CREATE DATABASE waste_management;"
-    ```
-    Replace `your_username` with your PostgreSQL username.
+## 🛠️ Tecnologías
 
-2.  **Restore the database from the dump:**
-    ```bash
-    psql -U your_username -d waste_management -f backend/database.sql
-    ```
-    This will create and populate the necessary tables in your `waste_management` database.
+### Backend
+- **Node.js 16+** - Servidor JavaScript
+- **Express 5** - Framework web
+- **PostgreSQL 12+** - Base de datos
+- **JWT** - Autenticación
+- **Bcrypt** - Hashing de contraseñas
 
-3.  **Configure database connection:**
-    Create a `.env` file in the `backend` directory with the following content:
-    ```
-    DB_USER=your_username
-    DB_HOST=localhost
-    DB_DATABASE=waste_management
-    DB_PASSWORD=your_password
-    DB_PORT=5432
-    JWT_SECRET=your_jwt_secret
-    ```
-    Replace `your_username`, `your_password` and `your_jwt_secret` with your actual credentials.
+### Frontend
+- **React 19** - Librería UI
+- **Vite** - Build tool y dev server
+- **Bootstrap 5** - Framework CSS
+- **Leaflet** - Mapas interactivos
+- **Chart.js** - Gráficos y visualizaciones
 
-## 4. Backend Setup and Run
+## 🚀 Instalación Manual
 
-The backend is a Node.js application.
+### Prerequisitos
 
-1.  **Navigate to the backend directory:**
-    ```bash
-    cd backend
-    ```
+- **Node.js 16+** y **npm**
+- **PostgreSQL 12+**
+- **Git**
 
-2.  **Install dependencies:**
-    ```bash
-    npm install
-    ```
+### 1. Configurar Base de Datos
 
-3.  **Start the backend server:**
-    ```bash
-    npm start
-    # or
-    node index.js
-    ```
-    The backend server should start on `http://localhost:5000` (or the port defined in `index.js`).
+```sql
+-- Crear usuario
+CREATE USER gestion_residuos WITH PASSWORD 'residuos123';
 
-## 5. Frontend Setup and Run
+-- Crear base de datos
+CREATE DATABASE gestion_residuos_db OWNER gestion_residuos;
 
-The frontend is a React application built with Vite.
+-- Dar permisos
+GRANT ALL PRIVILEGES ON DATABASE gestion_residuos_db TO gestion_residuos;
+```
 
-1.  **Navigate to the frontend directory:**
-    ```bash
-    cd frontend
-    ```
+### 2. Backend
 
-2.  **Install dependencies:**
-    ```bash
-    npm install
-    ```
+```bash
+cd backend
+npm install
+npm start  # Puerto 5000
+```
 
-3.  **Start the frontend development server:**
-    ```bash
-    npm run dev
-    ```
-    The frontend application should open in your browser, usually at `http://localhost:5173` (or another available port).
+### 3. Frontend
 
-    **Note on Responsiveness:** The frontend is built with Bootstrap, which provides a robust foundation for responsive design. The application is designed to adapt to various screen sizes (mobile, tablet, desktop).
+```bash
+cd frontend
+npm install
+npm run dev  # Puerto 5173
+```
 
-## 7. CSS Modification
+## 📁 Documentación
 
-The main CSS files for the frontend are located in the `frontend/src/` directory:
+### 📋 Guías
+- 🔨 **[Guía de Instalación Windows](docs/guias/GUIA_INSTALACION_WINDOWS.md)** - Instalación paso a paso
+- 🎨 **[Guía CSS](docs/guias/GUIA_CSS.txt)** - Modificación de estilos
 
-*   `frontend/src/App.css`: Contains general application-wide styles.
-*   `frontend/src/index.css`: Contains global styles, often related to basic HTML elements and root variables.
+### 📊 Análisis Técnico
+- 📈 **[Análisis del Proyecto](docs/analisis/Analisis_Proyecto_Reporte.md)**
+- 🗺️ **[Análisis Frontend](docs/analisis/Analisis_Frontend_Reporte.md)**
+- 🗺️ **[Análisis Base de Datos](docs/analisis/Analisis_Base_Datos_Reporte.md)**
 
-**Important Considerations for CSS:**
+### ⚙️ Configuración y Deploy
+- 🛰️ **[Deploy Vercel](docs/configuracion/DEPLOYMENT_VERCEL.md)**
+- 🗺️ **[Geocodificación](docs/configuracion/GEOCODING_AUTOMATIC.md)**
+- 🗺️ **[Configuración Neon](docs/configuracion/NEON_SETUP.md)**
 
-*   **Specificity:** Be aware of CSS specificity when adding or modifying styles. More specific rules (e.g., targeting an ID) will override less specific rules (e.g., targeting a tag).
-*   **Import Order:** In `frontend/src/main.jsx`, Bootstrap's CSS (`bootstrap/dist/css/bootstrap.min.css`) is imported before `index.css` and `App.css`. This means that styles defined in `index.css` and `App.css` will take precedence over Bootstrap's default styles if they have the same specificity.
-*   **Avoid `!important`:** As a general rule, avoid using `!important` in your CSS unless absolutely necessary, as it can make debugging and maintaining styles very difficult.
-*   **Browser Cache:** During development, if you make CSS changes and they don't appear, try a hard refresh of your browser (Ctrl+Shift+R or Cmd+Shift+R) or clear your browser's cache. Sometimes, restarting the frontend development server (`npm run dev`) can also help.
+### 📈 Reportes
+- 🔍 **[Reporte de Salud Backend](docs/reportes/BACKEND_HEALTH_REPORT.md)**
+- 📋 **[Criterios Técnicos](docs/reportes/Criterios_Reporte.md)**
+- 📈 **[Propuestas de Mejora](docs/reportes/Propuesta_Mejora_Documentacion.md)**
+
+## 📱 Uso del Sistema
+
+### Accesos
+- **Frontend:** http://localhost:5173
+- **Backend API:** http://localhost:5000/api
+- **Base de datos:** localhost:5432
+
+### Credenciales de Prueba
+- **Email:** test-windows@local.com
+- **Contraseña:** TestWindows123!
+
+### Funcionalidades Principales
+1. **Registro/Login** de usuarios
+2. **Crear proyectos** con geocodificación automática
+3. **Gestionar residuos** por tipo y cantidad
+4. **Dashboard** con métricas y gráficos
+5. **Mapa interactivo** con ubicaciones de proyectos
+
+## 🔧 Desarrollo
+
+- **Formato:** El proyecto usa Bootstrap y estilos personalizados
+- **API:** RESTful con autenticación JWT
+- **Base de Datos:** PostgreSQL con migraciones automáticas
+- **Geocodificación:** Servicio automático para direcciones
+
+---
+
+🎆 **¡Sistema listo para producción!** - Compatible con Vercel, Neon Database y otros servicios cloud.
+
+
