@@ -66,6 +66,12 @@ GestionDeResiduos/
 │       └── 📁 context/                   # Contextos React
 │           └── AuthContext.jsx           # Contexto de autenticación
 │
+├── 🧪 tests/                             # Tests y verificaciones
+│   ├── test-connection.js               # Test de conexión BD
+│   ├── test-backend.js                  # Tests del backend
+│   ├── test-login-flow.js               # Tests de autenticación
+│   └── ...                               # Otros tests
+│
 └── 📁 docs/                              # Documentación organizada
     ├── 📁 analisis/                      # Análisis técnicos
     ├── 📁 guias/                         # Guías de instalación
@@ -156,6 +162,11 @@ npm run dev  # Puerto 5173
 - 🔍 **[Reporte de Salud Backend](docs/reportes/BACKEND_HEALTH_REPORT.md)**
 - 📋 **[Criterios Técnicos](docs/reportes/Criterios_Reporte.md)**
 - 📈 **[Propuestas de Mejora](docs/reportes/Propuesta_Mejora_Documentacion.md)**
+
+### 🧪 Tests
+- 🔧 **[Guía de Tests](tests/README.md)** - Cómo ejecutar tests
+- 🔍 **Tests de conexión, backend, autenticación y geocodificación**
+- ⚙️ **Tests unitarios y de integración**
 
 ## 📱 Uso del Sistema
 

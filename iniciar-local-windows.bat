@@ -193,6 +193,7 @@ cd ..
 :: 5. EJECUTAR TESTS BÁSICOS
 echo.
 echo 🧪 Ejecutando tests de verificación...
+echo    📁 Tests organizados en directorio tests/
 
 :: Verificar que axios esté instalado
 cd backend
@@ -203,8 +204,16 @@ if errorlevel 1 (
 )
 cd ..
 
-:: Test de conexión básica
-echo 🔍 Test 1: Verificando endpoints...
+:: Test de conexión básica usando archivo de tests
+echo 🔍 Test 1: Verificando conexión a BD...
+node tests/test-connection.js 2>nul
+if not errorlevel 1 (
+    echo ✅ Test de conexión exitoso
+) else (
+    echo ⚠️  Test de conexión falló, continuando...
+)
+
+echo 🔍 Test 2: Verificando endpoints...
 node -e "
 const axios = require('axios');
 setTimeout(() => {
@@ -360,6 +369,17 @@ echo    1. Ve a http://localhost:5173
 echo    2. Inicia sesión con las credenciales de arriba
 echo    3. Crea un proyecto con ubicación "Santiago, Chile"
 echo    4. Ve al Mapa y verifica que aparezca en Santiago
+echo.
+echo 📁 Estructura del proyecto organizada:
+echo    📁 docs/ - Documentación completa
+echo    🧪 tests/ - Tests y verificaciones
+echo    🌐 backend/ - Servidor y API
+echo    🎨 frontend/ - Interfaz React
+echo.
+echo 🧪 Tests adicionales disponibles:
+echo    node tests/test-backend.js
+echo    node tests/test-login-flow.js
+echo    node tests/test-project-creation.js
 echo.
 echo 🛑 Para detener: Cierra las ventanas del backend y frontend
 echo.
