@@ -98,7 +98,11 @@ const ProjectForm = () => {
             onChange={handleInputChange}
             required
             autoComplete="off"
+            placeholder="Ej: Av. Providencia 123, Santiago"
           />
+          <div className="form-text">
+            🌍 <strong>Geocodificación automática:</strong> Las coordenadas se obtendrán automáticamente basadas en esta dirección.
+          </div>
         </div>
         <div className="mb-3">
           <label htmlFor="fecha_inicio" className="form-label">Fecha de Inicio</label>

@@ -18,6 +18,8 @@ CREATE TABLE proyectos (
     id_proyecto SERIAL PRIMARY KEY,
     nombre VARCHAR(255) NOT NULL,
     ubicacion VARCHAR(255),
+    latitud DECIMAL(10, 8),
+    longitud DECIMAL(11, 8),
     fecha_inicio DATE,
     fecha_fin DATE,
     empresa_rut VARCHAR(255) REFERENCES empresas(rut)

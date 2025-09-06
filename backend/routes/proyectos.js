@@ -5,6 +5,7 @@ const pool = require('../db');
 const asyncHandler = require('../utils/asyncHandler');
 const { projectValidationRules, validateRequest } = require('../middleware/validators');
 const authMiddleware = require('../middleware/auth');
+const { geocodeAddressWithFallbacks, getDefaultCoordinates } = require('../services/geocoding');
 
 // Todas las rutas en este archivo requieren autenticación
 router.use(authMiddleware);
@@ -20,11 +21,63 @@ router.get('/', asyncHandler(async (req, res) => {
 router.post('/', projectValidationRules(), validateRequest, asyncHandler(async (req, res) => {
   const { nombre, ubicacion, fecha_inicio, fecha_fin } = req.body;
   const { empresa_rut } = req.user; // Usar el rut de la empresa del token
+  
+  let latitud = null;
+  let longitud = null;
+  let geocoding_info = null;
+
+  // Intentar geocodificar la ubicación automáticamente
+  console.log(`🏗️  Creando proyecto "${nombre}" con ubicación: "${ubicacion}"`);
+  
+  try {
+    const coordinates = await geocodeAddressWithFallbacks(ubicacion);
+    
+    if (coordinates) {
+      latitud = coordinates.lat;
+      longitud = coordinates.lon;
+      geocoding_info = {
+        status: 'success',
+        display_name: coordinates.display_name,
+        confidence: coordinates.confidence
+      };
+      console.log(`✅ Geocodificación exitosa para proyecto "${nombre}"`);
+    } else {
+      // Usar coordenadas por defecto si falla la geocodificación
+      const defaultCoords = getDefaultCoordinates();
+      latitud = defaultCoords.lat;
+      longitud = defaultCoords.lon;
+      geocoding_info = {
+        status: 'fallback',
+        message: 'No se pudieron obtener coordenadas específicas, usando ubicación por defecto',
+        display_name: defaultCoords.display_name
+      };
+      console.log(`⚠️  Geocodificación falló para proyecto "${nombre}", usando coordenadas por defecto`);
+    }
+  } catch (error) {
+    console.error('❌ Error durante geocodificación:', error.message);
+    // Usar coordenadas por defecto en caso de error
+    const defaultCoords = getDefaultCoordinates();
+    latitud = defaultCoords.lat;
+    longitud = defaultCoords.lon;
+    geocoding_info = {
+      status: 'error',
+      message: 'Error durante geocodificación, usando ubicación por defecto',
+      error: error.message
+    };
+  }
+
   const newProject = await pool.query(
-    'INSERT INTO proyectos (nombre, ubicacion, fecha_inicio, fecha_fin, empresa_rut) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-    [nombre, ubicacion, fecha_inicio, fecha_fin, empresa_rut]
+    'INSERT INTO proyectos (nombre, ubicacion, latitud, longitud, fecha_inicio, fecha_fin, empresa_rut) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+    [nombre, ubicacion, latitud, longitud, fecha_inicio, fecha_fin, empresa_rut]
   );
-  res.status(201).json(newProject.rows[0]);
+  
+  // Añadir información de geocodificación a la respuesta
+  const result = {
+    ...newProject.rows[0],
+    geocoding_info
+  };
+  
+  res.status(201).json(result);
 }));
 
 // Obtener un proyecto por ID
@@ -45,15 +98,89 @@ router.put('/:id', asyncHandler(async (req, res) => {
   const { nombre, ubicacion, fecha_inicio, fecha_fin } = req.body;
   const { empresa_rut } = req.user;
 
+  let latitud = null;
+  let longitud = null;
+  let geocoding_info = null;
+
+  // Obtener datos actuales del proyecto para comparar ubicación
+  const currentProject = await pool.query(
+    'SELECT ubicacion, latitud, longitud FROM proyectos WHERE id_proyecto = $1 AND empresa_rut = $2',
+    [id, empresa_rut]
+  );
+
+  if (currentProject.rows.length === 0) {
+    return res.status(404).json({ message: 'Proyecto no encontrado o no pertenece a su empresa.' });
+  }
+
+  const currentData = currentProject.rows[0];
+  
+  // Solo geocodificar si la ubicación cambió
+  if (ubicacion && ubicacion.trim() !== currentData.ubicacion?.trim()) {
+    console.log(`🔄 Actualizando coordenadas para proyecto ID ${id}: "${currentData.ubicacion}" → "${ubicacion}"`);
+    
+    try {
+      const coordinates = await geocodeAddressWithFallbacks(ubicacion);
+      
+      if (coordinates) {
+        latitud = coordinates.lat;
+        longitud = coordinates.lon;
+        geocoding_info = {
+          status: 'success',
+          display_name: coordinates.display_name,
+          confidence: coordinates.confidence,
+          updated: true
+        };
+        console.log(`✅ Geocodificación exitosa para proyecto ID ${id}`);
+      } else {
+        // Mantener coordenadas existentes si falla la geocodificación
+        latitud = currentData.latitud || getDefaultCoordinates().lat;
+        longitud = currentData.longitud || getDefaultCoordinates().lon;
+        geocoding_info = {
+          status: 'fallback',
+          message: 'No se pudieron obtener nuevas coordenadas, manteniendo las existentes',
+          updated: false
+        };
+        console.log(`⚠️  Geocodificación falló para proyecto ID ${id}, manteniendo coordenadas existentes`);
+      }
+    } catch (error) {
+      console.error('❌ Error durante geocodificación:', error.message);
+      // Mantener coordenadas existentes en caso de error
+      latitud = currentData.latitud || getDefaultCoordinates().lat;
+      longitud = currentData.longitud || getDefaultCoordinates().lon;
+      geocoding_info = {
+        status: 'error',
+        message: 'Error durante geocodificación, manteniendo coordenadas existentes',
+        error: error.message,
+        updated: false
+      };
+    }
+  } else {
+    // Ubicación no cambió, mantener coordenadas existentes
+    latitud = currentData.latitud;
+    longitud = currentData.longitud;
+    geocoding_info = {
+      status: 'unchanged',
+      message: 'Ubicación no modificada, coordenadas sin cambios',
+      updated: false
+    };
+  }
+
   const updatedProject = await pool.query(
-    'UPDATE proyectos SET nombre = $1, ubicacion = $2, fecha_inicio = $3, fecha_fin = $4 WHERE id_proyecto = $5 AND empresa_rut = $6 RETURNING *',
-    [nombre, ubicacion, fecha_inicio, fecha_fin, id, empresa_rut]
+    'UPDATE proyectos SET nombre = $1, ubicacion = $2, latitud = $3, longitud = $4, fecha_inicio = $5, fecha_fin = $6 WHERE id_proyecto = $7 AND empresa_rut = $8 RETURNING *',
+    [nombre, ubicacion, latitud, longitud, fecha_inicio, fecha_fin, id, empresa_rut]
   );
 
   if (updatedProject.rows.length === 0) {
     return res.status(404).json({ message: 'Proyecto no encontrado o no pertenece a su empresa.' });
   }
-  res.json(updatedProject.rows[0]);
+  
+  // Añadir información de geocodificación a la respuesta
+  const result = {
+    ...updatedProject.rows[0],
+    geocoding_info
+  };
+  
+  res.json(result);
 }));
 
 // Eliminar un proyecto

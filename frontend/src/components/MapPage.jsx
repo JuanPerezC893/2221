@@ -64,15 +64,29 @@ const MapPage = () => {
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
-            {proyectos.map(project => (
-              // For now, all markers are at the default position.
-              // To show actual project locations, the project data needs latitude and longitude.
-              <Marker key={project.id_proyecto} position={defaultPosition}>
-                <Popup>
-                  <strong>{project.nombre}</strong> <br /> {project.ubicacion}
-                </Popup>
-              </Marker>
-            ))}
+            {proyectos.map(project => {
+              // Usar coordenadas del proyecto si están disponibles, sino usar posición por defecto
+              const position = (project.latitud && project.longitud) 
+                ? [parseFloat(project.latitud), parseFloat(project.longitud)]
+                : defaultPosition;
+              
+              return (
+                <Marker key={project.id_proyecto} position={position}>
+                  <Popup>
+                    <div>
+                      <strong>{project.nombre}</strong> <br /> 
+                      <span className="text-muted">{project.ubicacion}</span>
+                      {project.latitud && project.longitud && (
+                        <><br /><small>Coords: {project.latitud}, {project.longitud}</small></>
+                      )}
+                      {!project.latitud || !project.longitud && (
+                        <><br /><small className="text-warning">📍 Ubicación por defecto (sin coordenadas)</small></>
+                      )}
+                    </div>
+                  </Popup>
+                </Marker>
+              );
+            })}
           </MapContainer>
         </div>
       </div>
