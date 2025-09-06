@@ -8,6 +8,24 @@ const authMiddleware = require('../middleware/auth');
 // Todas las rutas en este archivo requieren autenticación
 router.use(authMiddleware);
 
+// Función para convertir unidades a kilogramos
+const convertToKg = (cantidad, unidad) => {
+  const conversiones = {
+    'kg': 1,
+    'kilogramos': 1,
+    'toneladas': 1000,
+    'ton': 1000,
+    't': 1000,
+    'gramos': 0.001,
+    'g': 0.001,
+    'libras': 0.453592,
+    'lb': 0.453592
+  };
+  
+  const factor = conversiones[unidad.toLowerCase()] || 1;
+  return cantidad * factor;
+};
+
 // Obtener todos los residuos (filtrado por proyecto o empresa)
 router.get('/', asyncHandler(async (req, res) => {
   const { id_proyecto } = req.query;
@@ -50,11 +68,34 @@ router.post('/', wasteValidationRules(), validateRequest, asyncHandler(async (re
     return res.status(403).json({ message: 'No puede agregar residuos a un proyecto que no le pertenece.' });
   }
 
+  // Convertir la cantidad a kilogramos y normalizar la unidad
+  const cantidadOriginal = cantidad;
+  const unidadOriginal = unidad;
+  const cantidadEnKg = convertToKg(cantidad, unidad);
+  
+  // Guardar siempre en kg para consistencia en cálculos
+  const unidadNormalizada = 'kg';
+
   const newResiduo = await pool.query(
     'INSERT INTO residuos (tipo, cantidad, unidad, reciclable, estado, id_proyecto) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-    [tipo, cantidad, unidad, reciclable, estado, id_proyecto]
+    [tipo, cantidadEnKg, unidadNormalizada, reciclable, estado, id_proyecto]
   );
-  res.status(201).json(newResiduo.rows[0]);
+  
+  // Agregar información sobre la conversión en la respuesta
+  const resultado = {
+    ...newResiduo.rows[0],
+    conversion_info: {
+      cantidad_original: cantidadOriginal,
+      unidad_original: unidadOriginal,
+      cantidad_convertida: cantidadEnKg,
+      unidad_convertida: unidadNormalizada,
+      message: unidadOriginal.toLowerCase() !== 'kg' ? 
+        `Se convirtió ${cantidadOriginal} ${unidadOriginal} a ${cantidadEnKg} kg` : 
+        'No se requirió conversión'
+    }
+  };
+  
+  res.status(201).json(resultado);
 }));
 
 // Obtener tipos de residuos distintos para la empresa
@@ -227,11 +268,32 @@ router.put('/:id', asyncHandler(async (req, res) => {
     return res.status(403).json({ message: 'No puede actualizar un residuo que no le pertenece.' });
   }
 
+  // Convertir la cantidad a kilogramos y normalizar la unidad
+  const cantidadOriginal = cantidad;
+  const unidadOriginal = unidad;
+  const cantidadEnKg = convertToKg(cantidad, unidad);
+  const unidadNormalizada = 'kg';
+
   const updatedResiduo = await pool.query(
     'UPDATE residuos SET tipo = $1, cantidad = $2, unidad = $3, reciclable = $4, estado = $5 WHERE id_residuo = $6 RETURNING *',
-    [tipo, cantidad, unidad, reciclable, estado, id]
+    [tipo, cantidadEnKg, unidadNormalizada, reciclable, estado, id]
   );
-  res.json(updatedResiduo.rows[0]);
+  
+  // Agregar información sobre la conversión en la respuesta
+  const resultado = {
+    ...updatedResiduo.rows[0],
+    conversion_info: {
+      cantidad_original: cantidadOriginal,
+      unidad_original: unidadOriginal,
+      cantidad_convertida: cantidadEnKg,
+      unidad_convertida: unidadNormalizada,
+      message: unidadOriginal.toLowerCase() !== 'kg' ? 
+        `Se convirtió ${cantidadOriginal} ${unidadOriginal} a ${cantidadEnKg} kg` : 
+        'No se requirió conversión'
+    }
+  };
+  
+  res.json(resultado);
 }));
 
 // Eliminar un residuo

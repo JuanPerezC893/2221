@@ -187,7 +187,27 @@ const AddWaste = () => {
             <div className="card-header bg-primary text-white">Paso 2: Residuo Guardado</div>
             <div className="card-body">
                 <h5 className="card-title">¡Residuo guardado con éxito!</h5>
-                <p>El siguiente paso es generar el código QR para su trazabilidad.</p>
+                
+                {/* Mostrar información de conversión si existe */}
+                {savedWasteData?.conversion_info && (
+                  <div className="alert alert-info mt-3">
+                    <h6 className="alert-heading">💡 Conversión de Unidades</h6>
+                    <p className="mb-1">{savedWasteData.conversion_info.message}</p>
+                    {savedWasteData.conversion_info.unidad_original.toLowerCase() !== 'kg' && (
+                      <small className="text-muted">
+                        Para mantener consistencia en los cálculos, todas las cantidades se almacenan en kilogramos.
+                      </small>
+                    )}
+                  </div>
+                )}
+                
+                <div className="mt-3">
+                  <p><strong>Tipo:</strong> {savedWasteData?.tipo}</p>
+                  <p><strong>Cantidad:</strong> {savedWasteData?.cantidad} {savedWasteData?.unidad}</p>
+                  <p><strong>Proyecto:</strong> {proyectos.find(p => p.id_proyecto === savedWasteData?.id_proyecto)?.nombre}</p>
+                </div>
+                
+                <p className="mt-3">El siguiente paso es generar el código QR para su trazabilidad.</p>
                 <button onClick={handleGoToQRStep} className="btn btn-success">Generar Código QR</button>
             </div>
         </div>
