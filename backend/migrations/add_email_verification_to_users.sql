@@ -1,0 +1,1 @@
+ALTER TABLE usuarios ADD COLUMN email_verificado BOOLEAN DEFAULT FALSE;

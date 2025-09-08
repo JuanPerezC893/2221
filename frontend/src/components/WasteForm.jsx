@@ -1,6 +1,11 @@
 import React from 'react';
 
-const WasteForm = ({ formData, handleInputChange, handleWasteTypeChange, showSuggestions, filteredWasteTypes, handleSelectWasteType, suggestionsRef, proyectos, setShowSuggestions }) => {
+const WasteForm = ({ formData, handleInputChange, proyectos }) => {
+  const wasteTypes = [
+    'Hormigón', 'Ladrillos', 'Tierra', 'Piedras', 'Asfalto', 
+    'Madera', 'Metales', 'Plásticos', 'Papel', 'Cartón'
+  ];
+
   return (
     <>
       {/* Project Selection */}
@@ -27,33 +32,21 @@ const WasteForm = ({ formData, handleInputChange, handleWasteTypeChange, showSug
       </div>
 
       {/* Tipo de Residuo */}
-      <div className="mb-3" ref={suggestionsRef}>
+      <div className="mb-3">
         <label htmlFor="tipo" className="form-label">Tipo de Residuo</label>
-        <input
-          type="text"
-          className="form-control"
+        <select
+          className="form-select"
           id="tipo"
           name="tipo"
-          placeholder="Ej: Madera, Metal, Plástico..."
           value={formData.tipo}
-          onChange={handleWasteTypeChange}
-          onFocus={() => setShowSuggestions(true)}
+          onChange={handleInputChange}
           required
-        />
-        {showSuggestions && filteredWasteTypes.length > 0 && (
-          <ul className="list-group position-absolute w-100" style={{ zIndex: 1000 }}>
-            {filteredWasteTypes.map((type, index) => (
-              <li
-                key={index}
-                className="list-group-item list-group-item-action"
-                onClick={() => handleSelectWasteType(type)}
-                style={{ cursor: 'pointer' }}
-              >
-                {type}
-              </li>
-            ))}
-          </ul>
-        )}
+        >
+          <option value="" disabled>Seleccione un tipo</option>
+          {wasteTypes.map((type, index) => (
+            <option key={index} value={type}>{type}</option>
+          ))}
+        </select>
       </div>
 
       {/* Cantidad y Unidad */}

@@ -107,13 +107,13 @@
 
 .card {
   width: 100%;
-  max-width: 400px;   /* ancho fijo y proporcionado */
+  max-width: 500px;   /* ancho fijo y proporcionado */
   margin: 0 auto;
 }
 
 .register-card {
   background: #fff;
-  width: 360px;
+  width: 450px;
   padding: 2rem;
   border-radius: 12px;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);

@@ -16,6 +16,7 @@ const ProjectForm = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(''); // State for success message
 
   useEffect(() => {
     if (id) {
@@ -41,16 +42,23 @@ const ProjectForm = () => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setSuccessMessage(''); // Clear previous success messages
+
     try {
       if (id) {
         await updateProyecto(id, formValues);
-        alert('Proyecto actualizado exitosamente!');
+        setSuccessMessage('¡Proyecto actualizado exitosamente!');
       } else {
         await createProyecto(formValues);
-        alert('Proyecto creado exitosamente!');
+        setSuccessMessage('¡Proyecto creado exitosamente!');
       }
       triggerDataRefresh(); // Trigger refresh after successful operation
-      navigate('/dashboard');
+      
+      // Navigate after a short delay to show the message
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 2000); // 2-second delay
+
     } catch (err) {
       console.error('Error guardando el proyecto:', err.response?.data || err.message);
       setError('Error guardando el proyecto.');
@@ -59,12 +67,20 @@ const ProjectForm = () => {
     }
   };
 
-  if (loading) {
-    return <div className="container mt-5">Cargando...</div>;
+  // Do not render the form if we are showing a success message and redirecting
+  if (successMessage) {
+    return (
+      <div className="container mt-5">
+        <div className="alert alert-success" role="alert">
+          {successMessage}
+        </div>
+        <p>Serás redirigido en unos segundos...</p>
+      </div>
+    );
   }
 
-  if (error) {
-    return <div className="container mt-5 text-danger">Error: {error}</div>;
+  if (loading) {
+    return <div className="container mt-5">Cargando...</div>;
   }
 
   return (
@@ -73,6 +89,9 @@ const ProjectForm = () => {
       <p className="lead text-muted text-center mb-4">
         {id ? 'Modifica los detalles de tu proyecto de gestión de residuos.' : 'Registra un nuevo proyecto para organizar la gestión de residuos de tu empresa.'}
       </p>
+      
+      {error && <div className="alert alert-danger">{error}</div>} {/* Display error message */}
+
       <form onSubmit={onSubmit}>
         <div className="mb-3">
           <label htmlFor="nombre" className="form-label">Nombre del Proyecto</label>
@@ -117,7 +136,7 @@ const ProjectForm = () => {
           />
         </div>
         <div className="mb-3">
-          <label htmlFor="fecha_fin" className="form-label">Fecha de Fin (Opcional)</label>
+          <label htmlFor="fecha_fin" className="form-label">Fecha de Fin</label>
           <input
             type="date"
             className="form-control"
@@ -125,9 +144,10 @@ const ProjectForm = () => {
             name="fecha_fin"
             value={fecha_fin ? fecha_fin.split('T')[0] : ''} // Format date for input
             onChange={handleInputChange}
+            required
           />
         </div>
-        <button type="submit" className="btn btn-primary">{id ? 'Actualizar Proyecto' : 'Crear Proyecto'}</button>
+        <button type="submit" className="btn btn-primary" disabled={loading}>{id ? 'Actualizar Proyecto' : 'Crear Proyecto'}</button>
       </form>
     </div>
   );

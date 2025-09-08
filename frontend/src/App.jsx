@@ -12,6 +12,7 @@ import ProjectForm from './components/ProjectForm';
 import Profile from './components/Profile';
 import MapPage from './components/MapPage'; // Import MapPage
 import EditWaste from './components/EditWaste';
+import VerificationFailed from './components/VerificationFailed'; // Importar componente
 import PrivateRoute from './components/PrivateRoute';
 import './App.css';
 
@@ -23,6 +24,7 @@ function App() {
           {/* Public Routes with AuthLayout */}
           <Route path="/login" element={<AuthLayout><Login /></AuthLayout>} />
           <Route path="/register" element={<AuthLayout><Register /></AuthLayout>} />
+          <Route path="/verification-failed" element={<AuthLayout><VerificationFailed /></AuthLayout>} /> {/* Añadir ruta */}
           <Route path="/" element={<AuthLayout><Login /></AuthLayout>} />
 
           {/* Private Routes with Main Layout */}
