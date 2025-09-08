@@ -5,7 +5,7 @@ import api from '../services/api';
 import AuthContext from '../context/AuthContext';
 
 // TODO: Replace with your Mapbox access token
-mapboxgl.accessToken = 'pk.eyJ1IjoicGVsaXNqdWFuMTMiLCJhIjoiY21mOWR6Y251MHIycTJqb211NnJnd2RxdiJ9.cH1oLRfKvocGtHrjFoARJg';
+mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
 
 const MapPage = () => {
   const { auth } = useContext(AuthContext);
