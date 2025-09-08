@@ -1,19 +1,16 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
+import React, { useState, useEffect, useContext, useRef } from 'react';
+import mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
 import api from '../services/api';
 import AuthContext from '../context/AuthContext';
 
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',
-  iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
-});
+// TODO: Replace with your Mapbox access token
+mapboxgl.accessToken = 'pk.eyJ1IjoicGVsaXNqdWFuMTMiLCJhIjoiY21mOWR6Y251MHIycTJqb211NnJnd2RxdiJ9.cH1oLRfKvocGtHrjFoARJg';
 
 const MapPage = () => {
   const { auth } = useContext(AuthContext);
+  const mapContainer = useRef(null);
+  const map = useRef(null);
   const [proyectos, setProyectos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -36,6 +33,34 @@ const MapPage = () => {
     fetchProyectos();
   }, [auth]);
 
+  useEffect(() => {
+    if (map.current) return; // initialize map only once
+    if (mapContainer.current) {
+      map.current = new mapboxgl.Map({
+        container: mapContainer.current,
+        style: 'mapbox://styles/mapbox/standard',
+        center: [-70.6693, -33.4489],
+        zoom: 12
+      });
+    }
+  });
+
+  useEffect(() => {
+    if (!map.current) return;
+
+    proyectos.forEach(project => {
+      if (project.latitud && project.longitud) {
+        const popup = new mapboxgl.Popup({ offset: 25 })
+          .setHTML(`<div><strong>${project.nombre}</strong><br/><span class="text-muted">${project.ubicacion}</span><br/><small>Coords: ${project.latitud}, ${project.longitud}</small></div>`);
+
+        new mapboxgl.Marker()
+          .setLngLat([project.longitud, project.latitud])
+          .setPopup(popup)
+          .addTo(map.current);
+      }
+    });
+  }, [proyectos]);
+
   if (loading) {
     return <div className="container mt-5">Cargando mapa...</div>;
   }
@@ -48,8 +73,6 @@ const MapPage = () => {
     return <div className="container mt-5">Por favor, inicia sesión para ver el mapa.</div>;
   }
 
-  const defaultPosition = [-33.4489, -70.6693]; // Santiago, Chile coordinates
-
   return (
     <div className="container mt-4">
       <h1 className="display-5 fw-bold mb-2">Visualización Geográfica de Proyectos</h1>
@@ -59,35 +82,7 @@ const MapPage = () => {
           Ubicación de Proyectos
         </div>
         <div className="card-body">
-          <MapContainer center={defaultPosition} zoom={13} scrollWheelZoom={false} style={{ height: '500px', width: '100%' }}>
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-            {proyectos.map(project => {
-              // Usar coordenadas del proyecto si están disponibles, sino usar posición por defecto
-              const position = (project.latitud && project.longitud) 
-                ? [parseFloat(project.latitud), parseFloat(project.longitud)]
-                : defaultPosition;
-              
-              return (
-                <Marker key={project.id_proyecto} position={position}>
-                  <Popup>
-                    <div>
-                      <strong>{project.nombre}</strong> <br /> 
-                      <span className="text-muted">{project.ubicacion}</span>
-                      {project.latitud && project.longitud && (
-                        <><br /><small>Coords: {project.latitud}, {project.longitud}</small></>
-                      )}
-                      {!project.latitud || !project.longitud && (
-                        <><br /><small className="text-warning">📍 Ubicación por defecto (sin coordenadas)</small></>
-                      )}
-                    </div>
-                  </Popup>
-                </Marker>
-              );
-            })}
-          </MapContainer>
+          <div ref={mapContainer} style={{ height: '500px', width: '100%' }} />
         </div>
       </div>
     </div>
