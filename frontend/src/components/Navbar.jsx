@@ -34,9 +34,7 @@ const Navbar = () => {
             <li className="nav-item">
               <Link className="nav-link" to="/agregar-proyecto">Agregar Proyecto</Link>
             </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/mapa">Mapa</Link>
-            </li>
+            
           </ul>
           <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
             {auth.user && (
