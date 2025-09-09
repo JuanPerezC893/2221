@@ -19,7 +19,7 @@ export const AuthProvider = ({ children }) => {
           setAuth({ token: null, isAuthenticated: false, user: null });
         } else {
           api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-          setAuth({ token, isAuthenticated: true, user: { id: decoded.id, rol: decoded.rol, empresa_rut: decoded.empresa_rut } });
+          setAuth({ token, isAuthenticated: true, user: { id: decoded.id, rol: decoded.rol, empresa_rut: decoded.empresa_rut, nombre: decoded.nombre } });
         }
       } catch (err) {
         console.error('Error decoding token', err);

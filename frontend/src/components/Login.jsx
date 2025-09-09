@@ -1,32 +1,53 @@
-import React, { useContext, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useContext, useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import AuthContext from '../context/AuthContext.jsx';
 import { useForm } from '../hooks/useForm';
 
 const Login = () => {
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
-  const [errorMessage, setErrorMessage] = useState(''); // State for error message
-  const [loading, setLoading] = useState(false); // State for loading indicator
+  const location = useLocation(); // Hook para leer la URL
+
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState(''); // Estado para mensaje de éxito
+  const [loading, setLoading] = useState(false);
   const [formValues, handleInputChange] = useForm({
     email: '',
     password: '',
   });
 
+  // Efecto para mostrar mensaje de verificación
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const verified = params.get('verified');
+    if (verified === 'true') {
+      setSuccessMessage('¡Correo verificado con éxito! Por favor, inicia sesión.');
+    } else if (verified === 'already') {
+      setSuccessMessage('Tu correo electrónico ya había sido verificado.');
+    }
+    // Limpiar la URL para que el mensaje no persista si el usuario recarga
+    if (verified) {
+      navigate('/login', { replace: true });
+    }
+  }, [location, navigate]);
+
   const { email, password } = formValues;
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true); // Set loading to true
-    setErrorMessage(''); // Clear previous errors
+    setLoading(true);
+    setErrorMessage('');
+    setSuccessMessage(''); // Limpiar mensaje de éxito al intentar login
     try {
-      await login(email, password); // Usar directamente la función del contexto
+      await login(email, password);
       navigate('/dashboard');
     } catch (err) {
       console.error(err);
-      setErrorMessage('Credenciales inválidas o error al iniciar sesión.');
+      // El backend ahora puede enviar un mensaje específico si el correo no está verificado
+      const specificError = err.response?.data?.message || 'Credenciales inválidas o error al iniciar sesión.';
+      setErrorMessage(specificError);
     } finally {
-      setLoading(false); // Set loading to false
+      setLoading(false);
     }
   };
 
@@ -37,6 +58,7 @@ const Login = () => {
               <h1 className="card-title text-center mb-4 text-white">Iniciar Sesión</h1>
               <form onSubmit={onSubmit}>
                 {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
+                {successMessage && <div className="alert alert-success">{successMessage}</div>}
                 <div className="mb-3">
                   <input
                     type="email"
@@ -65,9 +87,12 @@ const Login = () => {
                   <input type="submit" value={loading ? 'Iniciando...' : 'Iniciar Sesión'} className="btn btn-light" disabled={loading} />
                 </div>
               </form>
-              <p className="text-center mt-3 text-white">
-                ¿No tienes una cuenta? <a href="/register" className="text-white">Regístrate</a>
-              </p>
+              <div className="text-center mt-3">
+                <a href="#" className="text-white d-block mb-2">¿Olvidaste tu contraseña?</a>
+                <p className="text-white mb-0">
+                  ¿No tienes una cuenta? <a href="/register" className="text-white">Regístrate</a>
+                </p>
+              </div>
             </div>
           </div>
     </div>

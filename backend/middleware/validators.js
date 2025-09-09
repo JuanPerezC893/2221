@@ -34,6 +34,7 @@ const projectValidationRules = () => {
     body('nombre').notEmpty().withMessage('El nombre es requerido'),
     body('ubicacion').notEmpty().withMessage('La ubicación es requerida'),
     body('fecha_inicio').isISO8601().toDate().withMessage('La fecha de inicio debe ser una fecha válida'),
+    body('fecha_fin').notEmpty().withMessage('La fecha de fin es obligatoria').isISO8601().toDate().withMessage('La fecha de fin debe ser una fecha válida'),
     // empresa_rut se obtiene del token de autenticación, no del formulario
   ];
 };

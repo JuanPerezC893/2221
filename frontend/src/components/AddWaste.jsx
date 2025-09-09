@@ -1,10 +1,10 @@
-import { useState, useEffect, useContext, useRef } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import AuthContext from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import WasteForm from './WasteForm';
 import { getProyectos } from '../api/proyectos';
-import { createResiduo, getResiduosTypes } from '../api/residuos';
+import { createResiduo } from '../api/residuos';
 import { createTrazabilidad } from '../api/trazabilidad';
 
 const AddWaste = () => {
@@ -19,27 +19,22 @@ const AddWaste = () => {
     estado: 'Pendiente',
     id_proyecto: '',
   });
-  const [wasteTypes, setWasteTypes] = useState([]);
-  const [filteredWasteTypes, setFilteredWasteTypes] = useState([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
   const [qrCodeValue, setQrCodeValue] = useState('');
   const [savedWasteData, setSavedWasteData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [proyectos, setProyectos] = useState([]);
-  const suggestionsRef = useRef(null);
 
   useEffect(() => {
     const fetchData = async () => {
       if (auth.user) {
         try {
           setLoading(true);
-          const [proyectosRes, typesRes] = await Promise.all([getProyectos(), getResiduosTypes()]);
+          const [proyectosRes] = await Promise.all([getProyectos()]);
           setProyectos(proyectosRes.data);
           if (proyectosRes.data.length > 0) {
             setFormData(prev => ({ ...prev, id_proyecto: proyectosRes.data[0].id_proyecto }));
           }
-          setWasteTypes(typesRes.data);
         } catch (err) {
           console.error('Error fetching initial data:', err.response?.data || err.message);
           setError('Error al cargar datos iniciales.');
@@ -51,43 +46,12 @@ const AddWaste = () => {
     fetchData();
   }, [auth.user]);
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (suggestionsRef.current && !suggestionsRef.current.contains(event.target)) {
-        setShowSuggestions(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : (name === 'cantidad' || name === 'id_proyecto' ? (value === '' ? null : Number(value)) : value),
     }));
-  };
-
-  const handleWasteTypeChange = (e) => {
-    const value = e.target.value;
-    setFormData({ ...formData, tipo: value });
-    if (value.length > 0) {
-      const filtered = wasteTypes.filter(type =>
-        type.toLowerCase().includes(value.toLowerCase())
-      );
-      setFilteredWasteTypes(filtered);
-      setShowSuggestions(true);
-    } else {
-      setShowSuggestions(false);
-    }
-  };
-
-  const handleSelectWasteType = (type) => {
-    setFormData({ ...formData, tipo: type });
-    setShowSuggestions(false);
   };
 
   const handleSaveWaste = async (e) => {
@@ -168,13 +132,7 @@ const AddWaste = () => {
               <WasteForm
                 formData={formData}
                 handleInputChange={handleInputChange}
-                handleWasteTypeChange={handleWasteTypeChange}
-                showSuggestions={showSuggestions}
-                filteredWasteTypes={filteredWasteTypes}
-                handleSelectWasteType={handleSelectWasteType}
-                suggestionsRef={suggestionsRef}
                 proyectos={proyectos}
-                setShowSuggestions={setShowSuggestions}
               />
               <button type="submit" className="btn btn-primary">Siguiente</button>
             </form>
