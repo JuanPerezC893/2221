@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const pool = require('../db');
 const asyncHandler = require('../utils/asyncHandler');
 const { registerValidationRules, loginValidationRules, validateRequest } = require('../middleware/validators');
-// const { sendVerificationEmail } = require('../services/emailService'); // Desactivado temporalmente
+const { sendVerificationEmail } = require('../services/emailService');
 
 // Registrar un nuevo usuario y empresa (si no existe)
 router.post('/register', registerValidationRules(), validateRequest, asyncHandler(async (req, res) => {
@@ -38,20 +38,17 @@ router.post('/register', registerValidationRules(), validateRequest, asyncHandle
     
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-    // Se crea el usuario como verificado directamente
     const newUserResult = await client.query(
-      'INSERT INTO usuarios (nombre, rol, empresa_rut, email, password, email_verificado) VALUES ($1, $2, $3, $4, $5, TRUE) RETURNING id_usuario',
+      'INSERT INTO usuarios (nombre, rol, empresa_rut, email, password, email_verificado) VALUES ($1, $2, $3, $4, $5, FALSE) RETURNING id_usuario',
       [nombre, 'admin', empresa_rut, email, hashedPassword]
     );
     const newUser = newUserResult.rows[0];
 
-    // --- SECCIÓN DE VERIFICACIÓN DE CORREO DESACTIVADA ---
-    // const verificationToken = jwt.sign({ id: newUser.id_usuario }, process.env.JWT_SECRET, { expiresIn: '1d' });
-    // await sendVerificationEmail(email, verificationToken);
+    const verificationToken = jwt.sign({ id: newUser.id_usuario }, process.env.JWT_SECRET, { expiresIn: '1d' });
+    await sendVerificationEmail(email, verificationToken);
 
     await client.query('COMMIT');
-    // Se actualiza el mensaje de éxito
-    return res.status(201).json({ message: 'Registro exitoso. Ahora puedes iniciar sesión.' });
+    return res.status(201).json({ message: 'Registro exitoso. Por favor, verifica tu correo electrónico.' });
 
   } catch (error) {
     await client.query('ROLLBACK');
@@ -74,8 +71,6 @@ router.post('/register', registerValidationRules(), validateRequest, asyncHandle
   }
 }));
 
-/*
-// --- RUTA DE VERIFICACIÓN DE CORREO DESACTIVADA ---
 router.get('/verify-email/:token', asyncHandler(async (req, res) => {
     const { token } = req.params;
     try {
@@ -103,7 +98,6 @@ router.get('/verify-email/:token', asyncHandler(async (req, res) => {
         res.redirect(`${process.env.FRONTEND_URL}/verification-failed`);
     }
 }));
-*/
 
 
 // Iniciar sesión
@@ -118,13 +112,9 @@ router.post('/login', loginValidationRules(), validateRequest, asyncHandler(asyn
 
   const user = userResult.rows[0];
 
-  /*
-  // --- COMPROBACIÓN DE EMAIL VERIFICADO DESACTIVADA ---
   if (!user.email_verificado) {
     return res.status(403).json({ message: 'Por favor, verifica tu correo electrónico antes de iniciar sesión.' });
   }
-  // --- Fin de la Comprobación ---
-  */
 
   const validPassword = await bcrypt.compare(password, user.password);
 
