@@ -1,17 +1,32 @@
-const emailjs = require('@emailjs/browser');
+const emailjs = require('@emailjs/nodejs');
 
 const sendVerificationEmail = async (userEmail, token) => {
+  // Initialize EmailJS right before sending the email.
+  // This ensures that the environment variables are loaded.
+  emailjs.init({
+    publicKey: process.env.EMAILJS_PUBLIC_KEY,
+    privateKey: process.env.EMAILJS_PRIVATE_KEY,
+  });
+
   const verificationUrl = `${process.env.BACKEND_URL}/api/auth/verify-email/${token}`;
 
+  const templateParams = {
+    link: verificationUrl,
+    email: userEmail.trim(),
+  };
+
+  const serviceID = process.env.EMAILJS_SERVICE_ID;
+  const templateID = process.env.EMAILJS_TEMPLATE_ID;
+
+  if (!serviceID || !templateID || !process.env.EMAILJS_PUBLIC_KEY || !process.env.EMAILJS_PRIVATE_KEY) {
+      console.error('Missing EmailJS environment variables for sending email.');
+      throw new Error('Missing EmailJS environment variables');
+  }
+
   try {
-    await emailjs.send(process.env.EMAILJS_SERVICE_ID, process.env.EMAILJS_TEMPLATE_ID, {
-      link: verificationUrl,
-      email: userEmail,
-    }, {
-      publicKey: process.env.EMAILJS_PUBLIC_KEY,
-      privateKey: process.env.EMAILJS_PRIVATE_KEY
-    });
+    const response = await emailjs.send(serviceID, templateID, templateParams);
     console.log('Correo de verificación enviado a:', userEmail);
+    return response;
   } catch (error) {
     console.error('Error al enviar el correo de verificación con EmailJS:', error);
     throw new Error('No se pudo enviar el correo de verificación.');

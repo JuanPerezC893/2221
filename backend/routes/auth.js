@@ -15,56 +15,54 @@ router.post('/register', registerValidationRules(), validateRequest, asyncHandle
   try {
     await client.query('BEGIN');
 
-    // Verificar si el email ya está registrado
+    // 1. Verificar si el email ya está registrado
     const emailExists = await client.query('SELECT 1 FROM usuarios WHERE email = $1', [email]);
     if (emailExists.rows.length > 0) {
       await client.query('ROLLBACK');
       return res.status(400).json({ message: 'El correo electrónico ya está en uso.' });
     }
 
-    // Verificar si la empresa ya existe
-    let empresa = await client.query('SELECT * FROM empresas WHERE rut = $1', [empresa_rut]);
-    if (empresa.rows.length > 0) {
-        // Si la empresa ya existe, no se permite el auto-registro.
-        await client.query('ROLLBACK');
-        return res.status(400).json({ message: 'La empresa ya está registrada. Contacte al administrador para ser añadido.' });
+    let userRole = 'usuario'; // Default role for new users joining an existing company
+    let finalEmpresaRut = empresa_rut; // Use the provided RUT
+
+    // 2. Verificar si la empresa ya existe
+    const empresaResult = await client.query('SELECT * FROM empresas WHERE rut = $1', [empresa_rut]);
+
+    if (empresaResult.rows.length === 0) {
+      // Si la empresa NO existe, la crea y el primer usuario es 'admin'
+      await client.query(
+        'INSERT INTO empresas (rut, razon_social) VALUES ($1, $2)',
+        [empresa_rut, razon_social || `Empresa ${empresa_rut}`]
+      );
+      userRole = 'admin'; // First user of a new company is admin
+    } else {
+      // Si la empresa YA existe, el nuevo usuario se une a ella como 'usuario'
+      // No se necesita hacer nada aquí, userRole ya es 'usuario'
     }
 
-    // Si la empresa no existe, la crea y añade al usuario como admin
-    empresa = await client.query(
-      'INSERT INTO empresas (rut, razon_social) VALUES ($1, $2) RETURNING *',
-      [empresa_rut, razon_social || `Empresa ${empresa_rut}`]
-    );
-    
+    // 3. Hashear la contraseña
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
+
+    // 4. Insertar el nuevo usuario
     const newUserResult = await client.query(
-      'INSERT INTO usuarios (nombre, rol, empresa_rut, email, password, email_verificado) VALUES ($1, $2, $3, $4, $5, FALSE) RETURNING id_usuario',
-      [nombre, 'admin', empresa_rut, email, hashedPassword]
+      'INSERT INTO usuarios (nombre, rol, empresa_rut, email, password, email_verificado) VALUES ($1, $2, $3, $4, $5, FALSE) RETURNING id_usuario', // email_verificado set to FALSE
+      [nombre, userRole, finalEmpresaRut, email, hashedPassword]
     );
     const newUser = newUserResult.rows[0];
 
+    // 5. Generar y enviar token de verificación de email
     const verificationToken = jwt.sign({ id: newUser.id_usuario }, process.env.JWT_SECRET, { expiresIn: '1d' });
     await sendVerificationEmail(email, verificationToken);
 
     await client.query('COMMIT');
-    return res.status(201).json({ message: 'Registro exitoso. Por favor, verifica tu correo electrónico.' });
+    return res.status(201).json({ message: 'Registro exitoso. Por favor, verifica tu correo electrónico.' }); // Original success message
 
   } catch (error) {
     await client.query('ROLLBACK');
-    console.error('Error en la transacción de registro:', error);
+    console.error('Error en la transacción de registro:', error); // Log the full error object for debugging
 
-    // Manejo de errores específicos de la base de datos
-    if (error.code === '23505') { // Código para violación de unicidad (unique constraint)
-      if (error.constraint === 'usuarios_email_key') {
-        return res.status(400).json({ message: 'El correo electrónico ya está registrado.' });
-      } else if (error.constraint === 'empresas_pkey') {
-        return res.status(400).json({ message: 'El RUT de la empresa ya está registrado.' });
-      }
-      return res.status(400).json({ message: 'El correo o RUT ya existen.' });
-    }
-
-    // Error genérico
+    // Simplified error handling for debugging
     res.status(500).json({ message: 'Error al registrar el usuario. Por favor, intente de nuevo.' });
   } finally {
     client.release();
