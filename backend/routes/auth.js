@@ -53,7 +53,7 @@ router.post('/register', registerValidationRules(), validateRequest, asyncHandle
 
     // 5. Generar y enviar token de verificación de email
     const verificationToken = jwt.sign({ id: newUser.id_usuario }, process.env.JWT_SECRET, { expiresIn: '1d' });
-    await sendVerificationEmail(email, verificationToken);
+    await sendVerificationEmail(email, verificationToken, razon_social || `Empresa ${empresa_rut}`); // Added companyName
 
     await client.query('COMMIT');
     return res.status(201).json({ message: 'Registro exitoso. Por favor, verifica tu correo electrónico.' }); // Original success message

@@ -1,6 +1,6 @@
 const emailjs = require('@emailjs/nodejs');
 
-const sendVerificationEmail = async (userEmail, token) => {
+const sendVerificationEmail = async (userEmail, token, companyName) => {
   // Initialize EmailJS right before sending the email.
   // This ensures that the environment variables are loaded.
   emailjs.init({
@@ -13,6 +13,7 @@ const sendVerificationEmail = async (userEmail, token) => {
   const templateParams = {
     link: verificationUrl,
     email: userEmail.trim(),
+    name: companyName,
   };
 
   const serviceID = process.env.EMAILJS_SERVICE_ID;
