@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
     empresa_rut VARCHAR(255) REFERENCES empresas(rut) ON DELETE SET NULL, -- Allow null if company is deleted
     email VARCHAR(255) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
-    email_verificado BOOLEAN DEFAULT TRUE -- Added this column
+    email_verificado BOOLEAN DEFAULT FALSE -- Added this column
 );
 
 -- Table: proyectos
