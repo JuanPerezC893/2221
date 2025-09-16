@@ -32,7 +32,12 @@ if not exist "%~dp0backend\.env" (
     echo. >> "%~dp0backend\.env"
     echo # URL del frontend ^(para CORS^) >> "%~dp0backend\.env"
     echo FRONTEND_URL=http://localhost:5173 >> "%~dp0backend\.env"
-    
+    echo EMAILJS_SERVICE_ID=service_2j5yfxc >> "%~dp0backend\.env"
+    echo EMAILJS_TEMPLATE_ID=template_odl6p9h >> "%~dp0backend\.env"
+    echo EMAILJS_PUBLIC_KEY=sbpqlpSeR8VfFprfi >> "%~dp0backend\.env"
+    echo EMAILJS_PRIVATE_KEY=GLSiBVIWMQRd6ZskdgLtB >> "%~dp0backend\.env"
+    echo BACKEND_URL=http://localhost:5000 >> "%~dp0backend\.env"
+
     echo ✅ Archivo backend/.env creado
 ) else (
     echo ✅ Archivo backend/.env ya existe
@@ -44,10 +49,11 @@ if not exist "%~dp0frontend\.env" (
     echo 📝 Creando archivo de configuración...
     
     echo # Variables de entorno para desarrollo local > "%~dp0frontend\.env"
-    echo VITE_API_URL=http://localhost:5000/api >> "%~dp0frontend\.env"
+    echo VITE_API_URL=/api >> "%~dp0frontend\.env"
     echo VITE_FRONTEND_URL=http://localhost:5173 >> "%~dp0frontend\.env"
     echo VITE_APP_NAME=Gestión de Residuos - Windows Local >> "%~dp0frontend\.env"
-    
+    echo VITE_MAPBOX_ACCESS_TOKEN=pk.eyJ1IjoicGVsaXNqdWFuMTMiLCJhIjoiY21mYm8zeW5wMHB4cDJscHYxa3M2YTJraSJ9.m8AyNiwSWCLVL9DxEKHccA >> "%~dp0frontend\.env"
+
     echo ✅ Archivo frontend/.env creado
 ) else (
     echo ✅ Archivo frontend/.env ya existe
