@@ -59,6 +59,11 @@ if not exist "%~dp0frontend\.env" (
     echo ✅ Archivo frontend/.env ya existe
 )
 
+echo.
+echo 🔄 Modificando la configuración de Vite para desarrollo local...
+powershell -Command "(Get-Content '%~dp0frontend\vite.config.js') -replace 'https://3332-lilac.vercel.app', 'http://localhost:5000' | Set-Content '%~dp0frontend\vite.config.js'"
+echo ✅ Configuración de Vite actualizada.
+
 :: 3. INSTALAR DEPENDENCIAS
 echo.
 echo 📦 Verificando dependencias npm...
