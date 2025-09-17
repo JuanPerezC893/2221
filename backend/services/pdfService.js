@@ -69,12 +69,15 @@ async function crearPDF(proyecto, residuos) {
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: "networkidle0" });
 
-    const pdfPath = path.join(__dirname, "../output/proyecto.pdf");
-    await page.pdf({ path: pdfPath, format: "A4" });
+    const pdfBuffer = await page.pdf({
+      format: "A4",
+      margin: { top: "20mm", bottom: "20mm", left: "15mm", right: "15mm" },
+      printBackground: true
+    });
 
     await browser.close();
 
-    return pdfPath;
+    return pdfBuffer;
   } catch (error) {
     console.error("Error al generar PDF:", error);
     throw error;
