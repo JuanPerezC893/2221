@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="stile.css">
+    <title>Informe de Gestión de Residuos y Sostenibilidad</title>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <img src="file:///home/jusepecaz/Downloads/0.jpg" class="fondo">
+    <div class="contenido">
+    <h1>Informe de Gestión de Residuos y Sostenibilidad</h1>
+		<p>Proyecto: {{nomProyecto}} Fecha: {{fechaMade}}</p>
+
+    <h2>1.- Resumen ejecutivo y métricas claves.</h2>
+    <h3>1.1.- Resumen del proyecto:</h3>
+		<p>Ubicación: {{ubicacion}} Periodo del Informe: {{fechaInicio}} a {{fechaTermino}}</p>
+    <p>Descripción del proyecto: “breve descripción de que trato el proyecto”</p>
+
+    <h3>1.2.- Resultados Clave de la Gestión de Residuos</h3>
+		<p>Total de Residuos Generados: {{tonTotales}} toneladas</p>
+    <p>Gráfico de Barras: Muestra la generación de residuos mes a mes.</p>
+    <p>Destino de los Residuos</p>
+    <p>Gráfico Circular: "Vertedero" vs. "Valorizado(Reciclado/Reutilizado)".</p>
+    <p>[Y]% Valorizad [Z]% a Vertedero</p>
+    <p>Ahorro Económico Estimado:</p>
+    <p>Gráfico de Barras: Muestra el costo estimado de la disposición tradicional vs. el costo real con la valorización.</p>
+    <p>Ahorro Total: $[M] CLP</p>
+    <div class="page-break"></div>
+    <h2>2.- Detalle y Trazabilidad del Impacto</h2>
+    <h3>2.1.- Distribución por Tipo de Residuo:</h3>
+    <p>Gráfico Circular: Muestra la composición de los residuos por tipo. Esto ayuda a la empresa a identificar qué materiales generan más residuos.</p>
+
+    <h3>2.2.- Trazabilidad y Destino de los Materiales:</h3>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Tipo de Material</th>
+                <th>Cantidad (toneladas)</th>
+                <th>Destino</th>
+                <th>Certificado de Disposición</th>
+            </tr>
+        </thead>
+        <tbody>
+	   {{filas_materiales}}
+        </tbody>
+    </table>
+    <p>Cada fila puede tener un link o un código QR que lleve al certificado digital de disposición final, proporcionando una trazabilidad total y auditable.</p>
+
+    <h3>2.3.- Beneficios Ambientales Cuantificados:</h3>
+    <p>Reducción de Huella de Carbono:</p>
+		<p>"Al valorizar {{tonTotales}} toneladas de residuos, el proyecto evitó la emisión de {{tonCO2}} toneladas de CO₂</p>
+    <p>Ahorro de Recursos:</p>
+    <p>"El reciclaje de materiales permitió ahorrar el consumo de [B] litros de agua y la conservación de [C] árboles."</p>
+    <div class="page-break"></div>
+    <h2>3.- Conclusión y Certificación</h2>
+    <h3>Conclusión</h3>
+		<p>El presente informe certifica que el proyecto {{nomProyecto}}, durante el período comprendido entre el {{fechaInicio}} y el {{fechaTermino}}, ha implementado de manera efectiva un sistema de gestión de residuos que se alinea con los principios de la economía circular. Los datos detallados en este documento demuestran un compromiso cuantificable con la sostenibilidad, habiendo logrado [Y]% de valorización de los residuos generados.</p>
+    <p>Los resultados presentados validan que la constructora ha superado los estándares de disposición de residuos convencionales, transformando materiales de desecho en recursos valiosos. Este esfuerzo no solo contribuye a la reducción del impacto ambiental del proyecto, sino que también refuerza la posición de la empresa como un líder innovador y responsable en el sector de la construcción.</p>
+
+    <h3>Acreditación del Documento</h3>
+    <p>Por medio del presente, EcoObra acredita que los datos sobre la gestión de residuos y el impacto ambiental contenidos en este informe son precisos, completos y han sido verificados a través de nuestra plataforma de trazabilidad.</p>
+    <p>La información aquí consignada ha sido recopilada, procesada y validada digitalmente, cumpliendo con los criterios necesarios para la auditoría y la acreditación de sostenibilidad.</p>
+    <p>Este documento sirve como evidencia formal y auditable del desempeño ecológico del proyecto y puede ser utilizado para:</p>
+    <ul>
+        <li>Certificaciones de Sostenibilidad: Apoyo documental para la obtención o renovación de certificaciones como LEED, CES u otras normativas internacionales.</li>
+        <li>Informes de Sostenibilidad Corporativa (ESG): Sustento para la presentación de datos de impacto ambiental en reportes de responsabilidad social corporativa.</li>
+        <li>Validación ante Terceros: Prueba fehaciente del cumplimiento de metas de gestión de residuos acordadas con clientes, inversionistas o autoridades reguladoras.</li>
+    </ul>
+    <p>Datos validados por EcoObra</p>
+    <p>[Sello digital de EcoObra]</p>
+    </div>
+</body>
+</html>

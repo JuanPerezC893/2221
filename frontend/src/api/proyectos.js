@@ -19,3 +19,9 @@ export const updateProyecto = async (id, proyectoData) => {
 export const deleteProyecto = async (id) => {
   return await api.delete(`/proyectos/${id}`);
 };
+
+export const generarInforme = async (id) => {
+  return await api.post(`/proyectos/${id}/generar-informe`, {}, {
+    responseType: 'blob',
+  });
+};

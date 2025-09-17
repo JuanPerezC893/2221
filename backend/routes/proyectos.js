@@ -6,6 +6,7 @@ const asyncHandler = require('../utils/asyncHandler');
 const { projectValidationRules, validateRequest } = require('../middleware/validators');
 const authMiddleware = require('../middleware/auth');
 const { geocodeAddressWithFallbacks, getDefaultCoordinates } = require('../services/geocoding');
+const { crearPDF } = require('../services/pdfService');
 
 // Todas las rutas en este archivo requieren autenticación
 router.use(authMiddleware);
@@ -230,6 +231,39 @@ router.delete('/:id', asyncHandler(async (req, res) => {
     res.status(500).json({ message: 'Error al eliminar el proyecto.' });
   } finally {
     client.release();
+  }
+}));
+
+const { crearPDF } = require('../services/pdfService');
+
+// Generar un informe en PDF para un proyecto
+router.post('/:id/generar-informe', asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { empresa_rut } = req.user;
+
+  // 1. Obtener datos del proyecto
+  const proyectoResult = await pool.query('SELECT * FROM proyectos WHERE id_proyecto = $1 AND empresa_rut = $2', [id, empresa_rut]);
+
+  if (proyectoResult.rows.length === 0) {
+    return res.status(404).json({ message: 'Proyecto no encontrado o no pertenece a su empresa.' });
+  }
+  const proyecto = proyectoResult.rows[0];
+
+  // 2. Obtener residuos del proyecto
+  const residuosResult = await pool.query('SELECT * FROM residuos WHERE id_proyecto = $1', [id]);
+  const residuos = residuosResult.rows;
+
+  // 3. Generar el PDF
+  try {
+    const pdfBuffer = await crearPDF(proyecto, residuos);
+
+    // 4. Enviar el PDF como respuesta
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=InformeFinal-Proyecto-${id}.pdf`);
+    res.send(pdfBuffer);
+  } catch (error) {
+    console.error('Error al generar el PDF:', error);
+    res.status(500).json({ message: 'No se pudo generar el informe en PDF.' });
   }
 }));
 

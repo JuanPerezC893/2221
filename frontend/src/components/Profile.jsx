@@ -1,6 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react';
 import AuthContext from '../context/AuthContext';
-import api from '../services/api';
+import api from '../services/api'; // Keep this line
+import { generarInforme } from '../api/proyectos'; // Add this line
 import LabelModal from './LabelModal';
 import ChangePasswordModal from './ChangePasswordModal'; // Import the new modal
 
@@ -68,15 +69,20 @@ const Profile = () => {
     }
   };
 
-  const handleDeleteProject = async (projectId) => {
-    if (window.confirm('¿Estás seguro de que quieres eliminar este proyecto? Se perderá todo el registro de residuos asociado y los datos de progreso. Esta acción no se puede deshacer.')) {
-      try {
-        await api.delete(`/proyectos/${projectId}`);
-        setProjects(projects.filter(p => p.id_proyecto !== projectId));
-      } catch (err) {
-        setError('Error al eliminar el proyecto.');
-        console.error('Delete project error:', err);
-      }
+  const handleFinishProject = async (projectId) => {
+    try {
+      const response = await generarInforme(projectId);
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `InformeFinal-Proyecto-${projectId}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      setError('Error al generar el informe del proyecto.');
+      console.error('Generate report error:', err);
     }
   };
 
@@ -167,8 +173,8 @@ const Profile = () => {
                       projects.map(project => (
                         <li key={project.id_proyecto} className="list-group-item d-flex justify-content-between align-items-center">
                           {project.nombre}
-                          <button className="btn btn-danger btn-sm" onClick={() => handleDeleteProject(project.id_proyecto)}>
-                            Eliminar
+                          <button className="btn btn-success btn-sm" onClick={() => handleFinishProject(project.id_proyecto)}>
+                            Finalizar
                           </button>
                         </li>
                       ))
