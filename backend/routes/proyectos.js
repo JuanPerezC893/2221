@@ -234,8 +234,6 @@ router.delete('/:id', asyncHandler(async (req, res) => {
   }
 }));
 
-const { crearPDF } = require('../services/pdfService');
-
 // Generar un informe en PDF para un proyecto
 router.post('/:id/generar-informe', asyncHandler(async (req, res) => {
   const { id } = req.params;
