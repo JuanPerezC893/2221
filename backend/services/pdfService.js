@@ -2,9 +2,43 @@ const fs = require("fs").promises;
 const path = require("path");
 const puppeteer = require("puppeteer-core");
 const chromium = require("@sparticuz/chromium");
+const pool = require("../db"); // Para consultas a la BD
+const { generatePieChart, generateBarChart } = require("./chartService"); // Nuestro nuevo servicio
 
 async function crearPDF(proyecto, residuos) {
   try {
+    // 1. Obtener datos para los gráficos
+    const projectId = proyecto.id_proyecto;
+    const summaryByTypeQuery = pool.query(
+      `SELECT tipo, SUM(cantidad) as total_cantidad
+       FROM residuos
+       WHERE id_proyecto = $1
+       GROUP BY tipo
+       ORDER BY total_cantidad DESC`,
+      [projectId]
+    );
+
+    const summaryOverTimeQuery = pool.query(
+      `SELECT TO_CHAR(t.fecha, 'YYYY-MM') as month, SUM(r.cantidad) as total_cantidad
+       FROM residuos r
+       JOIN trazabilidad t ON r.id_residuo = t.id_residuo
+       WHERE r.id_proyecto = $1
+       GROUP BY month
+       ORDER BY month`,
+      [projectId]
+    );
+
+    const [summaryByTypeResult, summaryOverTimeResult] = await Promise.all([summaryByTypeQuery, summaryOverTimeQuery]);
+
+    // 2. Generar imágenes de los gráficos
+    const pieChartImagePromise = generatePieChart(summaryByTypeResult.rows);
+    const barChartImagePromise = generateBarChart(summaryOverTimeResult.rows);
+    
+    const [pieChartImage, barChartImage] = await Promise.all([pieChartImagePromise, barChartImagePromise]);
+
+    const graficoTortaImg = `<img src="${pieChartImage}" alt="Gráfico Circular" style="width: 70%; height: auto; display: block; margin-left: auto; margin-right: auto;"/>`;
+    const graficoBarrasImg = `<img src="${barChartImage}" alt="Gráfico de Barras" style="width: 70%; height: auto; display: block; margin-left: auto; margin-right: auto;"/>`;
+
     // 1. Leer HTML y CSS base
     const htmlPath = path.join(__dirname, "../templates/info.html");
     const cssPath = path.join(__dirname, "../templates/stile.css");
@@ -52,6 +86,8 @@ async function crearPDF(proyecto, residuos) {
     }
     html = html.replace("</head>", `<style>${css}</style></head>`);
     html = html.replace("{{filas_materiales}}", filasHTML);
+    html = html.replace("{{graficoBarras}}", graficoBarrasImg);
+    html = html.replace("{{graficoTorta}}", graficoTortaImg);
 
     // Manejar la imagen de fondo opcional
     const fondoPath = path.join(__dirname, "../templates/0.jpg");

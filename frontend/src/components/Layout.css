@@ -6,7 +6,7 @@
 
 .main-content {
   flex: 1;
-  padding-top: 1rem; /* Add some padding */
+  /* Removed padding-top to allow dashboard-container to fill space */
 }
 
 .footer-custom {

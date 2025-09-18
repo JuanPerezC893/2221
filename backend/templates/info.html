@@ -13,12 +13,12 @@
 
     <h2>1.- Resumen ejecutivo y métricas claves.</h2>
     <h3>1.1.- Resumen del proyecto:</h3>
-		<p>Ubicación: {{ubicacion}} Periodo del Informe: {{fechaInicio}} a {{fechaTermino}}</p>
+    <p>Ubicación: {{ubicacion}} Periodo del Informe: {{fechaInicio}} a {{fechaTermino}}</p>
     <p>Descripción del proyecto: “breve descripción de que trato el proyecto”</p>
 
     <h3>1.2.- Resultados Clave de la Gestión de Residuos</h3>
-		<p>Total de Residuos Generados: {{tonTotales}} toneladas</p>
-    <p>Gráfico de Barras: Muestra la generación de residuos mes a mes.</p>
+    <p>Total de Residuos Generados: {{tonTotales}} toneladas</p>
+    {{graficoBarras}}
     <p>Destino de los Residuos</p>
     <p>Gráfico Circular: "Vertedero" vs. "Valorizado(Reciclado/Reutilizado)".</p>
     <p>[Y]% Valorizad [Z]% a Vertedero</p>
@@ -28,8 +28,7 @@
     <div class="page-break"></div>
     <h2>2.- Detalle y Trazabilidad del Impacto</h2>
     <h3>2.1.- Distribución por Tipo de Residuo:</h3>
-    <p>Gráfico Circular: Muestra la composición de los residuos por tipo. Esto ayuda a la empresa a identificar qué materiales generan más residuos.</p>
-
+    {{graficoTorta}}
     <h3>2.2.- Trazabilidad y Destino de los Materiales:</h3>
     <table border="1">
         <thead>
@@ -48,13 +47,13 @@
 
     <h3>2.3.- Beneficios Ambientales Cuantificados:</h3>
     <p>Reducción de Huella de Carbono:</p>
-		<p>"Al valorizar {{tonTotales}} toneladas de residuos, el proyecto evitó la emisión de {{tonCO2}} toneladas de CO₂</p>
+    <p>"Al valorizar {{tonTotales}} toneladas de residuos, el proyecto evitó la emisión de {{tonCO2}} toneladas de CO₂</p>
     <p>Ahorro de Recursos:</p>
     <p>"El reciclaje de materiales permitió ahorrar el consumo de [B] litros de agua y la conservación de [C] árboles."</p>
     <div class="page-break"></div>
     <h2>3.- Conclusión y Certificación</h2>
     <h3>Conclusión</h3>
-		<p>El presente informe certifica que el proyecto {{nomProyecto}}, durante el período comprendido entre el {{fechaInicio}} y el {{fechaTermino}}, ha implementado de manera efectiva un sistema de gestión de residuos que se alinea con los principios de la economía circular. Los datos detallados en este documento demuestran un compromiso cuantificable con la sostenibilidad, habiendo logrado [Y]% de valorización de los residuos generados.</p>
+    <p>El presente informe certifica que el proyecto {{nomProyecto}}, durante el período comprendido entre el {{fechaInicio}} y el {{fechaTermino}}, ha implementado de manera efectiva un sistema de gestión de residuos que se alinea con los principios de la economía circular. Los datos detallados en este documento demuestran un compromiso cuantificable con la sostenibilidad, habiendo logrado [Y]% de valorización de los residuos generados.</p>
     <p>Los resultados presentados validan que la constructora ha superado los estándares de disposición de residuos convencionales, transformando materiales de desecho en recursos valiosos. Este esfuerzo no solo contribuye a la reducción del impacto ambiental del proyecto, sino que también refuerza la posición de la empresa como un líder innovador y responsable en el sector de la construcción.</p>
 
     <h3>Acreditación del Documento</h3>

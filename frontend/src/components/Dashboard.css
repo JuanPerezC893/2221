@@ -34,7 +34,7 @@
 
 .side-panel {
   position: absolute;
-  top: 80px; /* Position below the top bar */
+  top: 80px; /* Position below the top bar, adjusted for better fit */
   bottom: 20px;
   width: 350px;
   z-index: 1;
