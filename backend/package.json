@@ -16,10 +16,10 @@
   "license": "ISC",
   "dependencies": {
     "@emailjs/nodejs": "^5.0.2",
+    "@napi-rs/canvas": "^0.1.80",
     "@sparticuz/chromium": "^138.0.2",
     "axios": "^1.11.0",
     "bcrypt": "^6.0.0",
-    "canvas": "^3.2.0",
     "chart.js": "^4.5.0",
     "chartjs-adapter-date-fns": "^3.0.0",
     "chartjs-node-canvas": "^5.0.0",

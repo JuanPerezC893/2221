@@ -1,10 +1,22 @@
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
+const { createCanvas } = require('@napi-rs/canvas');
 const fs = require('fs');
 
 // Configuración global para los gráficos
 const width = 1200; // Ancho en píxeles
 const height = 600; // Alto en píxeles
-const chartJSNodeCanvas = new ChartJSNodeCanvas({ width, height, backgroundColour: '#ffffff' });
+const chartJSNodeCanvas = new ChartJSNodeCanvas({ 
+  width, 
+  height, 
+  backgroundColour: '#ffffff',
+  plugins: {
+    modern: [require('chartjs-adapter-date-fns')]
+  },
+  chartCallback: (ChartJS) => {
+    ChartJS.defaults.responsive = true;
+    ChartJS.defaults.maintainAspectRatio = false;
+  }
+});
 
 /**
  * Genera un gráfico de torta (pie chart) a partir de los datos de residuos.
