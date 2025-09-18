@@ -1,16 +1,11 @@
-const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
-const { Canvas } = require('@napi-rs/canvas');
-const fs = require('fs');
+const { createCanvas } = require('@napi-rs/canvas');
+const { Chart, registerables } = require('chart.js');
 
-// Configuración global para los gráficos
+// Registrar todos los componentes de Chart.js (controladores, elementos, escalas, etc.)
+Chart.register(...registerables);
+
 const width = 1200; // Ancho en píxeles
 const height = 600; // Alto en píxeles
-const chartJSNodeCanvas = new ChartJSNodeCanvas({ 
-  width, 
-  height, 
-  backgroundColour: '#ffffff',
-  Canvas: Canvas, // Indicar que use @napi-rs/canvas
-});
 
 /**
  * Genera un gráfico de torta (pie chart) a partir de los datos de residuos.
@@ -18,6 +13,9 @@ const chartJSNodeCanvas = new ChartJSNodeCanvas({
  * @returns {Promise<string>} Una promesa que resuelve a la imagen del gráfico en formato Data URL (Base64).
  */
 async function generatePieChart(wasteData) {
+  const canvas = createCanvas(width, height);
+  const ctx = canvas.getContext('2d');
+
   const labels = wasteData.length > 0 ? wasteData.map(item => item.tipo) : ['Sin Datos'];
   const data = wasteData.length > 0 ? wasteData.map(item => parseFloat(item.total_cantidad)) : [1];
 
@@ -45,17 +43,13 @@ async function generatePieChart(wasteData) {
             }
           }
         }
-        //title: {
-        //  display: true,
-        //  text: 'Distribución de Residuos por Tipo',
-        //  font: { size: 50 },
-        //}
       }
     }
   };
 
-  const dataUrl = await chartJSNodeCanvas.renderToDataURL(configuration);
-  return dataUrl;
+  new Chart(ctx, configuration);
+
+  return canvas.toDataURL('image/png');
 }
 
 /**
@@ -64,6 +58,9 @@ async function generatePieChart(wasteData) {
  * @returns {Promise<string>} Una promesa que resuelve a la imagen del gráfico en formato Data URL (Base64).
  */
 async function generateBarChart(wasteData) {
+  const canvas = createCanvas(width, height);
+  const ctx = canvas.getContext('2d');
+
   const labels = wasteData.map(item => item.month).sort();
   const data = wasteData.map(item => parseFloat(item.total_cantidad));
 
@@ -106,8 +103,9 @@ async function generateBarChart(wasteData) {
     }
   };
 
-  const dataUrl = await chartJSNodeCanvas.renderToDataURL(configuration);
-  return dataUrl;
+  new Chart(ctx, configuration);
+
+  return canvas.toDataURL('image/png');
 }
 
 module.exports = { generatePieChart, generateBarChart };
