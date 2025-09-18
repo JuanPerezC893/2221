@@ -1,5 +1,5 @@
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
-const { createCanvas } = require('@napi-rs/canvas');
+const { Canvas } = require('@napi-rs/canvas');
 const fs = require('fs');
 
 // Configuración global para los gráficos
@@ -8,7 +8,8 @@ const height = 600; // Alto en píxeles
 const chartJSNodeCanvas = new ChartJSNodeCanvas({ 
   width, 
   height, 
-  backgroundColour: '#ffffff'
+  backgroundColour: '#ffffff',
+  Canvas: Canvas, // Indicar que use @napi-rs/canvas
 });
 
 /**
