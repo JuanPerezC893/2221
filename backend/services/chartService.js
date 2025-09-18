@@ -32,6 +32,7 @@ async function generatePieChart(wasteData) {
       }],
     },
     options: {
+      animation: false,
       devicePixelRatio: 2,
       responsive: true,
       plugins: {
@@ -78,6 +79,7 @@ async function generateBarChart(wasteData) {
       }],
     },
     options: {
+      animation: false,
       devicePixelRatio: 2,
       responsive: true,
       maintainAspectRatio: false,
