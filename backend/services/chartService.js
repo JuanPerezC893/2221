@@ -8,14 +8,7 @@ const height = 600; // Alto en píxeles
 const chartJSNodeCanvas = new ChartJSNodeCanvas({ 
   width, 
   height, 
-  backgroundColour: '#ffffff',
-  plugins: {
-    modern: [require('chartjs-adapter-date-fns')]
-  },
-  chartCallback: (ChartJS) => {
-    ChartJS.defaults.responsive = true;
-    ChartJS.defaults.maintainAspectRatio = false;
-  }
+  backgroundColour: '#ffffff'
 });
 
 /**
