@@ -49,6 +49,9 @@ app.use('/api/trazabilidad', trazabilidadRouter);
 const usersRouter = require('./routes/users');
 app.use('/api/users', usersRouter);
 
+const empresasRouter = require('./routes/empresas');
+app.use('/api/empresas', empresasRouter);
+
 const errorHandler = require('./middleware/errorHandler');
 app.use(errorHandler);
 

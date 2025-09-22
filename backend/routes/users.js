@@ -20,6 +20,18 @@ router.get('/me', asyncHandler(async (req, res) => {
   res.json(user.rows[0]);
 }));
 
+// Obtener todos los usuarios de la misma empresa
+router.get('/', asyncHandler(async (req, res) => {
+  const { empresa_rut } = req.user; // El rut de la empresa se obtiene del token
+
+  const users = await pool.query(
+    'SELECT id_usuario, nombre, email, rol FROM usuarios WHERE empresa_rut = $1 ORDER BY nombre',
+    [empresa_rut]
+  );
+
+  res.json(users.rows);
+}));
+
 // Actualizar datos del perfil del usuario autenticado
 router.put('/me', asyncHandler(async (req, res) => {
   const { nombre, email } = req.body;

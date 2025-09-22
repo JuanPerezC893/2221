@@ -1,17 +1,23 @@
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import Navbar from './Navbar';
 import './Layout.css'; // Importar los nuevos estilos
 
 const Layout = ({ children }) => {
+  const location = useLocation();
+  const isDashboard = location.pathname === '/dashboard';
+
   return (
     <div className="layout-container">
       <Navbar /> 
       <main className="main-content">
         {children}
       </main>
-      <footer className="footer-custom">
-        <p>© 2025 EcObra. Todos los derechos reservados.</p>
-      </footer>
+      {!isDashboard && (
+        <footer className="footer-custom">
+          <p>© 2025 EcoObra. Todos los derechos reservados.</p>
+        </footer>
+      )}
     </div>
   );
 };

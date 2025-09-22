@@ -13,30 +13,25 @@ const Register = () => {
     password: '',
     confirmPassword: '',
     empresa_rut: '',
+    razon_social: '',
+    direccion: '',
     rol: 'usuario',
   });
 
-  const { nombre, email, confirmEmail, password, confirmPassword, empresa_rut } = formValues;
+  const { nombre, email, confirmEmail, password, confirmPassword, empresa_rut, razon_social, direccion } = formValues;
 
   const handleRutChange = (e) => {
     let value = e.target.value;
-    // Limpiar: quitar todo lo que no sea número o K
     let cleaned = value.replace(/[^0-9kK]/gi, '');
-
-    // Truncar a un máximo de 9 caracteres (8 para el cuerpo, 1 para el verificador)
     if (cleaned.length > 9) {
       cleaned = cleaned.substring(0, 9);
     }
-
-    // Formatear
     let formatted = cleaned;
     if (cleaned.length > 1) {
       const body = cleaned.slice(0, -1);
       const verifier = cleaned.slice(-1);
       formatted = `${body}-${verifier}`;
     }
-
-    // Actualizar el estado usando el manejador original del hook
     handleInputChange({
       target: {
         name: 'empresa_rut',
@@ -64,12 +59,12 @@ const Register = () => {
     }
 
     try {
-      const dataToSend = { nombre, email, password, empresa_rut, rol: 'usuario' };
+      const dataToSend = { nombre, email, password, empresa_rut, razon_social, direccion, rol: 'usuario' };
       await registerService(dataToSend);
-      setSuccessMessage('Usuario registrado exitosamente! Redirigiendo al login...');
+      setSuccessMessage('Usuario registrado exitosamente! Por favor, revisa tu correo para verificar la cuenta.');
       setTimeout(() => {
         window.location.href = '/login';
-      }, 2000);
+      }, 3000);
     } catch (err) {
       console.error(err.response?.data || err.message);
       if (err.response && err.response.data && err.response.data.errors) {
@@ -98,7 +93,7 @@ const Register = () => {
                 <div className="mb-3">
                   <input
                     type="text"
-                    placeholder="Nombre Empresa"
+                    placeholder="Tu Nombre Completo"
                     name="nombre"
                     value={nombre}
                     onChange={handleInputChange}
@@ -110,7 +105,7 @@ const Register = () => {
                 <div className="mb-3">
                   <input
                     type="email"
-                    placeholder="Email"
+                    placeholder="Email de Contacto"
                     name="email"
                     value={email}
                     onChange={handleInputChange}
@@ -143,9 +138,6 @@ const Register = () => {
                     className="form-control"
                     autoComplete="new-password"
                   />
-                  <small className="form-text text-muted">
-                    La contraseña debe tener al menos 8 caracteres, incluyendo mayúsculas, minúsculas, números y símbolos.
-                  </small>
                 </div>
                 <div className="mb-3">
                   <input
@@ -159,16 +151,41 @@ const Register = () => {
                     autoComplete="new-password"
                   />
                 </div>
+                <hr />
+                <p className='text-muted text-center'>Datos de la Empresa</p>
                 <div className="mb-3">
                   <input
                     type="text"
                     placeholder="RUT de la empresa"
                     name="empresa_rut"
                     value={empresa_rut}
-                    onChange={handleRutChange} // Changed to the new handler
+                    onChange={handleRutChange}
                     required
                     className="form-control"
                     autoComplete="organization-id"
+                  />
+                </div>
+                <div className="mb-3">
+                  <input
+                    type="text"
+                    placeholder="Tipo de constructora"
+                    name="razon_social"
+                    value={razon_social}
+                    onChange={handleInputChange}
+                    required
+                    className="form-control"
+                  />
+                </div>
+                <div className="mb-3">
+                  <input
+                    type="text"
+                    placeholder="Dirección de la empresa"
+                    name="direccion"
+                    value={direccion}
+                    onChange={handleInputChange}
+                    required
+                    className="form-control"
+                    autoComplete="street-address"
                   />
                 </div>
                 <div className="d-grid">

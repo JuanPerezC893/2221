@@ -9,7 +9,7 @@ const { sendVerificationEmail } = require('../services/emailService');
 
 // Registrar un nuevo usuario y empresa (si no existe)
 router.post('/register', registerValidationRules(), validateRequest, asyncHandler(async (req, res) => {
-  const { nombre, empresa_rut, razon_social, email, password } = req.body;
+  const { nombre, empresa_rut, razon_social, direccion, email, password } = req.body;
 
   const client = await pool.connect();
   try {
@@ -31,8 +31,8 @@ router.post('/register', registerValidationRules(), validateRequest, asyncHandle
     if (empresaResult.rows.length === 0) {
       // Si la empresa NO existe, la crea y el primer usuario es 'admin'
       await client.query(
-        'INSERT INTO empresas (rut, razon_social) VALUES ($1, $2)',
-        [empresa_rut, razon_social || `Empresa ${empresa_rut}`]
+        'INSERT INTO empresas (rut, razon_social, direccion) VALUES ($1, $2, $3)',
+        [empresa_rut, razon_social, direccion]
       );
       userRole = 'admin'; // First user of a new company is admin
     } else {
