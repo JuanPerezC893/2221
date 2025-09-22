@@ -1,4 +1,11 @@
-const { createCanvas } = require('@napi-rs/canvas');
+const { createCanvas, GlobalFonts } = require('@napi-rs/canvas');
+const path = require('path');
+
+// Registrar la fuente
+const fontPath = path.join(__dirname, '..', 'fonts', 'DejaVuSans.ttf');
+if (require('fs').existsSync(fontPath)) {
+  GlobalFonts.registerFromPath(fontPath, 'DejaVu Sans');
+}
 const { Chart, registerables } = require('chart.js');
 
 // Registrar todos los componentes de Chart.js (controladores, elementos, escalas, etc.)
@@ -40,7 +47,8 @@ async function generatePieChart(wasteData) {
           position: 'right',
           labels: {
             font: {
-              size: 30
+              size: 30,
+              family: 'DejaVu Sans'
             }
           }
         }
@@ -88,18 +96,18 @@ async function generateBarChart(wasteData) {
         title: {
           display: true,
           text: 'Gestión de Residuos por Mes',
-          font: { size: 40 },
+          font: { size: 40, family: 'DejaVu Sans' },
           padding: { top: 10, bottom: 20 }
         },
       },
       scales: {
         x: { 
           grid: { display: false },
-          ticks: { font: { size: 30 } }
+          ticks: { font: { size: 30, family: 'DejaVu Sans' } }
         },
         y: { 
           beginAtZero: true,
-          ticks: { font: { size: 30 } }
+          ticks: { font: { size: 30, family: 'DejaVu Sans' } }
         },
       },
     }
