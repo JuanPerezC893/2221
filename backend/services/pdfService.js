@@ -69,7 +69,7 @@ async function crearPDF(proyecto, residuos) {
         filasHTML += `
           <tr>
             <td>${residuo.tipo || "N/A"}</td>
-            <td>${residuo.cantidad || 0} T</td>
+            <td>${residuo.cantidad || 0} Kg</td>
             <td>${residuo.destino_final || "N/A"}</td>
             <td>${residuo.certificado || "No disponible"}</td>
           </tr>
