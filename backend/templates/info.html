@@ -17,7 +17,7 @@
     <p>Descripción del proyecto: “breve descripción de que trato el proyecto”</p>
 
     <h3>1.2.- Resultados Clave de la Gestión de Residuos</h3>
-    <p>Total de Residuos Generados: {{tonTotales}} toneladas</p>
+    <p>Total de Residuos Generados: {{tonTotales}} kilogramos</p>
     {{graficoBarras}}
     <p>Destino de los Residuos</p>
     <p>Gráfico Circular: "Vertedero" vs. "Valorizado(Reciclado/Reutilizado)".</p>
@@ -34,7 +34,7 @@
         <thead>
             <tr>
                 <th>Tipo de Material</th>
-                <th>Cantidad (toneladas)</th>
+                <th>Cantidad (Kilogramos)</th>
                 <th>Destino</th>
                 <th>Certificado de Disposición</th>
             </tr>
@@ -43,13 +43,12 @@
 	   {{filas_materiales}}
         </tbody>
     </table>
-    <p>Cada fila puede tener un link o un código QR que lleve al certificado digital de disposición final, proporcionando una trazabilidad total y auditable.</p>
 
     <h3>2.3.- Beneficios Ambientales Cuantificados:</h3>
     <p>Reducción de Huella de Carbono:</p>
-    <p>"Al valorizar {{tonTotales}} toneladas de residuos, el proyecto evitó la emisión de {{tonCO2}} toneladas de CO₂</p>
+    <p>Al valorizar {{tonTotales}} kilogramos de residuos, el proyecto evitó la emisión de {{tonCO2}} kilogramos de CO₂</p>
     <p>Ahorro de Recursos:</p>
-    <p>"El reciclaje de materiales permitió ahorrar el consumo de [B] litros de agua y la conservación de [C] árboles."</p>
+    <p>El reciclaje de materiales permitió ahorrar el consumo de [B] litros de agua y la conservación de [C] árboles.</p>
     <div class="page-break"></div>
     <h2>3.- Conclusión y Certificación</h2>
     <h3>Conclusión</h3>
