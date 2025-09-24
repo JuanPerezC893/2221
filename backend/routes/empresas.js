@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db');
 const asyncHandler = require('../utils/asyncHandler');
-const authMiddleware = require('../middleware/auth');
+const { authMiddleware } = require('../middleware/auth');
 
 // Todas las rutas en este archivo requieren autenticación
 router.use(authMiddleware);

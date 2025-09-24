@@ -8,6 +8,35 @@ const validateRequest = (req, res, next) => {
   next();
 };
 
+const validarRut = (rut) => {
+  const valor = rut.replace(/[\.\-]/g, '');
+  const cuerpo = valor.slice(0, -1);
+  let dv = valor.slice(-1).toUpperCase();
+
+  if (cuerpo.length < 7) {
+      return false;
+  }
+
+  let suma = 0;
+  let multiplo = 2;
+
+  for (let i = 1; i <= cuerpo.length; i++) {
+      let index = multiplo * valor.charAt(cuerpo.length - i);
+      suma = suma + index;
+      if (multiplo < 7) {
+          multiplo = multiplo + 1;
+      } else {
+          multiplo = 2;
+      }
+  }
+
+  const dvEsperado = 11 - (suma % 11);
+  dv = (dv == 'K') ? 10 : dv;
+  dv = (dv == 0) ? 11 : dv;
+
+  return dvEsperado == dv;
+};
+
 const registerValidationRules = () => {
   return [
     body('nombre').notEmpty().withMessage('El nombre es requerido'),
@@ -18,7 +47,14 @@ const registerValidationRules = () => {
       .matches(/[a-z]/).withMessage('La contraseña debe contener al menos una letra minúscula')
       .matches(/[0-9]/).withMessage('La contraseña debe contener al menos un número')
       .matches(/[^A-Za-z0-9]/).withMessage('La contraseña debe contener al menos un carácter especial'),
-    body('empresa_rut').notEmpty().withMessage('El RUT de la empresa es requerido'),
+    body('empresa_rut')
+      .notEmpty().withMessage('El RUT de la empresa es requerido')
+      .custom(value => {
+        if (!validarRut(value)) {
+          throw new Error('El RUT de la empresa no es válido');
+        }
+        return true;
+      }),
   ];
 };
 
@@ -50,10 +86,27 @@ const wasteValidationRules = () => {
   ];
 };
 
+const createUserValidationRules = () => {
+  return [
+    body('nombre').notEmpty().withMessage('El nombre es requerido'),
+    body('email').isEmail().withMessage('Debe ser un email válido'),
+    body('password').isLength({ min: 8 }).withMessage('La contraseña debe tener al menos 8 caracteres'),
+    body('rol').isIn(['gerente', 'subgerente', 'operador']).withMessage('Rol no válido'),
+    body('rut_personal').custom(value => {
+      if (!validarRut(value)) {
+        throw new Error('El RUT personal no es válido');
+      }
+      return true;
+    })
+  ];
+};
+
 module.exports = {
   validateRequest,
   registerValidationRules,
   loginValidationRules,
   projectValidationRules,
   wasteValidationRules,
+  createUserValidationRules,
+  validarRut, // Exporting for reuse
 };

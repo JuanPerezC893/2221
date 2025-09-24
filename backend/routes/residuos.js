@@ -3,7 +3,7 @@ const router = express.Router();
 const pool = require('../db');
 const asyncHandler = require('../utils/asyncHandler');
 const { wasteValidationRules, validateRequest } = require('../middleware/validators');
-const authMiddleware = require('../middleware/auth');
+const { authMiddleware } = require('../middleware/auth');
 
 // Todas las rutas en este archivo requieren autenticación
 router.use(authMiddleware);
@@ -40,13 +40,21 @@ router.get('/', asyncHandler(async (req, res) => {
     if (proyecto.rows.length === 0) {
       return res.status(403).json({ message: 'Acceso denegado a este proyecto.' });
     }
-    query = 'SELECT * FROM residuos WHERE id_proyecto = $1 ORDER BY id_residuo DESC';
+    query = `
+      SELECT r.*, p.nombre as nombre_proyecto, u.nombre AS nombre_creador
+      FROM residuos r
+      JOIN proyectos p ON r.id_proyecto = p.id_proyecto
+      LEFT JOIN usuarios u ON r.id_usuario_creacion = u.id_usuario
+      WHERE r.id_proyecto = $1
+      ORDER BY r.id_residuo DESC
+    `;
     params = [id_proyecto];
   } else {
     query = `
-      SELECT r.*, p.nombre as nombre_proyecto
+      SELECT r.*, p.nombre as nombre_proyecto, u.nombre AS nombre_creador
       FROM residuos r
       JOIN proyectos p ON r.id_proyecto = p.id_proyecto
+      LEFT JOIN usuarios u ON r.id_usuario_creacion = u.id_usuario
       WHERE p.empresa_rut = $1
       ORDER BY r.id_residuo DESC
     `;
@@ -60,7 +68,7 @@ router.get('/', asyncHandler(async (req, res) => {
 // Crear un nuevo residuo
 router.post('/', wasteValidationRules(), validateRequest, asyncHandler(async (req, res) => {
   const { tipo, cantidad, unidad, reciclable, estado, id_proyecto } = req.body;
-  const { empresa_rut } = req.user;
+  const { empresa_rut, id: id_usuario_creacion } = req.user;
 
   // Verificar que el proyecto pertenece a la empresa del usuario
   const proyecto = await pool.query('SELECT 1 FROM proyectos WHERE id_proyecto = $1 AND empresa_rut = $2', [id_proyecto, empresa_rut]);
@@ -77,8 +85,8 @@ router.post('/', wasteValidationRules(), validateRequest, asyncHandler(async (re
   const unidadNormalizada = 'kg';
 
   const newResiduo = await pool.query(
-    'INSERT INTO residuos (tipo, cantidad, unidad, reciclable, estado, id_proyecto) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-    [tipo, cantidadEnKg, unidadNormalizada, reciclable, estado, id_proyecto]
+    'INSERT INTO residuos (tipo, cantidad, unidad, reciclable, estado, id_proyecto, id_usuario_creacion) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+    [tipo, cantidadEnKg, unidadNormalizada, reciclable, estado, id_proyecto, id_usuario_creacion]
   );
   
   // Agregar información sobre la conversión en la respuesta

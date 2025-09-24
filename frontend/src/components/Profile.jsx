@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect, useCallback } from 'react';
 import AuthContext from '../context/AuthContext';
 import api from '../services/api';
 import { generarInforme } from '../api/proyectos';
@@ -6,8 +6,6 @@ import LabelModal from './LabelModal';
 import ChangePasswordModal from './ChangePasswordModal';
 import CompanyProfile from './CompanyProfile'; // Import new component
 import UserRoles from './UserRoles'; // Import new component
-
-
 
 const Profile = () => {
   const { auth, updateUser } = useContext(AuthContext);
@@ -30,49 +28,45 @@ const Profile = () => {
   const [formData, setFormData] = useState({
     // User fields
     nombre: '',
-    email: '',
     // Company fields
     razon_social: '',
     direccion: '',
   });
 
-  useEffect(() => {
+  const fetchData = useCallback(async () => {
     if (!auth.user) return;
+    setLoading(true);
+    try {
+      const [companyRes, usersRes, projectsRes, wastesRes] = await Promise.all([
+        api.get('/empresas/me'),
+        api.get('/users'),
+        api.get('/proyectos'),
+        api.get('/residuos'),
+      ]);
 
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const [companyRes, usersRes, projectsRes, wastesRes] = await Promise.all([
-          api.get('/empresas/me'),
-          api.get('/users'),
-          api.get('/proyectos'),
-          api.get('/residuos'),
-        ]);
+      setCompanyData(companyRes.data);
+      setUserRoles(usersRes.data);
+      setProjects(projectsRes.data);
+      setWastes(wastesRes.data);
+      
+      setFormData({
+        nombre: auth.user.nombre,
+        razon_social: companyRes.data.razon_social,
+        direccion: companyRes.data.direccion,
+      });
 
-        setCompanyData(companyRes.data);
-        setUserRoles(usersRes.data);
-        setProjects(projectsRes.data);
-        setWastes(wastesRes.data);
-        
-        // Set initial form data after fetching
-        setFormData({
-          nombre: auth.user.nombre,
-          email: auth.user.email,
-          razon_social: companyRes.data.razon_social,
-          direccion: companyRes.data.direccion,
-        });
-
-        setError(null);
-      } catch (err) {
-        setError('Error al cargar los datos del perfil.');
-        console.error('Fetch profile data error:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
+      setError(null);
+    } catch (err) {
+      setError('Error al cargar los datos del perfil.');
+      console.error('Fetch profile data error:', err);
+    } finally {
+      setLoading(false);
+    }
   }, [auth.user]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -80,10 +74,8 @@ const Profile = () => {
 
   const handleCancel = () => {
     setIsEditing(false);
-    // Reset form data to original state from context and state
     setFormData({
       nombre: auth.user.nombre,
-      email: auth.user.email,
       razon_social: companyData.razon_social,
       direccion: companyData.direccion,
     });
@@ -95,17 +87,14 @@ const Profile = () => {
 
   const handleSave = async () => {
     try {
-      // Separar los datos del usuario y de la empresa
-      const userUpdatePayload = { nombre: formData.nombre, email: formData.email };
+      const userUpdatePayload = { nombre: formData.nombre };
       const companyUpdatePayload = { razon_social: formData.razon_social, direccion: formData.direccion };
 
-      // Realizar ambas actualizaciones en paralelo
       const [userRes, companyRes] = await Promise.all([
         api.put('/users/me', userUpdatePayload),
         api.put('/empresas/me', companyUpdatePayload)
       ]);
 
-      // Actualizar el contexto y el estado local con las respuestas
       updateUser(userRes.data); 
       setCompanyData(companyRes.data);
 
@@ -176,7 +165,7 @@ const Profile = () => {
             formData={formData}
             handleInputChange={handleInputChange}
           />
-          <UserRoles users={userRoles} />
+          <UserRoles users={userRoles} onUsersUpdate={fetchData} />
         </div>
 
         {/* Right Column for User-specific info and actions */}
@@ -194,14 +183,6 @@ const Profile = () => {
                   </div>
               ) : (
                 <p><strong>Nombre:</strong> {auth.user.nombre}</p>
-              )}
-               {isEditing ? (
-                 <div className="mb-3">
-                    <label className="form-label">Email</label>
-                    <input type="email" className="form-control" name="email" value={formData.email} onChange={handleInputChange} />
-                  </div>
-              ) : (
-                <p><strong>Email:</strong> {auth.user.email}</p>
               )}
               <hr />
               <div className="row text-center mb-3">
@@ -245,13 +226,14 @@ const Profile = () => {
                   {wastes.length > 0 ? (
                     <div className="table-responsive">
                       <table className="table table-hover">
-                        <thead><tr><th>ID</th><th>Tipo</th><th>Proyecto</th><th></th></tr></thead>
+                        <thead><tr><th>ID</th><th>Tipo</th><th>Proyecto</th><th>Creado por</th><th></th></tr></thead>
                         <tbody>
                           {wastes.map(waste => (
                             <tr key={waste.id_residuo}>
                               <td>{waste.id_residuo}</td>
                               <td>{waste.tipo}</td>
                               <td>{waste.nombre_proyecto}</td>
+                              <td>{waste.nombre_creador || 'N/A'}</td>
                               <td className="text-end">
                                 <button className="btn btn-secondary btn-sm" onClick={() => handleOpenLabelModal(waste)}>Ver / Imprimir</button>
                               </td>

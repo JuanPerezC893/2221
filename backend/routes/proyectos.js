@@ -4,7 +4,7 @@ const router = express.Router();
 const pool = require('../db');
 const asyncHandler = require('../utils/asyncHandler');
 const { projectValidationRules, validateRequest } = require('../middleware/validators');
-const authMiddleware = require('../middleware/auth');
+const { authMiddleware } = require('../middleware/auth');
 const { geocodeAddressWithFallbacks, getDefaultCoordinates } = require('../services/geocoding');
 const { crearPDF } = require('../services/pdfService');
 

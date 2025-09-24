@@ -2,11 +2,46 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db');
 const asyncHandler = require('../utils/asyncHandler');
-const authMiddleware = require('../middleware/auth');
+const { authMiddleware, adminOnly } = require('../middleware/auth');
 const bcrypt = require('bcrypt');
+const { validateRequest, createUserValidationRules } = require('../middleware/validators');
 
 // Todas las rutas en este archivo requieren autenticación
 router.use(authMiddleware);
+
+// Endpoint to create a new user by an admin
+router.post('/create-by-admin', 
+  adminOnly, 
+  createUserValidationRules(), 
+  validateRequest, 
+  asyncHandler(async (req, res) => {
+    const { nombre, email, password, rol, rut_personal } = req.body;
+    const { empresa_rut } = req.user; // Get company RUT from admin's token
+
+    // Check if email already exists
+    const emailExists = await pool.query('SELECT 1 FROM usuarios WHERE email = $1', [email]);
+    if (emailExists.rows.length > 0) {
+      return res.status(400).json({ message: 'El correo electrónico ya está en uso.' });
+    }
+
+    // Check if personal RUT already exists
+    const rutExists = await pool.query('SELECT 1 FROM usuarios WHERE rut_personal = $1', [rut_personal]);
+    if (rutExists.rows.length > 0) {
+      return res.status(400).json({ message: 'El RUT personal ya está en uso.' });
+    }
+
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Insert new user
+    const newUserResult = await pool.query(
+      'INSERT INTO usuarios (nombre, email, password, rol, empresa_rut, rut_personal, email_verificado) VALUES ($1, $2, $3, $4, $5, $6, TRUE) RETURNING id_usuario, nombre, email, rol, rut_personal',
+      [nombre, email, hashedPassword, rol, empresa_rut, rut_personal]
+    );
+
+    res.status(201).json(newUserResult.rows[0]);
+}));
 
 // Obtener datos del usuario autenticado (reemplaza a /api/auth/me)
 router.get('/me', asyncHandler(async (req, res) => {
@@ -25,7 +60,7 @@ router.get('/', asyncHandler(async (req, res) => {
   const { empresa_rut } = req.user; // El rut de la empresa se obtiene del token
 
   const users = await pool.query(
-    'SELECT id_usuario, nombre, email, rol FROM usuarios WHERE empresa_rut = $1 ORDER BY nombre',
+    'SELECT id_usuario, nombre, email, rol, rut_personal FROM usuarios WHERE empresa_rut = $1 ORDER BY nombre',
     [empresa_rut]
   );
 
@@ -34,16 +69,16 @@ router.get('/', asyncHandler(async (req, res) => {
 
 // Actualizar datos del perfil del usuario autenticado
 router.put('/me', asyncHandler(async (req, res) => {
-  const { nombre, email } = req.body;
+  const { nombre } = req.body; // Email removed
   const { id } = req.user;
 
-  if (!nombre || !email) {
-    return res.status(400).json({ message: 'Nombre y email son requeridos.' });
+  if (!nombre) {
+    return res.status(400).json({ message: 'Nombre es requerido.' });
   }
 
   const updatedUser = await pool.query(
-    'UPDATE usuarios SET nombre = $1, email = $2 WHERE id_usuario = $3 RETURNING id_usuario, nombre, rol, empresa_rut, email',
-    [nombre, email, id]
+    'UPDATE usuarios SET nombre = $1 WHERE id_usuario = $2 RETURNING id_usuario, nombre, rol, empresa_rut, email',
+    [nombre, id]
   );
 
   if (updatedUser.rows.length === 0) {

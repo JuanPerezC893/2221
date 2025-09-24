@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-module.exports = function (req, res, next) {
+const authMiddleware = (req, res, next) => {
   const authHeader = req.header('Authorization');
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -11,7 +11,6 @@ module.exports = function (req, res, next) {
     const token = authHeader.split(' ')[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
-    // Adjuntar el payload decodificado a la solicitud
     req.user = decoded; 
 
     next();
@@ -19,3 +18,13 @@ module.exports = function (req, res, next) {
     res.status(401).json({ message: 'El token no es válido.' });
   }
 };
+
+const adminOnly = (req, res, next) => {
+  if (req.user && req.user.rol === 'admin') {
+    next();
+  } else {
+    res.status(403).json({ message: 'Acceso denegado. Se requiere rol de administrador.' });
+  }
+};
+
+module.exports = { authMiddleware, adminOnly };

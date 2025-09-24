@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from '../hooks/useForm';
 import { register as registerService } from '../api/auth';
+import { validarRut } from '../utils/validation.js';
 
 const Register = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [rutError, setRutError] = useState('');
+
   const [formValues, handleInputChange] = useForm({
     nombre: '',
     email: '',
@@ -20,22 +23,42 @@ const Register = () => {
 
   const { nombre, email, confirmEmail, password, confirmPassword, empresa_rut, razon_social, direccion } = formValues;
 
+  useEffect(() => {
+    if (empresa_rut) {
+      if (validarRut(empresa_rut)) {
+        setRutError('');
+      } else {
+        setRutError('El RUT de la empresa no es válido.');
+      }
+    } else {
+      setRutError('');
+    }
+  }, [empresa_rut]);
+
   const handleRutChange = (e) => {
     let value = e.target.value;
+    // Limpia el valor para procesarlo: quita todo excepto números y la letra K
     let cleaned = value.replace(/[^0-9kK]/gi, '');
-    if (cleaned.length > 9) {
-      cleaned = cleaned.substring(0, 9);
+
+    if (cleaned) {
+        // Toma el cuerpo (todos los caracteres menos el último) y el dígito verificador
+        const body = cleaned.slice(0, -1);
+        const dv = cleaned.slice(-1);
+
+        // Formatea el cuerpo con puntos
+        const formattedBody = body.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+        // Une el cuerpo formateado y el dígito verificador
+        value = `${formattedBody}-${dv}`;
+    } else {
+        value = '';
     }
-    let formatted = cleaned;
-    if (cleaned.length > 1) {
-      const body = cleaned.slice(0, -1);
-      const verifier = cleaned.slice(-1);
-      formatted = `${body}-${verifier}`;
-    }
+
+
     handleInputChange({
       target: {
         name: 'empresa_rut',
-        value: formatted,
+        value: value,
       },
     });
   };
@@ -44,6 +67,12 @@ const Register = () => {
     e.preventDefault();
     setErrorMessage('');
     setSuccessMessage('');
+
+    if (rutError) {
+      setErrorMessage('Por favor, corrige los errores antes de continuar.');
+      return;
+    }
+
     setLoading(true);
 
     if (email !== confirmEmail) {
@@ -161,9 +190,10 @@ const Register = () => {
                     value={empresa_rut}
                     onChange={handleRutChange}
                     required
-                    className="form-control"
+                    className={`form-control ${rutError ? 'is-invalid' : ''}`}
                     autoComplete="organization-id"
                   />
+                  {rutError && <div className="invalid-feedback">{rutError}</div>}
                 </div>
                 <div className="mb-3">
                   <input
@@ -193,7 +223,7 @@ const Register = () => {
                     type="submit"
                     value={loading ? 'Registrando...' : 'Registrarse'}
                     className="btn btn-primary"
-                    disabled={loading}
+                    disabled={loading || !!rutError}
                   />
                 </div>
               </form>
