@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => ({
   server: mode === 'development' ? {
     proxy: {
       '/api': {
-	target: 'https://2221-six.vercel.app/',
+	target: 'https://2221-six.vercel.app',
         changeOrigin: true,
         secure: true,
       }
