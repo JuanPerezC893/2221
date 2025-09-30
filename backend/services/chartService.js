@@ -5,15 +5,20 @@ const path = require('path');
 const fontPath = path.join(__dirname, '..', 'fonts', 'DejaVuSans.ttf');
 if (require('fs').existsSync(fontPath)) {
   GlobalFonts.registerFromPath(fontPath, 'DejaVu Sans');
+  console.log('Fuente DejaVu Sans registrada correctamente desde:', fontPath);
+} else {
+  console.error('Archivo de fuente no encontrado en:', fontPath);
 }
 const { Chart, registerables } = require('chart.js');
 
 // Registrar todos los componentes de Chart.js (controladores, elementos, escalas, etc.)
 Chart.register(...registerables);
 
-const width = 1200; // Ancho en píxeles
+const width = 1000; // Ancho en píxeles
 const height = 600; // Alto en píxeles
 
+const width2 = 1300;
+const height2 = 600;
 /**
  * Genera un gráfico de torta (pie chart) a partir de los datos de residuos.
  * @param {Array<Object>} wasteData - Datos de los residuos, ej: [{ tipo: 'Metal', total_cantidad: '150' }]
@@ -35,19 +40,19 @@ async function generatePieChart(wasteData) {
         data: data,
         backgroundColor: wasteData.length > 0 ? ['#0d6efd', '#198754', '#ffc107', '#dc3545', '#6f42c1', '#fd7e14'] : ['#dee2e6'],
         borderColor: '#fff',
-        borderWidth: 2,
+        borderWidth: 6,
       }],
     },
     options: {
       animation: false,
-      devicePixelRatio: 2,
-      responsive: true,
+      devicePixelRatio: 10,
+      responsive: false,
       plugins: {
         legend: {
           position: 'right',
           labels: {
             font: {
-              size: 30,
+              size: 36,
               family: 'DejaVu Sans'
             }
           }
@@ -67,7 +72,7 @@ async function generatePieChart(wasteData) {
  * @returns {Promise<string>} Una promesa que resuelve a la imagen del gráfico en formato Data URL (Base64).
  */
 async function generateBarChart(wasteData) {
-  const canvas = createCanvas(width, height);
+  const canvas = createCanvas(width2, height2);
   const ctx = canvas.getContext('2d');
 
   const labels = wasteData.map(item => item.month).sort();
@@ -89,14 +94,14 @@ async function generateBarChart(wasteData) {
     options: {
       animation: false,
       devicePixelRatio: 2,
-      responsive: true,
+      responsive: false,
       maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
         title: {
           display: true,
           text: 'Gestión de Residuos por Mes',
-          font: { size: 40, family: 'DejaVu Sans' },
+          font: { size: 36, family: 'DejaVu Sans' },
           padding: { top: 10, bottom: 20 }
         },
       },

@@ -4,6 +4,17 @@ const pool = require('../db');
 const asyncHandler = require('../utils/asyncHandler');
 const { authMiddleware } = require('../middleware/auth');
 
+// Ruta pública para verificar si una empresa existe por su RUT
+router.get('/check/:rut', asyncHandler(async (req, res) => {
+  const { rut } = req.params;
+  const empresa = await pool.query('SELECT 1 FROM empresas WHERE rut = $1', [rut]);
+
+  if (empresa.rows.length > 0) {
+    return res.json({ exists: true });
+  }
+  return res.json({ exists: false });
+}));
+
 // Todas las rutas en este archivo requieren autenticación
 router.use(authMiddleware);
 

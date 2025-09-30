@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const pool = require('../db');
 const asyncHandler = require('../utils/asyncHandler');
 const { registerValidationRules, loginValidationRules, validateRequest } = require('../middleware/validators');
-const { sendVerificationEmail } = require('../services/emailService');
+const { sendVerificationEmail, sendNewUserForApprovalEmail } = require('../services/emailService');
 
 // Registrar un nuevo usuario y empresa (si no existe)
 router.post('/register', registerValidationRules(), validateRequest, asyncHandler(async (req, res) => {
@@ -45,15 +45,33 @@ router.post('/register', registerValidationRules(), validateRequest, asyncHandle
     const hashedPassword = await bcrypt.hash(password, salt);
 
     // 4. Insertar el nuevo usuario
+    const userStatus = userRole === 'admin' ? 'aprobado' : 'pendiente'; // Set status based on role
     const newUserResult = await client.query(
-      'INSERT INTO usuarios (nombre, rol, empresa_rut, email, password, email_verificado) VALUES ($1, $2, $3, $4, $5, FALSE) RETURNING id_usuario', // email_verificado set to FALSE
-      [nombre, userRole, finalEmpresaRut, email, hashedPassword]
+      'INSERT INTO usuarios (nombre, rol, empresa_rut, email, password, email_verificado, estado) VALUES ($1, $2, $3, $4, $5, FALSE, $6) RETURNING id_usuario', // Add estado column
+      [nombre, userRole, finalEmpresaRut, email, hashedPassword, userStatus]
     );
     const newUser = newUserResult.rows[0];
 
-    // 5. Generar y enviar token de verificación de email
+    // 5. Enviar correos de verificación y notificación
     const verificationToken = jwt.sign({ id: newUser.id_usuario }, process.env.JWT_SECRET, { expiresIn: '1d' });
-    await sendVerificationEmail(email, verificationToken, nombre); // Added companyName
+    await sendVerificationEmail(email, verificationToken, nombre);
+
+    // Si el usuario se une a una empresa existente, notificar a los administradores
+    if (userRole === 'usuario') {
+      const adminsResult = await client.query(
+        "SELECT nombre, email FROM usuarios WHERE empresa_rut = $1 AND rol = 'admin' AND email_verificado = TRUE",
+        [finalEmpresaRut]
+      );
+
+      if (adminsResult.rows.length > 0) {
+        const { razon_social } = empresaResult.rows[0];
+        for (const admin of adminsResult.rows) {
+          await sendNewUserForApprovalEmail(admin.email, admin.nombre, nombre, email, razon_social);
+        }
+      } else {
+        console.warn(`No se encontró administrador verificado para la empresa con RUT ${finalEmpresaRut} para notificar sobre el nuevo usuario ${email}.`);
+      }
+    }
 
     await client.query('COMMIT');
     return res.status(201).json({ message: 'Registro exitoso. Por favor, verifica tu correo electrónico.' }); // Original success message
@@ -112,6 +130,11 @@ router.post('/login', loginValidationRules(), validateRequest, asyncHandler(asyn
 
   if (!user.email_verificado) {
     return res.status(403).json({ message: 'Por favor, verifica tu correo electrónico antes de iniciar sesión.' });
+  }
+
+  // Check if user account is approved
+  if (user.estado === 'pendiente') {
+    return res.status(403).json({ message: 'Tu cuenta está pendiente de aprobación por un administrador.' });
   }
 
   const validPassword = await bcrypt.compare(password, user.password);

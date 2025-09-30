@@ -60,7 +60,7 @@ router.get('/', asyncHandler(async (req, res) => {
   const { empresa_rut } = req.user; // El rut de la empresa se obtiene del token
 
   const users = await pool.query(
-    'SELECT id_usuario, nombre, email, rol, rut_personal FROM usuarios WHERE empresa_rut = $1 ORDER BY nombre',
+    'SELECT id_usuario, nombre, email, rol, rut_personal, estado FROM usuarios WHERE empresa_rut = $1 ORDER BY nombre',
     [empresa_rut]
   );
 
@@ -159,6 +159,41 @@ router.delete('/me', asyncHandler(async (req, res) => {
         client.release();
     }
 }));
+
+// Update a user's role and status (for admins)
+router.put('/:id/status',
+  adminOnly,
+  asyncHandler(async (req, res) => {
+    const { id } = req.params; // User ID to update
+    const { rol, estado } = req.body;
+    const { empresa_rut } = req.user; // Admin's company RUT
+
+    if (!rol || !estado) {
+      return res.status(400).json({ message: 'Rol y estado son requeridos.' });
+    }
+
+    // Verify the user to be updated belongs to the admin's company
+    const userToUpdateResult = await pool.query(
+      'SELECT empresa_rut FROM usuarios WHERE id_usuario = $1',
+      [id]
+    );
+
+    if (userToUpdateResult.rows.length === 0) {
+      return res.status(404).json({ message: 'Usuario a actualizar no encontrado.' });
+    }
+
+    if (userToUpdateResult.rows[0].empresa_rut !== empresa_rut) {
+      return res.status(403).json({ message: 'No tienes permiso para modificar a este usuario.' });
+    }
+
+    const updatedUser = await pool.query(
+      'UPDATE usuarios SET rol = $1, estado = $2 WHERE id_usuario = $3 RETURNING id_usuario, nombre, email, rol, estado',
+      [rol, estado, id]
+    );
+
+    res.json(updatedUser.rows[0]);
+  })
+);
 
 
 module.exports = router;
