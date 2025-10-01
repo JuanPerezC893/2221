@@ -128,6 +128,13 @@ router.post('/login', loginValidationRules(), validateRequest, asyncHandler(asyn
 
   const user = userResult.rows[0];
 
+  // Verificar la integridad de los datos: la empresa asociada debe existir
+  const empresaResult = await pool.query('SELECT 1 FROM empresas WHERE rut = $1', [user.empresa_rut]);
+  if (empresaResult.rows.length === 0) {
+    console.error(`Error de integridad de datos: El usuario ${user.email} está asociado a una empresa con RUT ${user.empresa_rut} que no existe.`);
+    return res.status(500).json({ message: 'Error en la configuración de la cuenta. La empresa asociada a tu usuario no fue encontrada. Por favor, contacta a soporte.' });
+  }
+
   if (!user.email_verificado) {
     return res.status(403).json({ message: 'Por favor, verifica tu correo electrónico antes de iniciar sesión.' });
   }
