@@ -84,10 +84,10 @@
   text-decoration: underline;
 }
 
-.login-card-facebook .btn-light {
-  background-color: #0d6efd !important;
-  color: #fff !important;
-  border-color: #9c9c9c !important;
+.login-card-facebook .btn-primary {
+  width: 100%;
+  border-radius: 6px;
+  font-weight: bold;
 }
 /* Footer */
 .auth-footer {
