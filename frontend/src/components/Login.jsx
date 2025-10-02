@@ -84,7 +84,7 @@ const Login = () => {
                   />
                 </div>
                 <div className="d-grid">
-                  <input type="submit" value={loading ? 'Iniciando...' : 'Iniciar Sesión'} className="btn btn-light" disabled={loading} />
+                  <input type="submit" value={loading ? 'Iniciando...' : 'Iniciar Sesión'} className="btn btn-primary" disabled={loading} />
                 </div>
               </form>
               <div className="text-center mt-3">
