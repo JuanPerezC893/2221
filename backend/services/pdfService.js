@@ -36,8 +36,8 @@ async function crearPDF(proyecto, residuos) {
     
     const [pieChartImage, barChartImage] = await Promise.all([pieChartImagePromise, barChartImagePromise]);
 
-    const graficoTortaImg = `<img src="${pieChartImage}" alt="Gráfico Circular" style="width: 100%; height: auto; display: block; margin-left: auto; margin-right: auto;"/>`;
-    const graficoBarrasImg = `<img src="${barChartImage}" alt="Gráfico de Barras" style="width: 70%; height: auto; display: block; margin-left: auto; margin-right: auto;"/>`;
+    const graficoTortaImg = `<img src="${pieChartImage}" alt="Gráfico Circular" style="width: 70%; height: auto; display: block; margin-left: auto; margin-right: auto;"/>`;
+    const graficoBarrasImg = `<img src="${barChartImage}" alt="Gráfico de Barras" style="width: 100%; height: auto; display: block; margin-left: auto; margin-right: auto;"/>`;
 
     // 1. Leer HTML y CSS base
     const htmlPath = path.join(__dirname, "../templates/info.html");
