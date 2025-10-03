@@ -36,7 +36,7 @@ async function crearPDF(proyecto, residuos) {
     
     const [pieChartImage, barChartImage] = await Promise.all([pieChartImagePromise, barChartImagePromise]);
 
-    const graficoTortaImg = `<img src="${pieChartImage}" alt="Gráfico Circular" style="width: 70%; height: auto; display: block; margin-left: auto; margin-right: auto;"/>`;
+    const graficoTortaImg = `<img src="${pieChartImage}" alt="Gráfico Circular" style="width: 100%; height: auto; display: block; margin-left: auto; margin-right: auto;"/>`;
     const graficoBarrasImg = `<img src="${barChartImage}" alt="Gráfico de Barras" style="width: 70%; height: auto; display: block; margin-left: auto; margin-right: auto;"/>`;
 
     // 1. Leer HTML y CSS base
@@ -89,16 +89,31 @@ async function crearPDF(proyecto, residuos) {
     html = html.replace("{{graficoBarras}}", graficoBarrasImg);
     html = html.replace("{{graficoTorta}}", graficoTortaImg);
 
-    // Manejar la imagen de fondo opcional
+    // Manejar la imagen de fondo
     const fondoPath = path.join(__dirname, "../templates/0.jpg");
     try {
-      await fs.access(fondoPath);
-      html = html.replace(
-        "file:///home/jusepecaz/Downloads/0.jpg",
-        "file://" + fondoPath
-      );
+      const fondoImage = await fs.readFile(fondoPath);
+      const fondoBase64 = fondoImage.toString("base64");
+      const fondoDataUri = `data:image/jpeg;base64,${fondoBase64}`;
+      const backgroundStyle = `
+        <style>
+          body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("${fondoDataUri}") no-repeat center center;
+            background-size: cover;
+            opacity: 0.3;
+            z-index: -1;
+          }
+        </style>
+      `;
+      html = html.replace("</head>", `${backgroundStyle}</head>`);
     } catch (err) {
-      console.warn("No se encontró la imagen de fondo, se omite.");
+      console.warn("No se encontró la imagen de fondo en 'templates/0.jpg', se omite.");
     }
 
     // 5. Generar PDF con Puppeteer

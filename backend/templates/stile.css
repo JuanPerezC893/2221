@@ -8,20 +8,6 @@ body {
   position: relative;
 }
 
-/* Fondo del informe (imagen en cada página) */
-body::before {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: url("file:///home/jusepecaz/Downloads/0.jpg") no-repeat center center;
-  background-size: cover;
-  opacity: 0.1; /* Ajusta transparencia */
-  z-index: -1;
-}
-
 /* Títulos */
 h1 {
   text-align: center;
@@ -76,15 +62,6 @@ ul {
   page-break-after: always;
 }
 
-.fondo {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0.1;
-  z-index: -1;
-}
 .contenido {
   position: relative;
   z-index: 1;

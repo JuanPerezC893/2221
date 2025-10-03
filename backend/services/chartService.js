@@ -17,7 +17,7 @@ Chart.register(...registerables);
 const width = 1000; // Ancho en píxeles
 const height = 600; // Alto en píxeles
 
-const width2 = 1300;
+const width2 = 1800;
 const height2 = 600;
 /**
  * Genera un gráfico de torta (pie chart) a partir de los datos de residuos.
@@ -85,8 +85,8 @@ async function generateBarChart(wasteData) {
       datasets: [{
         label: 'Cantidad de Residuos (kg)',
         data: data,
-        backgroundColor: 'rgba(13, 110, 253, 0.6)',
-        borderColor: 'rgba(13, 110, 253, 1)',
+        backgroundColor: '#0d6efd',
+        borderColor: '#0d6efd',
         borderWidth: 1,
         borderRadius: 4,
       }],
