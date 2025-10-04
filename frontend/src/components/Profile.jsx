@@ -1,15 +1,17 @@
-import React, { useContext, useState, useEffect, useCallback } from 'react';
+import React, { useContext, useState, useEffect, useCallback, useRef } from 'react';
 import AuthContext from '../context/AuthContext';
 import api from '../services/api';
 import { generarInforme } from '../api/proyectos';
 import LabelModal from './LabelModal';
 import ChangePasswordModal from './ChangePasswordModal';
-import CompanyProfile from './CompanyProfile'; // Import new component
-import UserRoles from './UserRoles'; // Import new component
+import CompanyProfile from './CompanyProfile';
+import UserProfile from './UserProfile';
+import UserRoles from './UserRoles';
+import './ProfileTabs.css';
 
 const Profile = () => {
   const { auth, updateUser } = useContext(AuthContext);
-  
+
   // Data states
   const [companyData, setCompanyData] = useState(null);
   const [userRoles, setUserRoles] = useState([]);
@@ -17,18 +19,22 @@ const Profile = () => {
   const [wastes, setWastes] = useState([]);
 
   // UI states
+  const [activeTab, setActiveTab] = useState('user'); // 'user' or 'company'
   const [selectedWaste, setSelectedWaste] = useState(null);
   const [isLabelModalOpen, setIsLabelModalOpen] = useState(false);
   const [isChangePasswordModalOpen, setChangePasswordModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
-  
+  const [indicatorStyle, setIndicatorStyle] = useState({});
+
+  // Refs for tabs
+  const userTabRef = useRef(null);
+  const companyTabRef = useRef(null);
+
   // Form state for editing company and user info
   const [formData, setFormData] = useState({
-    // User fields
     nombre: '',
-    // Company fields
     razon_social: '',
     direccion: '',
   });
@@ -48,7 +54,7 @@ const Profile = () => {
       setUserRoles(usersRes.data);
       setProjects(projectsRes.data);
       setWastes(wastesRes.data);
-      
+
       setFormData({
         nombre: auth.user.nombre,
         razon_social: companyRes.data.razon_social,
@@ -67,6 +73,20 @@ const Profile = () => {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  useEffect(() => {
+    if (activeTab === 'user' && userTabRef.current) {
+      setIndicatorStyle({
+        left: userTabRef.current.offsetLeft,
+        width: userTabRef.current.offsetWidth,
+      });
+    } else if (activeTab === 'company' && companyTabRef.current) {
+      setIndicatorStyle({
+        left: companyTabRef.current.offsetLeft,
+        width: companyTabRef.current.offsetWidth,
+      });
+    }
+  }, [activeTab, loading]);
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -92,10 +112,10 @@ const Profile = () => {
 
       const [userRes, companyRes] = await Promise.all([
         api.put('/users/me', userUpdatePayload),
-        api.put('/empresas/me', companyUpdatePayload)
+        api.put('/empresas/me', companyUpdatePayload),
       ]);
 
-      updateUser(userRes.data); 
+      updateUser(userRes.data);
       setCompanyData(companyRes.data);
 
       setIsEditing(false);
@@ -138,114 +158,116 @@ const Profile = () => {
 
   return (
     <div className="container mt-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1 className="h3">Gestión de Perfil y Empresa</h1>
-        {!loading && (
-          <div>
-            {isEditing ? (
-              <>
-                <button className="btn btn-secondary me-2" onClick={handleCancel}>Cancelar</button>
-                <button className="btn btn-primary" onClick={handleSave}>Guardar Cambios</button>
-              </>
-            ) : (
-              <button className="btn btn-primary" onClick={handleEdit}>Editar Perfil y Empresa</button>
-            )}
-          </div>
-        )}
-      </div>
-
-      {error && <div className="alert alert-danger">{error}</div>}
-
       <div className="row">
-        {/* Left Column for Company and User Roles */}
         <div className="col-lg-5 mb-4 mb-lg-0">
-          <CompanyProfile
-            company={companyData}
-            isEditing={isEditing}
-            formData={formData}
-            handleInputChange={handleInputChange}
-          />
+          <div className="card mb-4">
+            <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+              <h1 className="h3 mb-0">Perfil</h1>
+              {!loading && (
+                <div>
+                  {isEditing ? (
+                    <>
+                      <button className="btn btn-success btn-sm me-2" onClick={handleSave}>Guardar Cambios</button>
+                      <button className="btn btn-secondary btn-sm" onClick={handleCancel}>Cancelar</button>
+                    </>
+                  ) : (
+                    <button className="btn btn-light btn-sm" onClick={handleEdit}>Editar</button>
+                  )}
+                </div>
+              )}
+            </div>
+            <div className="card-body">
+              <div className="nav-tabs-container">
+                <div className="nav-tabs-animated">
+                  <button
+                    ref={userTabRef}
+                    className={`nav-link-animated ${activeTab === 'user' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('user')}
+                  >
+                    Personal
+                  </button>
+                  <button
+                    ref={companyTabRef}
+                    className={`nav-link-animated ${activeTab === 'company' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('company')}
+                  >
+                    Empresa
+                  </button>
+                </div>
+                <div className="tab-indicator" style={indicatorStyle} />
+              </div>
+
+              {error && <div className="alert alert-danger mt-3">{error}</div>}
+
+              <div className="tab-content mt-3">
+                {activeTab === 'user' && (
+                  <UserProfile
+                    user={auth.user}
+                    isEditing={isEditing}
+                    formData={formData}
+                    handleInputChange={handleInputChange}
+                    projects={projects}
+                    wastes={wastes}
+                    onOpenChangePassword={() => setChangePasswordModalOpen(true)}
+                  />
+                )}
+                {activeTab === 'company' && companyData && (
+                  <CompanyProfile
+                    company={companyData}
+                    isEditing={isEditing}
+                    formData={formData}
+                    handleInputChange={handleInputChange}
+                  />
+                )}
+              </div>
+            </div>
+          </div>
           <UserRoles users={userRoles} onUsersUpdate={fetchData} />
         </div>
 
-        {/* Right Column for User-specific info and actions */}
         <div className="col-lg-7">
-          {/* Personal Info & Stats Card */}
-          <div className="card mb-4">
-            <div className="card-header bg-primary text-white">
-              <h3 className="h5 mb-0">Mi Perfil ({auth.user.rol})</h3>
-            </div>
-            <div className="card-body">
-              {isEditing ? (
-                 <div className="mb-3">
-                    <label className="form-label">Nombre</label>
-                    <input type="text" className="form-control" name="nombre" value={formData.nombre} onChange={handleInputChange} />
-                  </div>
-              ) : (
-                <p><strong>Nombre:</strong> {auth.user.nombre}</p>
-              )}
-              <hr />
-              <div className="row text-center mb-3">
-                <div className="col">
-                  <h5 className="card-title">{loading ? '-' : projects.length}</h5>
-                  <p className="card-text text-muted">Proyectos</p>
-                </div>
-                <div className="col">
-                  <h5 className="card-title">{loading ? '-' : wastes.length}</h5>
-                  <p className="card-text text-muted">Residuos</p>
-                </div>
-              </div>
-              {!isEditing && (
-                <button className="btn btn-secondary w-100" onClick={() => setChangePasswordModalOpen(true)}>
-                  Cambiar Contraseña
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* Projects and Labels */}
           <>
-              <div className="card mb-4">
-                <div className="card-header bg-primary text-white"><h3 className="h5 mb-0">Proyectos</h3></div>
-                <div className="card-body">
-                  <ul className="list-group">
-                    {projects.length > 0 ? (
-                      projects.map(project => (
-                        <li key={project.id_proyecto} className="list-group-item d-flex justify-content-between align-items-center">
-                          {project.nombre}
-                          <button className="btn btn-success btn-sm" onClick={() => handleFinishProject(project.id_proyecto)}>Finalizar</button>
-                        </li>
-                      ))
-                    ) : <li className="list-group-item">No hay proyectos para mostrar.</li>}
-                  </ul>
-                </div>
+            <div className="card mb-4">
+              <div className="card-header bg-primary text-white"><h3 className="h5 mb-0">Proyectos</h3></div>
+              <div className="card-body">
+                <ul className="list-group">
+                  {projects.length > 0 ? (
+                    projects.map(project => (
+                      <li key={project.id_proyecto} className="list-group-item d-flex justify-content-between align-items-center">
+                        {project.nombre}
+                        <button className="btn btn-success btn-sm" onClick={() => handleFinishProject(project.id_proyecto)}>Finalizar</button>
+                      </li>
+                    ))
+                  ) : <li className="list-group-item">No hay proyectos para mostrar.</li>}
+                </ul>
               </div>
-              <div className="card">
-                <div className="card-header bg-primary text-white"><h3 className="h5 mb-0">Historial de Etiquetas</h3></div>
-                <div className="card-body">
-                  {wastes.length > 0 ? (
-                    <div className="table-responsive">
-                      <table className="table table-hover">
-                        <thead><tr><th>ID</th><th>Tipo</th><th>Proyecto</th><th>Creado por</th><th></th></tr></thead>
-                        <tbody>
-                          {wastes.map(waste => (
-                            <tr key={waste.id_residuo}>
-                              <td>{waste.id_residuo}</td>
-                              <td>{waste.tipo}</td>
-                              <td>{waste.nombre_proyecto}</td>
-                              <td>{waste.nombre_creador || 'N/A'}</td>
-                              <td className="text-end">
-                                <button className="btn btn-secondary btn-sm" onClick={() => handleOpenLabelModal(waste)}>Ver / Imprimir</button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  ) : <p className="p-3 text-muted">No hay residuos registrados.</p>}
-                </div>
+            </div>
+            <div className="card">
+              <div className="card-header bg-primary text-white"><h3 className="h5 mb-0">Historial de Etiquetas</h3></div>
+              <div className="card-body">
+                {wastes.length > 0 ? (
+                  <div className="table-responsive">
+                    <table className="table table-hover">
+                      <thead><tr><th>ID</th><th>Tipo</th><th>Proyecto</th><th>Creado por</th><th></th></tr></thead>
+                      <tbody>
+                        {wastes.map(waste => (
+                          <tr key={waste.id_residuo}>
+                            <td>{waste.id_residuo}</td>
+                            <td>{waste.tipo}</td>
+                            <td>{waste.nombre_proyecto}</td>
+                            <td>{waste.nombre_creador || 'N/A'}</td>
+                            <td className="text-end">
+                              <button className="btn btn-secondary btn-sm" onClick={() => handleOpenLabelModal(waste)}>Ver / Imprimir</button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : <p className="p-3 text-muted">No hay residuos registrados.</p>}
               </div>
-            </>
+            </div>
+          </>
         </div>
       </div>
 

@@ -1,0 +1,36 @@
+.nav-tabs-container {
+  position: relative;
+}
+
+.nav-tabs-animated {
+  display: flex;
+  justify-content: space-around;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.nav-link-animated {
+  flex: 1;
+  text-align: center;
+  padding: 1rem;
+  border: none;
+  background: none;
+  color: #495057;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.nav-link-animated.active {
+  color: #007bff;
+}
+
+.nav-link-animated:hover {
+  color: #0056b3;
+}
+
+.tab-indicator {
+  position: absolute;
+  bottom: -1px;
+  height: 2px;
+  background-color: #007bff;
+  transition: left 0.3s ease, width 0.3s ease;
+}
