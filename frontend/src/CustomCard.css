@@ -1,0 +1,5 @@
+body .card {
+  max-width: 1000px; /* Adjust this value as needed */
+  width: 100%;
+  margin: 0 auto; /* Centered with bottom margin */
+}

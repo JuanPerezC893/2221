@@ -134,57 +134,60 @@ const ProjectForm = () => {
         {id ? 'Modifica los detalles de tu proyecto.' : 'Registra un nuevo proyecto para tu empresa.'}
       </p>
       
-      {error && <div className="alert alert-danger">{error}</div>}
+      <div className="card">
+        <div className="card-header bg-primary text-white">
+          {id ? 'Editar Proyecto' : 'Crear Nuevo Proyecto'}
+        </div>
+        <div className="card-body">
+          {error && <div className="alert alert-danger">{error}</div>}
 
-      <form onSubmit={onSubmit}>
-        <div className="mb-3">
-          <label htmlFor="nombre" className="form-label">Nombre del Proyecto</label>
-          <input type="text" className="form-control" id="nombre" name="nombre" value={nombre} onChange={handleInputChange} required autoComplete="off" />
-        </div>
-        
-        <div className="mb-3 position-relative">
-          <label htmlFor="ubicacion" className="form-label">Ubicación</label>
-          <input
-            type="text"
-            className="form-control"
-            id="ubicacion"
-            name="ubicacion"
-            value={ubicacion}
-            onChange={handleUbicacionChange}
-            required
-            autoComplete="off"
-            placeholder="Ej: Av. Providencia 123, Santiago"
-          />
-          {isSuggesting && <div className="form-text">Buscando...</div>}
-          {suggestions.length > 0 && (
-            <ul className="list-group position-absolute w-100" style={{ zIndex: 1000 }}>
-              {suggestions.map((s) => (
-                <li key={s.mapbox_id} className="list-group-item list-group-item-action" onClick={() => handleSuggestionClick(s)}>
-                  <strong>{s.name}</strong>
-                  <div className="text-muted small">{s.full_address || s.place_formatted || s.address}</div>
-                </li>
-              ))}
-            </ul>
-          )}
-          <div className="form-text">
-            🌍 <strong>Geocodificación automática:</strong> Las coordenadas se obtendrán de la dirección.
-          </div>
-        </div>
+          <form onSubmit={onSubmit}>
+            <div className="mb-3">
+              <label htmlFor="nombre" className="form-label">Nombre del Proyecto</label>
+              <input type="text" className="form-control" id="nombre" name="nombre" value={nombre} onChange={handleInputChange} required autoComplete="off" />
+            </div>
+            
+            <div className="mb-3 position-relative">
+              <label htmlFor="ubicacion" className="form-label">Ubicación</label>
+              <input
+                type="text"
+                className="form-control"
+                id="ubicacion"
+                name="ubicacion"
+                value={ubicacion}
+                onChange={handleUbicacionChange}
+                required
+                autoComplete="off"
+                placeholder="Ej: Av. Providencia 123, Santiago"
+              />
+              {suggestions.length > 0 && (
+                <ul className="list-group position-absolute w-100" style={{ zIndex: 1000 }}>
+                  {suggestions.map((s) => (
+                    <li key={s.mapbox_id} className="list-group-item list-group-item-action" onClick={() => handleSuggestionClick(s)}>
+                      <strong>{s.name}</strong>
+                      <div className="text-muted small">{s.full_address || s.place_formatted || s.address}</div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
 
-        <div className="mb-3">
-          <label htmlFor="fecha_inicio" className="form-label">Fecha de Inicio</label>
-          <input type="date" className="form-control" id="fecha_inicio" name="fecha_inicio" value={fecha_inicio} onChange={handleInputChange} required />
-        </div>
-        
-        <div className="mb-3">
-          <label htmlFor="fecha_fin" className="form-label">Fecha de Fin</label>
-          <input type="date" className="form-control" id="fecha_fin" name="fecha_fin" value={fecha_fin} onChange={handleInputChange} required />
-        </div>
+            <div className="mb-3">
+              <label htmlFor="fecha_inicio" className="form-label">Fecha de Inicio</label>
+              <input type="date" className="form-control" id="fecha_inicio" name="fecha_inicio" value={fecha_inicio} onChange={handleInputChange} required />
+            </div>
+            
+            <div className="mb-3">
+              <label htmlFor="fecha_fin" className="form-label">Fecha de Fin</label>
+              <input type="date" className="form-control" id="fecha_fin" name="fecha_fin" value={fecha_fin} onChange={handleInputChange} required />
+            </div>
 
-        <button type="submit" className="btn btn-primary w-100" disabled={loading || isSuggesting}>
-          {loading ? (id ? 'Actualizando...' : 'Creando...') : (id ? 'Actualizar Proyecto' : 'Crear Proyecto')}
-        </button>
-      </form>
+            <button type="submit" className="btn btn-primary w-100" disabled={loading || isSuggesting}>
+              {loading ? (id ? 'Actualizando...' : 'Creando...') : (id ? 'Actualizar Proyecto' : 'Crear Proyecto')}
+            </button>
+          </form>
+        </div>
+      </div>
     </div>
   );
 };

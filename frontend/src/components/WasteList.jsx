@@ -69,50 +69,53 @@ const WasteList = () => {
 
   return (
     <div className="container mt-4">
-      <div className="card p-3">
-        <h1 className="card-title mb-4">Lista de Residuos</h1>
-
-        <div className="mb-3">
-          <label htmlFor="project-select" className="form-label">Filtrar por Proyecto:</label>
-          <select 
-            id="project-select" 
-            className="form-select" 
-            value={selectedProject} 
-            onChange={(e) => setSelectedProject(e.target.value)}
-            disabled={projects.length === 0}
-          >
-            {projects.length > 0 ? (
-              projects.map(p => (
-                <option key={p.id_proyecto} value={p.id_proyecto}>
-                  {p.nombre}
-                </option>
-              ))
-            ) : (
-              <option>No hay proyectos disponibles</option>
-            )}
-          </select>
+      <div className="card">
+        <div className="card-header bg-primary text-white">
+          Lista de Residuos
         </div>
+        <div className="card-body">
+          <div className="mb-3">
+            <label htmlFor="project-select" className="form-label">Filtrar por Proyecto:</label>
+            <select 
+              id="project-select" 
+              className="form-select" 
+              value={selectedProject} 
+              onChange={(e) => setSelectedProject(e.target.value)}
+              disabled={projects.length === 0}
+            >
+              {projects.length > 0 ? (
+                projects.map(p => (
+                  <option key={p.id_proyecto} value={p.id_proyecto}>
+                    {p.nombre}
+                  </option>
+                ))
+              ) : (
+                <option>No hay proyectos disponibles</option>
+              )}
+            </select>
+          </div>
 
-        {loading && <p>Cargando residuos...</p>}
-        {error && <p className="text-danger">{error}</p>}
-        
-        {!loading && !error && (
-          <ul className="list-group">
-            {residuos.length > 0 ? (
-              residuos.map((residuo) => (
-                <li key={residuo.id_residuo} className="list-group-item d-flex justify-content-between align-items-center">
-                  {residuo.tipo} - {residuo.cantidad} {residuo.unidad}
-                  <div>
-                    <button onClick={() => navigate(`/edit-residuo/${residuo.id_residuo}`)} className="btn btn-warning btn-sm me-2">Editar</button>
-                    <button onClick={() => handleDeleteResiduo(residuo.id_residuo)} className="btn btn-danger btn-sm">Eliminar</button>
-                  </div>
-                </li>
-              ))
-            ) : (
-              <li className="list-group-item">No hay residuos para mostrar en este proyecto.</li>
-            )}
-          </ul>
-        )}
+          {loading && <p>Cargando residuos...</p>}
+          {error && <p className="text-danger">{error}</p>}
+          
+          {!loading && !error && (
+            <ul className="list-group">
+              {residuos.length > 0 ? (
+                residuos.map((residuo) => (
+                  <li key={residuo.id_residuo} className="list-group-item d-flex justify-content-between align-items-center">
+                    {residuo.tipo} - {residuo.cantidad} {residuo.unidad}
+                    <div>
+                      <button onClick={() => navigate(`/edit-residuo/${residuo.id_residuo}`)} className="btn btn-warning btn-sm me-2">Editar</button>
+                      <button onClick={() => handleDeleteResiduo(residuo.id_residuo)} className="btn btn-danger btn-sm">Eliminar</button>
+                    </div>
+                  </li>
+                ))
+              ) : (
+                <li className="list-group-item">No hay residuos para mostrar en este proyecto.</li>
+              )}
+            </ul>
+          )}
+        </div>
       </div>
     </div>
   );
