@@ -14,7 +14,7 @@ const Layout = ({ children }) => {
         {children}
       </main>
       {!isDashboard && (
-        <footer className="footer-custom">
+        <footer className="footer-custom mt-3">
           <p>© 2025 EcoObra. Todos los derechos reservados.</p>
         </footer>
       )}

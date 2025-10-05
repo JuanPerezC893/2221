@@ -108,7 +108,7 @@ const UserRoles = ({ users, onUsersUpdate }) => {
     }
 
     return (
-        <div className="card mb-4">
+        <div className="card">
             <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                 <h3 className="h5 mb-0">Gestión de Roles</h3>
                 {!isEditing ? (

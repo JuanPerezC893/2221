@@ -1,0 +1,20 @@
+.profile-grid {
+  display: grid;
+  grid-template-columns: 5fr 7fr;
+  gap: 1.5rem;
+}
+
+.profile-grid-left {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.profile-grid-right {
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-grid-right .card {
+  flex-grow: 1;
+}

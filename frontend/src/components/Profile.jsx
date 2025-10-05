@@ -7,6 +7,7 @@ import ChangePasswordModal from './ChangePasswordModal';
 import CompanyProfile from './CompanyProfile';
 import UserProfile from './UserProfile';
 import UserRoles from './UserRoles';
+import ProjectWasteTree from './ProjectWasteTree';
 import './ProfileTabs.css';
 
 const Profile = () => {
@@ -152,14 +153,47 @@ const Profile = () => {
     setSelectedWaste(null);
   };
 
+  const leftColumnRef = useRef(null);
+  const rightColumnRef = useRef(null);
+
+  useEffect(() => {
+    const setColumnHeights = () => {
+      if (leftColumnRef.current && rightColumnRef.current) {
+        // Reset heights to auto to get natural heights
+        leftColumnRef.current.style.height = 'auto';
+        rightColumnRef.current.style.height = 'auto';
+
+        const leftHeight = leftColumnRef.current.offsetHeight;
+        const rightHeight = rightColumnRef.current.offsetHeight;
+
+        // Set both to the max height
+        const maxHeight = Math.max(leftHeight, rightHeight);
+        leftColumnRef.current.style.height = `${maxHeight}px`;
+        rightColumnRef.current.style.height = `${maxHeight}px`;
+      }
+    };
+
+    // Set heights initially and on window resize
+    setColumnHeights();
+    window.addEventListener('resize', setColumnHeights);
+
+    // Clean up event listener
+    return () => window.removeEventListener('resize', setColumnHeights);
+  }, [loading]); // Re-run when loading state changes, ensuring elements are rendered
+
+  
   if (loading) {
-    return <div className="container mt-4 text-center"><div className="spinner-border"></div></div>;
+    return (
+      <div className="container mt-4 text-center">
+        <div className="spinner-border"></div>
+      </div>
+    );
   }
 
   return (
     <div className="container mt-4">
       <div className="row">
-        <div className="col-lg-5 mb-4 mb-lg-0">
+        <div className="col-lg-5 mb-4 mb-lg-0" ref={leftColumnRef}>
           <div className="card mb-4">
             <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
               <h1 className="h3 mb-0">Perfil</h1>
@@ -225,57 +259,26 @@ const Profile = () => {
           <UserRoles users={userRoles} onUsersUpdate={fetchData} />
         </div>
 
-        <div className="col-lg-7">
-          <>
-            <div className="card mb-4">
-              <div className="card-header bg-primary text-white"><h3 className="h5 mb-0">Proyectos</h3></div>
-              <div className="card-body">
-                <ul className="list-group">
-                  {projects.length > 0 ? (
-                    projects.map(project => (
-                      <li key={project.id_proyecto} className="list-group-item d-flex justify-content-between align-items-center">
-                        {project.nombre}
-                        <button className="btn btn-success btn-sm" onClick={() => handleFinishProject(project.id_proyecto)}>Finalizar</button>
-                      </li>
-                    ))
-                  ) : <li className="list-group-item">No hay proyectos para mostrar.</li>}
-                </ul>
-              </div>
-            </div>
-            <div className="card">
-              <div className="card-header bg-primary text-white"><h3 className="h5 mb-0">Historial de Etiquetas</h3></div>
-              <div className="card-body">
-                {wastes.length > 0 ? (
-                  <div className="table-responsive">
-                    <table className="table table-hover">
-                      <thead><tr><th>ID</th><th>Tipo</th><th>Proyecto</th><th>Creado por</th><th></th></tr></thead>
-                      <tbody>
-                        {wastes.map(waste => (
-                          <tr key={waste.id_residuo}>
-                            <td>{waste.id_residuo}</td>
-                            <td>{waste.tipo}</td>
-                            <td>{waste.nombre_proyecto}</td>
-                            <td>{waste.nombre_creador || 'N/A'}</td>
-                            <td className="text-end">
-                              <button className="btn btn-secondary btn-sm" onClick={() => handleOpenLabelModal(waste)}>Ver / Imprimir</button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ) : <p className="p-3 text-muted">No hay residuos registrados.</p>}
-              </div>
-            </div>
-          </>
+        <div className="col-lg-7" ref={rightColumnRef}>
+          <ProjectWasteTree 
+            projects={projects}
+            wastes={wastes}
+            onFinishProject={handleFinishProject}
+            onOpenLabelModal={handleOpenLabelModal}
+          />
         </div>
       </div>
 
       {/* Modals */}
-      {isLabelModalOpen && <LabelModal residuo={selectedWaste} onClose={handleCloseLabelModal} />}
-      {isChangePasswordModalOpen && <ChangePasswordModal onClose={() => setChangePasswordModalOpen(false)} />}
+      {isLabelModalOpen && (
+        <LabelModal residuo={selectedWaste} onClose={handleCloseLabelModal} />
+      )}
+      {isChangePasswordModalOpen && (
+        <ChangePasswordModal onClose={() => setChangePasswordModalOpen(false)} />
+      )}
     </div>
   );
 };
 
 export default Profile;
+
