@@ -16,17 +16,7 @@ const allowedOrigins = [
 ].filter(Boolean); // Filtrar valores undefined/null
 
 app.use(cors({
-  origin: function (origin, callback) {
-    // Permitir requests sin origin (como mobile apps o curl)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      console.log('CORS blocked origin:', origin);
-      callback(new Error('No permitido por CORS'));
-    }
-  },
+  origin: allowedOrigins,
   credentials: true
 }));
 app.use(express.json());
