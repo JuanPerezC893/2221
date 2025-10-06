@@ -99,6 +99,7 @@ async function crearPDF(proyecto, residuos) {
     html = html.replace("{{graficoBarras}}", graficoBarrasImg);
     html = html.replace("{{graficoTorta}}", graficoTortaImg);
 
+<<<<<<< HEAD
     // ... (código para imagen de fondo)
 
     // 6. Generar PDF con Puppeteer
@@ -115,6 +116,33 @@ async function crearPDF(proyecto, residuos) {
     } else {
       const puppeteerLocal = require('puppeteer');
       browser = await puppeteerLocal.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+=======
+    // Manejar la imagen de fondo
+    const fondoPath = path.join(__dirname, "../templates/0.jpg");
+    try {
+      const fondoImage = await fs.readFile(fondoPath);
+      const fondoBase64 = fondoImage.toString("base64");
+      const fondoDataUri = `data:image/jpeg;base64,${fondoBase64}`;
+      const backgroundStyle = `
+        <style>
+          body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("${fondoDataUri}") no-repeat center center;
+            background-size: cover;
+            opacity: 0.1;
+            z-index: -1;
+          }
+        </style>
+      `;
+      html = html.replace("</head>", `${backgroundStyle}</head>`);
+    } catch (err) {
+      console.warn("No se encontró la imagen de fondo en 'templates/0.jpg', se omite.");
+>>>>>>> 2c8d677e7ab2e56db7b8e4239fd3d08729b7dc6d
     }
 
     const page = await browser.newPage();
