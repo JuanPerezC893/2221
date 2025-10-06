@@ -147,7 +147,7 @@ const Register = () => {
   return (
     <div className="container d-flex justify-content-center align-items-center">
       <div className="auth-card">
-        <div className="col-md-6 col-lg-4">
+        <div className="col-md-12 col-lg-4">
           <div className="card register-card">
             <div className="card-body">
               <h1 className="card-title text-center mb-4">Registrarse</h1>
