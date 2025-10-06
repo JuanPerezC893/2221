@@ -1,29 +1,45 @@
 const { createCanvas, GlobalFonts } = require('@napi-rs/canvas');
 const path = require('path');
+const { Chart, registerables } = require('chart.js');
+
+// --- START: Color Logic ---
+const WASTE_TYPE_COLORS = {
+  'Hormigón': '#1f77b4',
+  'Ladrillos': '#ff7f0e',
+  'Tierra': '#2ca02c',
+  'Piedras': '#d62728',
+  'Asfalto': '#9467bd',
+  'Madera': '#8c564b',
+  'Metales': '#e377c2',
+  'Plásticos': '#7f7f7f',
+  'Papel': '#bcbd22',
+  'Cartón': '#17becf'
+};
+const DEFAULT_COLOR = '#adb5bd';
+
+const getChartColors = (labels) => {
+  if (!labels || labels.length === 0) {
+    return [DEFAULT_COLOR];
+  }
+  return labels.map(label => WASTE_TYPE_COLORS[label] || DEFAULT_COLOR);
+};
+// --- END: Color Logic ---
 
 // Registrar la fuente
 const fontPath = path.join(__dirname, '..', 'fonts', 'DejaVuSans.ttf');
 if (require('fs').existsSync(fontPath)) {
   GlobalFonts.registerFromPath(fontPath, 'DejaVu Sans');
-  console.log('Fuente DejaVu Sans registrada correctamente desde:', fontPath);
 } else {
   console.error('Archivo de fuente no encontrado en:', fontPath);
 }
-const { Chart, registerables } = require('chart.js');
 
-// Registrar todos los componentes de Chart.js (controladores, elementos, escalas, etc.)
 Chart.register(...registerables);
 
-const width = 1000; // Ancho en píxeles
-const height = 600; // Alto en píxeles
-
+const width = 1000;
+const height = 600;
 const width2 = 1800;
 const height2 = 600;
-/**
- * Genera un gráfico de torta (pie chart) a partir de los datos de residuos.
- * @param {Array<Object>} wasteData - Datos de los residuos, ej: [{ tipo: 'Metal', total_cantidad: '150' }]
- * @returns {Promise<string>} Una promesa que resuelve a la imagen del gráfico en formato Data URL (Base64).
- */
+
 async function generatePieChart(wasteData) {
   const canvas = createCanvas(width, height);
   const ctx = canvas.getContext('2d');
@@ -38,7 +54,7 @@ async function generatePieChart(wasteData) {
       datasets: [{
         label: 'Distribución de Residuos',
         data: data,
-        backgroundColor: wasteData.length > 0 ? ['#0d6efd', '#198754', '#ffc107', '#dc3545', '#6f42c1', '#fd7e14'] : ['#dee2e6'],
+        backgroundColor: getChartColors(labels),
         borderColor: '#fff',
         borderWidth: 6,
       }],
@@ -66,11 +82,6 @@ async function generatePieChart(wasteData) {
   return canvas.toDataURL('image/png');
 }
 
-/**
- * Genera un gráfico de barras a partir de los datos de residuos a lo largo del tiempo.
- * @param {Array<Object>} wasteData - Datos de los residuos, ej: [{ month: '2023-01', total_cantidad: '250' }]
- * @returns {Promise<string>} Una promesa que resuelve a la imagen del gráfico en formato Data URL (Base64).
- */
 async function generateBarChart(wasteData) {
   const canvas = createCanvas(width2, height2);
   const ctx = canvas.getContext('2d');

@@ -1,4 +1,34 @@
 .project-waste-tree-body {
-  max-height: 500px; /* You can adjust this value */
+  max-height: 600px; /* Increased height for better visibility */
   overflow-y: auto;
+  padding-right: 10px; /* Add some padding for the scrollbar */
+}
+
+.waste-list-scrollable {
+  max-height: 280px; /* Approx. 5 items, adjust as needed */
+  overflow-y: auto;
+  padding-right: 5px; /* Add some padding for the scrollbar */
+}
+
+/* Custom scrollbar for webkit browsers */
+.project-waste-tree-body::-webkit-scrollbar,
+.waste-list-scrollable::-webkit-scrollbar {
+  width: 8px;
+}
+
+.project-waste-tree-body::-webkit-scrollbar-track,
+.waste-list-scrollable::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.project-waste-tree-body::-webkit-scrollbar-thumb,
+.waste-list-scrollable::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+.project-waste-tree-body::-webkit-scrollbar-thumb:hover,
+.waste-list-scrollable::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }

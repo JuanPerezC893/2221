@@ -185,31 +185,69 @@ router.get('/environmental-impact', asyncHandler(async (req, res) => {
     const { projectId } = req.query;
     const { empresa_rut } = req.user;
 
-    let query;
+    // Factores de emisión en kg de CO2e ahorrado por kg de material reciclado
+    const EMISSION_FACTORS = {
+        'Plásticos': 2.5,    // Ahorro por evitar producción virgen
+        'Metales': 2.047,  // Ahorro muy alto por reciclaje de metales
+        'Madera': 1.468,    // Incluye carbono secuestrado
+        'Papel': 1.468,    // Similar a la madera
+        'Cartón': 1.468,   // Similar a la madera
+        'Hormigón': 0.1004, // Ahorro por reciclaje de agregados
+        'Ladrillos': 0.1004,
+        'Tierra': 0.1004,
+        'Piedras': 0.1004,
+        'Asfalto': 0.1004,
+        'default': 0.1     // Un valor por defecto conservador para otros materiales
+    };
+
+    let recyclableQuery, totalQuery;
     let params;
 
     if (projectId) {
-        query = 'SELECT SUM(CASE WHEN reciclable = TRUE THEN cantidad ELSE 0 END) AS total_reciclado, SUM(cantidad) AS total_residuos FROM residuos WHERE id_proyecto = $1';
         params = [projectId];
+        recyclableQuery = 'SELECT tipo, SUM(cantidad) AS total_reciclado_tipo FROM residuos WHERE reciclable = TRUE AND id_proyecto = $1 GROUP BY tipo';
+        totalQuery = 'SELECT SUM(cantidad) AS total_residuos FROM residuos WHERE id_proyecto = $1';
     } else {
-        query = `
-            SELECT SUM(CASE WHEN r.reciclable = TRUE THEN r.cantidad ELSE 0 END) AS total_reciclado, SUM(r.cantidad) AS total_residuos 
+        params = [empresa_rut];
+        recyclableQuery = `
+            SELECT r.tipo, SUM(r.cantidad) AS total_reciclado_tipo
+            FROM residuos r
+            JOIN proyectos p ON r.id_proyecto = p.id_proyecto
+            WHERE r.reciclable = TRUE AND p.empresa_rut = $1
+            GROUP BY r.tipo
+        `;
+        totalQuery = `
+            SELECT SUM(r.cantidad) AS total_residuos
             FROM residuos r
             JOIN proyectos p ON r.id_proyecto = p.id_proyecto
             WHERE p.empresa_rut = $1
         `;
-        params = [empresa_rut];
     }
     
-    const result = await pool.query(query, params);
-    const row = result.rows[0] || { total_reciclado: 0, total_residuos: 0 };
-    const total_reciclado = parseFloat(row.total_reciclado) || 0;
-    const total_residuos = parseFloat(row.total_residuos) || 0;
+    const [recyclableResult, totalResult] = await Promise.all([
+        pool.query(recyclableQuery, params),
+        pool.query(totalQuery, params)
+    ]);
 
-    const co2Avoided = (total_reciclado * 0.5).toFixed(2);
+    const recyclableRows = recyclableResult.rows || [];
+    const total_residuos = parseFloat(totalResult.rows[0]?.total_residuos) || 0;
+
+    let total_reciclado = 0;
+    let co2Avoided = 0;
+
+    recyclableRows.forEach(row => {
+        const cantidad = parseFloat(row.total_reciclado_tipo);
+        const factor = EMISSION_FACTORS[row.tipo] || EMISSION_FACTORS.default;
+        co2Avoided += cantidad * factor;
+        total_reciclado += cantidad;
+    });
+
     const percentageDiverted = total_residuos > 0 ? ((total_reciclado / total_residuos) * 100).toFixed(2) : '0.00';
 
-    res.json({ co2Avoided, percentageDiverted });
+    res.json({ 
+        co2Avoided: co2Avoided.toFixed(2),
+        percentageDiverted 
+    });
 }));
 
 // Últimos registros de residuos (para un proyecto específico o toda la empresa)

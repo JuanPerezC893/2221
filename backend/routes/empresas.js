@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db');
 const asyncHandler = require('../utils/asyncHandler');
-const { authMiddleware } = require('../middleware/auth');
+const { authMiddleware, adminOnly } = require('../middleware/auth');
 
 // Ruta pública para verificar si una empresa existe por su RUT
 router.get('/check/:rut', asyncHandler(async (req, res) => {
@@ -39,7 +39,7 @@ router.get('/me', asyncHandler(async (req, res) => {
 }));
 
 // Actualizar datos de la empresa (ejemplo para el futuro)
-router.put('/me', asyncHandler(async (req, res) => {
+router.put('/me', adminOnly, asyncHandler(async (req, res) => {
     const { empresa_rut } = req.user;
     const { razon_social, direccion } = req.body;
 

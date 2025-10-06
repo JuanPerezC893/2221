@@ -8,7 +8,7 @@ const AuthLayout = ({ children }) => {
         {children}
       </main>
       <footer className="auth-footer">
-        <p>© 2025 EcObra. Todos los derechos reservados.</p>
+        <p>© 2025 EcoObra. Todos los derechos reservados.</p>
       </footer>
     </div>
   );

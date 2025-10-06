@@ -14,7 +14,7 @@ import MapPage from './components/MapPage'; // Import MapPage
 import EditWaste from './components/EditWaste';
 import VerificationFailed from './components/VerificationFailed'; // Importar componente
 import PrivateRoute from './components/PrivateRoute';
-import './App.css';
+
 
 function App() {
   return (

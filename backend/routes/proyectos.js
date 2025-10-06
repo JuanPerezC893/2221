@@ -4,7 +4,7 @@ const router = express.Router();
 const pool = require('../db');
 const asyncHandler = require('../utils/asyncHandler');
 const { projectValidationRules, validateRequest } = require('../middleware/validators');
-const { authMiddleware } = require('../middleware/auth');
+const { authMiddleware, adminOnly } = require('../middleware/auth');
 const { geocodeAddressWithFallbacks, getDefaultCoordinates } = require('../services/geocoding');
 const { crearPDF } = require('../services/pdfService');
 
@@ -185,7 +185,7 @@ router.put('/:id', asyncHandler(async (req, res) => {
 }));
 
 // Eliminar un proyecto
-router.delete('/:id', asyncHandler(async (req, res) => {
+router.delete('/:id', adminOnly, asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { empresa_rut } = req.user;
 

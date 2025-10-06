@@ -129,7 +129,7 @@ const ProjectForm = () => {
 
   return (
     <div className="container mt-4">
-      <h1 className="display-5 fw-bold mb-2">{id ? 'Editar Proyecto' : 'Crear Nuevo Proyecto'}</h1>
+      <h1 className="display-5 fw-bold mb-2 text-center text-dark">{id ? 'Editar Proyecto' : 'Crear Nuevo Proyecto'}</h1>
       <p className="lead text-muted text-center mb-4">
         {id ? 'Modifica los detalles de tu proyecto.' : 'Registra un nuevo proyecto para tu empresa.'}
       </p>

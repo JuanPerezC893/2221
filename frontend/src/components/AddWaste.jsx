@@ -121,7 +121,7 @@ const AddWaste = () => {
 
   return (
     <div className="container mt-4">
-      <h1 className="display-5 fw-bold mb-2">Añadir Nuevo Residuo</h1>
+      <h1 className="display-5 fw-bold mb-2 text-center text-dark">Añadir Nuevo Residuo</h1>
       <p className="lead text-muted text-center mb-4">Completa los pasos para registrar un nuevo residuo y generar su código de trazabilidad.</p>
 
       {step === 1 && (

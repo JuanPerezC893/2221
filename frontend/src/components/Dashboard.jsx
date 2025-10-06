@@ -16,6 +16,8 @@ import AuthContext from '../context/AuthContext';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import './Dashboard.css'; // Import new CSS file
+import { getChartColors } from '../utils/colorUtils';
+
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, ChartTitle);
 
@@ -144,11 +146,11 @@ const Dashboard = () => {
   const currentProjectDetails = projects.find(p => p.id_proyecto === parseInt(selectedProject));
 
   const pieChartData = {
-    labels: wasteSummaryByType.length > 0 ? wasteSummaryByType.map(item => item.tipo) : ['Sin Datos'],
+    labels: wasteSummaryByType.map(item => item.tipo),
     datasets: [{
       label: 'Distribución de Residuos',
-      data: wasteSummaryByType.length > 0 ? wasteSummaryByType.map(item => parseFloat(item.total_cantidad)) : [1],
-      backgroundColor: wasteSummaryByType.length > 0 ? ['#0d6efd', '#198754', '#ffc107', '#dc3545', '#6f42c1', '#fd7e14'] : ['#dee2e6'],
+      data: wasteSummaryByType.map(item => parseFloat(item.total_cantidad)),
+      backgroundColor: getChartColors(wasteSummaryByType.map(item => item.tipo)),
       borderColor: '#fff',
       borderWidth: 2,
     }],
