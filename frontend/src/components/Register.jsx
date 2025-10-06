@@ -147,48 +147,47 @@ const Register = () => {
   return (
     <div className="container d-flex justify-content-center align-items-center">
       <div className="auth-card">
-        <div className="col-md-12 col-lg-4">
-          <div className="card register-card">
-            <div className="card-body">
-              <h1 className="card-title text-center mb-4">Registrarse</h1>
-              <form onSubmit={onSubmit}>
-                {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
-                {successMessage && <div className="alert alert-success">{successMessage}</div>}
+        <div className="card register-card">
+          <div className="card-body">
+            <h1 className="card-title text-center mb-4">Registrarse</h1>
+             <form onSubmit={onSubmit}>
+              {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
+              {successMessage && <div className="alert alert-success">{successMessage}</div>}
                 
-                <p className='text-muted text-center'>Tus Datos</p>
-                <div className="mb-3">
-                  <input type="text" placeholder="Tu Nombre Completo" name="nombre" value={nombre} onChange={handleInputChange} required className="form-control" autoComplete="name" />
-                </div>
-                <div className="mb-3">
-                  <input type="email" placeholder="Email de Contacto" name="email" value={email} onChange={handleInputChange} required className="form-control" autoComplete="email" />
-                </div>
-                <div className="mb-3">
-                  <input type="email" placeholder="Confirmar Email" name="confirmEmail" value={confirmEmail} onChange={handleInputChange} required className="form-control" autoComplete="email" />
-                </div>
-                <div className="mb-3">
-                  <input type="password" placeholder="Contraseña" name="password" value={password} onChange={handleInputChange} minLength="8" required className="form-control" autoComplete="new-password" />
-                </div>
-                <div className="mb-3">
-                  <input type="password" placeholder="Confirmar Contraseña" name="confirmPassword" value={confirmPassword} onChange={handleInputChange} required className="form-control" autoComplete="new-password" />
-                </div>
+              <p className='text-muted text-center'>Tus Datos</p>
+              <div className="mb-3">
+                <input type="text" placeholder="Tu Nombre Completo" name="nombre" value={nombre} onChange={handleInputChange} required className="form-control" autoComplete="name" />
+              </div>
+              <div className="mb-3">
+                <input type="email" placeholder="Email de Contacto" name="email" value={email} onChange={handleInputChange} required className="form-control" autoComplete="email" />
+              </div>
+              <div className="mb-3">
+                <input type="email" placeholder="Confirmar Email" name="confirmEmail" value={confirmEmail} onChange={handleInputChange} required className="form-control" autoComplete="email" />
+              </div>
+              <div className="mb-3">
+                <input type="password" placeholder="Contraseña" name="password" value={password} onChange={handleInputChange} minLength="8" required className="form-control" autoComplete="new-password" />
+              </div>
+              <div className="mb-3">
+                <input type="password" placeholder="Confirmar Contraseña" name="confirmPassword" value={confirmPassword} onChange={handleInputChange} required className="form-control" autoComplete="new-password" />
+              </div>
                 
-                <hr />
-                <p className='text-muted text-center'>Datos de la Empresa</p>
-                <div className="mb-3">
-                  <input
-                    type="text"
-                    placeholder="RUT de la empresa"
-                    name="empresa_rut"
-                    value={empresa_rut}
-                    onChange={handleRutChange}
-                    onBlur={checkCompany}
-                    required
-                    className={`form-control ${rutError ? 'is-invalid' : ''}`}
-                    autoComplete="organization-id"
-                  />
-                  {rutError && <div className="invalid-feedback">{rutError}</div>}
-                  {isCheckingCompany && <div className="form-text">Verificando empresa...</div>}
-                </div>
+              <hr />
+              <p className='text-muted text-center'>Datos de la Empresa</p>
+              <div className="mb-3">
+                <input
+                  type="text"
+                  placeholder="RUT de la empresa"
+                  name="empresa_rut"
+                  value={empresa_rut}
+                  onChange={handleRutChange}
+                  onBlur={checkCompany}
+                  required
+                  className={`form-control ${rutError ? 'is-invalid' : ''}`}
+                  autoComplete="organization-id"
+                />
+                {rutError && <div className="invalid-feedback">{rutError}</div>}
+                {isCheckingCompany && <div className="form-text">Verificando empresa...</div>}
+              </div>
 
                 {rutChecked && companyExists === true && (
                   <div className="alert alert-info">
@@ -241,7 +240,6 @@ const Register = () => {
               </div>
             </div>
           </div>
-        </div>
       </div>
     </div>
   );
