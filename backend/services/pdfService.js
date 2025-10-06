@@ -2,8 +2,10 @@ const fs = require("fs").promises;
 const path = require("path");
 const pool = require("../db");
 const { generatePieChart, generateBarChart } = require("./chartService");
+const puppeteer = require("puppeteer-core");
+const chromium = require("@sparticuz/chromium");
 
-// --- START: Emission Factor Logic ---
+// Factores de emisión en kg de CO2e ahorrado por kg de material reciclado
 const EMISSION_FACTORS = {
     'Plásticos': 2.5,
     'Metales': 2.047,
@@ -17,43 +19,32 @@ const EMISSION_FACTORS = {
     'Asfalto': 0.1004,
     'default': 0.1
 };
-// --- END: Emission Factor Logic ---
 
 async function crearPDF(proyecto, residuos) {
   try {
-    // ... (chart generation logic remains the same)
     const projectId = proyecto.id_proyecto;
     const summaryByTypeQuery = pool.query(
-      `SELECT tipo, SUM(cantidad) as total_cantidad
-       FROM residuos
-       WHERE id_proyecto = $1
-       GROUP BY tipo
-       ORDER BY total_cantidad DESC`,
+      `SELECT tipo, SUM(cantidad) as total_cantidad FROM residuos WHERE id_proyecto = $1 GROUP BY tipo ORDER BY total_cantidad DESC`,
       [projectId]
     );
     const summaryOverTimeQuery = pool.query(
-      `SELECT TO_CHAR(t.fecha, 'YYYY-MM') as month, SUM(r.cantidad) as total_cantidad
-       FROM residuos r
-       JOIN trazabilidad t ON r.id_residuo = t.id_residuo
-       WHERE r.id_proyecto = $1
-       GROUP BY month
-       ORDER BY month`,
+      `SELECT TO_CHAR(t.fecha, 'YYYY-MM') as month, SUM(r.cantidad) as total_cantidad FROM residuos r JOIN trazabilidad t ON r.id_residuo = t.id_residuo WHERE r.id_proyecto = $1 GROUP BY month ORDER BY month`,
       [projectId]
     );
+
     const [summaryByTypeResult, summaryOverTimeResult] = await Promise.all([summaryByTypeQuery, summaryOverTimeQuery]);
     const pieChartImagePromise = generatePieChart(summaryByTypeResult.rows);
     const barChartImagePromise = generateBarChart(summaryOverTimeResult.rows);
     const [pieChartImage, barChartImage] = await Promise.all([pieChartImagePromise, barChartImagePromise]);
+
     const graficoTortaImg = `<img src="${pieChartImage}" alt="Gráfico Circular" style="width: 70%; height: auto; display: block; margin-left: auto; margin-right: auto;"/>`;
     const graficoBarrasImg = `<img src="${barChartImage}" alt="Gráfico de Barras" style="width: 100%; height: auto; display: block; margin-left: auto; margin-right: auto;"/>`;
 
-    // 1. Leer HTML y CSS base
     const htmlPath = path.join(__dirname, "../templates/info.html");
     const cssPath = path.join(__dirname, "../templates/stile.css");
     let html = await fs.readFile(htmlPath, "utf8");
     const css = await fs.readFile(cssPath, "utf8");
 
-    // 2. Calcular CO2 ahorrado con la nueva lógica
     const co2Saved = residuos
       .filter(res => res.reciclable)
       .reduce((acc, res) => {
@@ -61,7 +52,6 @@ async function crearPDF(proyecto, residuos) {
         return acc + (parseFloat(res.cantidad) * factor);
       }, 0);
 
-    // 3. Datos dinámicos
     const data = {
       nomProyecto: proyecto.nombre,
       fechaMade: new Date().toLocaleDateString(),
@@ -72,7 +62,6 @@ async function crearPDF(proyecto, residuos) {
       tonCO2: co2Saved.toFixed(2),
     };
 
-    // 4. Generar filas HTML
     let filasHTML = "";
     if (residuos && residuos.length > 0) {
       for (const residuo of residuos) {
@@ -89,7 +78,6 @@ async function crearPDF(proyecto, residuos) {
       filasHTML = `<tr><td colspan="4">No hay residuos registrados.</td></tr>`;
     }
 
-    // 5. Reemplazar placeholders en el HTML
     for (const key in data) {
       const regex = new RegExp(`{{${key}}}`, "g");
       html = html.replace(regex, data[key]);
@@ -99,25 +87,6 @@ async function crearPDF(proyecto, residuos) {
     html = html.replace("{{graficoBarras}}", graficoBarrasImg);
     html = html.replace("{{graficoTorta}}", graficoTortaImg);
 
-<<<<<<< HEAD
-    // ... (código para imagen de fondo)
-
-    // 6. Generar PDF con Puppeteer
-    const puppeteer = require("puppeteer-core");
-    const chromium = require("@sparticuz/chromium");
-    let browser;
-    if (process.env.NODE_ENV === 'production') {
-      browser = await puppeteer.launch({
-        args: chromium.args,
-        defaultViewport: chromium.defaultViewport,
-        executablePath: await chromium.executablePath(),
-        headless: chromium.headless,
-      });
-    } else {
-      const puppeteerLocal = require('puppeteer');
-      browser = await puppeteerLocal.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
-=======
-    // Manejar la imagen de fondo
     const fondoPath = path.join(__dirname, "../templates/0.jpg");
     try {
       const fondoImage = await fs.readFile(fondoPath);
@@ -125,25 +94,20 @@ async function crearPDF(proyecto, residuos) {
       const fondoDataUri = `data:image/jpeg;base64,${fondoBase64}`;
       const backgroundStyle = `
         <style>
-          body::before {
-            content: "";
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: url("${fondoDataUri}") no-repeat center center;
-            background-size: cover;
-            opacity: 0.1;
-            z-index: -1;
-          }
+          body::before { content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: url("${fondoDataUri}") no-repeat center center; background-size: cover; opacity: 0.3; z-index: -1; }
         </style>
       `;
       html = html.replace("</head>", `${backgroundStyle}</head>`);
     } catch (err) {
       console.warn("No se encontró la imagen de fondo en 'templates/0.jpg', se omite.");
->>>>>>> 2c8d677e7ab2e56db7b8e4239fd3d08729b7dc6d
     }
+
+    const browser = await puppeteer.launch({
+      args: chromium.args,
+      defaultViewport: chromium.defaultViewport,
+      executablePath: await chromium.executablePath(),
+      headless: chromium.headless,
+    });
 
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: "networkidle0" });
