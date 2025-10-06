@@ -94,7 +94,7 @@ async function crearPDF(proyecto, residuos) {
       const fondoDataUri = `data:image/jpeg;base64,${fondoBase64}`;
       const backgroundStyle = `
         <style>
-          body::before { content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: url("${fondoDataUri}") no-repeat center center; background-size: cover; opacity: 0.3; z-index: -1; }
+          body::before { content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: url("${fondoDataUri}") no-repeat center center; background-size: cover; opacity: 0.08; z-index: -1; }
         </style>
       `;
       html = html.replace("</head>", `${backgroundStyle}</head>`);
