@@ -106,7 +106,7 @@ async function crearPDF(proyecto, residuos) {
             height: 100%;
             background: url("${fondoDataUri}") no-repeat center center;
             background-size: cover;
-            opacity: 0.3;
+            opacity: 0.1;
             z-index: -1;
           }
         </style>
