@@ -93,17 +93,27 @@
   margin: 0;
 }
 
-/* Print-specific styles */
+/* Reglas específicas para la impresión */
 @media print {
-  body, html {
-    background: #fff;
-    margin: 0;
-    padding: 0;
+  .label-body {
+    display: block !important; /* Desactivar Flexbox y apilar secciones */
   }
-  .label-container {
-    width: 90%; /* Adjust width for printing */
-    border: 2px solid #000;
-    margin: 20px auto;
-    page-break-inside: avoid;
+
+  .qr-section {
+    width: 100% !important;
+    text-align: center !important; /* Centrar el QR */
+    border-right: none !important; /* Eliminar la línea divisoria en la impresión */
+    padding-right: 0 !important;
+    margin-bottom: 15px !important;
+  }
+
+  .qr-section img {
+    width: 150px !important; /* Tamaño fijo y legible para la impresión */
+    height: 150px !important;
+  }
+
+  .details-section {
+    width: 100% !important;
   }
 }
+

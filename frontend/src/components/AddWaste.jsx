@@ -103,13 +103,40 @@ const AddWaste = () => {
   };
 
   const handlePrintLabel = () => {
-    const printable = document.getElementById('printable-label');
-    const originalContents = document.body.innerHTML;
-    const printStyles = document.head.innerHTML;
-    document.body.innerHTML = `<html><head>${printStyles}</head><body>${printable.innerHTML}</body></html>`;
-    window.print();
-    document.body.innerHTML = originalContents;
-    window.location.reload();
+    const labelElement = document.getElementById('printable-label');
+    if (!labelElement) return;
+
+    const printWindow = window.open('', '_blank', 'width=800,height=600');
+    printWindow.document.write('<html><head><title>Imprimir Etiqueta</title>');
+
+    Array.from(document.styleSheets).forEach(styleSheet => {
+      if (styleSheet.href) {
+        printWindow.document.write(`<link rel="stylesheet" href="${styleSheet.href}">`);
+      } else if (styleSheet.cssRules) {
+        printWindow.document.write('<style>');
+        Array.from(styleSheet.cssRules).forEach(rule => {
+          printWindow.document.write(rule.cssText);
+        });
+        printWindow.document.write('</style>');
+      }
+    });
+
+    printWindow.document.write('</head><body>');
+    printWindow.document.write(labelElement.outerHTML);
+    printWindow.document.write('</body></html>');
+
+    printWindow.document.close();
+
+    // Cierra la ventana solo DESPUÉS de que el diálogo de impresión se haya cerrado.
+    printWindow.onafterprint = () => {
+      printWindow.close();
+    };
+
+    // Llama a imprimir solo DESPUÉS de que toda la página y estilos se hayan cargado.
+    printWindow.onload = () => {
+      printWindow.focus();
+      printWindow.print();
+    };
   };
 
   const resetForm = () => {
