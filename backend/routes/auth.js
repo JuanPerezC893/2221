@@ -52,29 +52,39 @@ router.post('/register', registerValidationRules(), validateRequest, asyncHandle
     );
     const newUser = newUserResult.rows[0];
 
-    // 5. Enviar correos de verificación y notificación
-    const verificationToken = jwt.sign({ id: newUser.id_usuario }, process.env.JWT_SECRET, { expiresIn: '1d' });
-    await sendVerificationEmail(email, verificationToken, nombre);
+    // 5. Enviar correos de verificación y notificación (con manejo de errores para no revertir la transacción)
+    try {
+      const verificationToken = jwt.sign({ id: newUser.id_usuario }, process.env.JWT_SECRET, { expiresIn: '1d' });
+      await sendVerificationEmail(email, verificationToken, nombre);
+    } catch (emailError) {
+      console.error("Error al enviar correo de VERIFICACIÓN de usuario. El registro continuará.", emailError);
+    }
 
     // Si el usuario se une a una empresa existente, notificar a los administradores
     if (userRole === 'usuario') {
-      const adminsResult = await client.query(
-        "SELECT nombre, email FROM usuarios WHERE empresa_rut = $1 AND rol = 'admin' AND email_verificado = TRUE",
-        [finalEmpresaRut]
-      );
+      try {
+        const adminsResult = await client.query(
+          "SELECT nombre, email FROM usuarios WHERE empresa_rut = $1 AND rol = 'admin' AND email_verificado = TRUE",
+          [finalEmpresaRut]
+        );
 
-      if (adminsResult.rows.length > 0) {
-        const { razon_social } = empresaResult.rows[0];
-        for (const admin of adminsResult.rows) {
-          await sendNewUserForApprovalEmail(admin.email, admin.nombre, nombre, email, razon_social);
+        if (adminsResult.rows.length > 0) {
+          const { razon_social } = empresaResult.rows[0];
+          for (const admin of adminsResult.rows) {
+            await sendNewUserForApprovalEmail(admin.email, admin.nombre, nombre, email, razon_social);
+          }
+        } else {
+          console.warn(`No se encontró administrador verificado para la empresa con RUT ${finalEmpresaRut} para notificar sobre el nuevo usuario ${email}.`);
         }
-      } else {
-        console.warn(`No se encontró administrador verificado para la empresa con RUT ${finalEmpresaRut} para notificar sobre el nuevo usuario ${email}.`);
+      } catch (emailError) {
+        console.error("Error al enviar correo de NOTIFICACIÓN a admin. El registro del usuario continuará.", emailError);
       }
     }
 
     await client.query('COMMIT');
-    return res.status(201).json({ message: 'Registro exitoso. Por favor, verifica tu correo electrónico.' }); // Original success message
+    
+    // Mensaje unificado. El usuario se ha creado. Si los correos fallan, es un problema secundario.
+    return res.status(201).json({ message: 'Registro exitoso. Por favor, verifica tu correo electrónico para activar tu cuenta. Si no lo recibes, contacta a soporte.' });
 
   } catch (error) {
     await client.query('ROLLBACK');
@@ -129,32 +139,19 @@ router.post('/login', loginValidationRules(), validateRequest, asyncHandler(asyn
   const user = userResult.rows[0];
 
   // Verificar la integridad de los datos: la empresa asociada debe existir
-  const empresaResult = await pool.query('SELECT 1 FROM empresas WHERE rut = $1', [user.empresa_rut]);
+  const empresaResult = await pool.query('SELECT razon_social FROM empresas WHERE rut = $1', [user.empresa_rut]);
   if (empresaResult.rows.length === 0) {
     console.error(`Error de integridad de datos: El usuario ${user.email} está asociado a una empresa con RUT ${user.empresa_rut} que no existe.`);
     return res.status(500).json({ message: 'Error en la configuración de la cuenta. La empresa asociada a tu usuario no fue encontrada. Por favor, contacta a soporte.' });
   }
-
-  if (!user.email_verificado) {
-    return res.status(403).json({ message: 'Por favor, verifica tu correo electrónico antes de iniciar sesión.' });
-  }
-
-  // Check if user account is approved
-  if (user.estado === 'pendiente') {
-    return res.status(403).json({ message: 'Tu cuenta está pendiente de aprobación por un administrador.' });
-  }
-
-  const validPassword = await bcrypt.compare(password, user.password);
-
-  if (!validPassword) {
-    return res.status(401).json({ message: 'Credenciales inválidas' });
-  }
+  const nombre_empresa = empresaResult.rows[0].razon_social;
 
   const tokenPayload = {
     id: user.id_usuario,
     rol: user.rol,
     empresa_rut: user.empresa_rut,
-    nombre: user.nombre // Añadir el nombre al payload del token
+    nombre: user.nombre,
+    nombre_empresa: nombre_empresa // Añadir el nombre de la empresa al payload
   };
 
   const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '1h' });

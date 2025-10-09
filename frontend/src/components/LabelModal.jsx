@@ -1,13 +1,37 @@
-import React from 'react';
+
+import React, { useState, useEffect } from 'react';
+import QRCode from 'qrcode';
+import ProfessionalLabel from './ProfessionalLabel'; // Importar el componente de etiqueta
+import './Label.css'; // Importar los estilos de la etiqueta profesional
 
 const LabelModal = ({ residuo, onClose }) => {
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState('');
+  const [qrCodeValue, setQrCodeValue] = useState('');
+
+  useEffect(() => {
+    if (residuo && residuo.id_residuo) {
+      const urlString = `${import.meta.env.VITE_FRONTEND_URL || window.location.origin}/trazabilidad/${residuo.id_residuo}`;
+      setQrCodeValue(urlString);
+
+      QRCode.toDataURL(urlString, { errorCorrectionLevel: 'H', width: 200, margin: 2 }, (err, url) => {
+        if (err) {
+          console.error('Error al generar el código QR en LabelModal:', err);
+          setQrCodeDataUrl('');
+        } else {
+          setQrCodeDataUrl(url);
+        }
+      });
+    } else {
+      setQrCodeDataUrl('');
+      setQrCodeValue('');
+    }
+  }, [residuo]);
+
   if (!residuo) return null;
 
   const handlePrint = () => {
     window.print();
   };
-
-  const qrCodeValue = `${import.meta.env.VITE_FRONTEND_URL || window.location.origin}/waste/${residuo.id_residuo}`;
 
   return (
     <>
@@ -25,6 +49,10 @@ const LabelModal = ({ residuo, onClose }) => {
               left: 0;
               top: 0;
               width: 100%;
+              height: 100%;
+              display: flex;
+              justify-content: center;
+              align-items: center;
             }
             .modal-footer-print {
                 display: none;
@@ -33,24 +61,19 @@ const LabelModal = ({ residuo, onClose }) => {
         `}
       </style>
       <div className="modal fade show" style={{ display: 'block' }} tabIndex="-1">
-        <div className="modal-dialog modal-dialog-centered">
+        <div className="modal-dialog modal-lg modal-dialog-centered">
           <div className="modal-content">
             <div className="modal-header">
               <h5 className="modal-title">Etiqueta de Residuo #{residuo.id_residuo}</h5>
               <button type="button" className="btn-close" onClick={onClose}></button>
             </div>
-            <div className="modal-body" id="printable-label-modal">
-              <h5 className="card-title text-center mb-4">Detalles del Residuo</h5>
-              <p><strong>Proyecto:</strong> {residuo.nombre_proyecto}</p>
-              <p><strong>Tipo:</strong> {residuo.tipo}</p>
-              <p><strong>Cantidad:</strong> {residuo.cantidad} {residuo.unidad}</p>
-              <p><strong>Reciclable:</strong> {residuo.reciclable ? 'Sí' : 'No'}</p>
-              <p><strong>Estado:</strong> {residuo.estado}</p>
-              <div className="my-3 text-center">
-                {/* We still have the qrcode.react issue, so we'll show the text for now */}
-                <p className="text-muted">Datos del QR:</p>
-                <code className="p-2 bg-light d-block text-break">{qrCodeValue}</code>
-              </div>
+            <div className="modal-body">
+              <ProfessionalLabel 
+                id="printable-label-modal"
+                residuo={residuo} 
+                qrCodeDataUrl={qrCodeDataUrl} 
+                qrCodeValue={qrCodeValue} 
+              />
             </div>
             <div className="modal-footer modal-footer-print">
               <button type="button" className="btn btn-secondary" onClick={onClose}>Cerrar</button>

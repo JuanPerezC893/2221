@@ -143,7 +143,10 @@ const Profile = () => {
   };
 
   const handleOpenLabelModal = (waste) => {
-    setSelectedWaste(waste);
+    // Enrich waste object with project name before passing to modal
+    const project = projects.find(p => p.id_proyecto === waste.id_proyecto);
+    const enrichedWaste = { ...waste, nombre_proyecto: project?.nombre || 'N/A' };
+    setSelectedWaste(enrichedWaste);
     setIsLabelModalOpen(true);
   };
 

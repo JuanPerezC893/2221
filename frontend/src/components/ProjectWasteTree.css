@@ -5,7 +5,7 @@
 }
 
 .waste-list-scrollable {
-  max-height: 280px; /* Approx. 5 items, adjust as needed */
+  max-height: 200px; /* Approx. 4-5 items, adjust as needed */
   overflow-y: auto;
   padding-right: 5px; /* Add some padding for the scrollbar */
 }

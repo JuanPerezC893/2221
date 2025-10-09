@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
 import { getProyectos } from '../api/proyectos';
 import { getResiduos, deleteResiduo } from '../api/residuos';
+import './WasteList.css'; // Importar los nuevos estilos
 
 const WasteList = () => {
   const [projects, setProjects] = useState([]);
@@ -99,7 +100,7 @@ const WasteList = () => {
           {error && <p className="text-danger">{error}</p>}
           
           {!loading && !error && (
-            <ul className="list-group">
+            <ul className="list-group waste-list-scrollable">
               {residuos.length > 0 ? (
                 residuos.map((residuo) => (
                   <li key={residuo.id_residuo} className="list-group-item d-flex justify-content-between align-items-center">

@@ -1,0 +1,28 @@
+/* WasteList.css */
+
+.waste-list-scrollable {
+  max-height: 45rem; /* Altura máxima para aproximadamente 8-9 elementos */
+  overflow-y: auto;   /* Activa el scroll vertical solo cuando es necesario */
+  border: 1px solid #dee2e6; /* Borde sutil para delimitar el área */
+  border-radius: 0.375rem; /* Bordes redondeados a juego con Bootstrap */
+  padding: 0; /* El padding ya lo manejan los list-group-item */
+}
+
+/* Estilo para el scrollbar (opcional, pero mejora la estética) */
+.waste-list-scrollable::-webkit-scrollbar {
+  width: 8px;
+}
+
+.waste-list-scrollable::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.waste-list-scrollable::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+.waste-list-scrollable::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}

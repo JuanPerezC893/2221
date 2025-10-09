@@ -13,6 +13,7 @@ import Profile from './components/Profile';
 import MapPage from './components/MapPage'; // Import MapPage
 import EditWaste from './components/EditWaste';
 import VerificationFailed from './components/VerificationFailed'; // Importar componente
+import PublicTrazabilidad from './components/PublicTrazabilidad'; // Importar componente de trazabilidad
 import PrivateRoute from './components/PrivateRoute';
 
 
@@ -21,10 +22,11 @@ function App() {
     <AuthProvider>
       <Router>
         <Routes>
-          {/* Public Routes with AuthLayout */}
+          {/* Public Routes */}
           <Route path="/login" element={<AuthLayout><Login /></AuthLayout>} />
           <Route path="/register" element={<AuthLayout><Register /></AuthLayout>} />
-          <Route path="/verification-failed" element={<AuthLayout><VerificationFailed /></AuthLayout>} /> {/* Añadir ruta */}
+          <Route path="/verification-failed" element={<AuthLayout><VerificationFailed /></AuthLayout>} />
+          <Route path="/trazabilidad/:id" element={<PublicTrazabilidad />} /> {/* Nueva ruta pública */}
           <Route path="/" element={<AuthLayout><Login /></AuthLayout>} />
 
           {/* Private Routes with Main Layout */}
