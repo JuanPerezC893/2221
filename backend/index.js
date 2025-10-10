@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -19,6 +20,10 @@ app.use(cors({
   origin: allowedOrigins,
   credentials: true
 }));
+
+// Use Helmet to set various security headers
+app.use(helmet());
+
 app.use(express.json());
 
 app.get('/', (req, res) => {
