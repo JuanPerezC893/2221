@@ -138,6 +138,12 @@ router.post('/login', loginValidationRules(), validateRequest, asyncHandler(asyn
 
   const user = userResult.rows[0];
 
+  // Comparar la contraseña proporcionada con la almacenada
+  const validPassword = await bcrypt.compare(password, user.password);
+  if (!validPassword) {
+    return res.status(401).json({ message: 'Credenciales inválidas' });
+  }
+
   // Verificar la integridad de los datos: la empresa asociada debe existir
   const empresaResult = await pool.query('SELECT razon_social FROM empresas WHERE rut = $1', [user.empresa_rut]);
   if (empresaResult.rows.length === 0) {
