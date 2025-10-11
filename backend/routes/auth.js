@@ -88,9 +88,19 @@ router.post('/register', registerValidationRules(), validateRequest, asyncHandle
 
   } catch (error) {
     await client.query('ROLLBACK');
-    console.error('Error en la transacción de registro:', error); // Log the full error object for debugging
+    console.error('Error en la transacción de registro:', error);
 
-    // Simplified error handling for debugging
+    // Improved error handling to give specific feedback
+    if (error.code === '23505') { // 23505 is the code for unique_violation in PostgreSQL
+      if (error.constraint === 'usuarios_email_key') {
+        return res.status(400).json({ message: 'El correo electrónico ya está en uso.' });
+      }
+      // This handles the race condition where two users try to create the same company
+      if (error.constraint === 'empresas_pkey') {
+        return res.status(400).json({ message: 'El RUT de la empresa ya fue registrado. Intente unirse a la empresa existente.' });
+      }
+    }
+    
     res.status(500).json({ message: 'Error al registrar el usuario. Por favor, intente de nuevo.' });
   } finally {
     client.release();
