@@ -43,8 +43,9 @@ const AddressAutocomplete = ({ value, onValueChange, onAddressSelect, placeholde
         setIsLoading(false);
       }
     } else {
-      // If not fetching full details, just use the suggestion's text
-      onAddressSelect(suggestion.place_name);
+      // If not fetching full details, use the best available text from the suggestion itself
+      const bestAddressText = suggestion.full_address || suggestion.place_formatted || suggestion.place_name;
+      onAddressSelect(bestAddressText);
     }
     setSuggestions([]); // Clear suggestions after selection
   };
@@ -66,7 +67,7 @@ const AddressAutocomplete = ({ value, onValueChange, onAddressSelect, placeholde
           {suggestions.map((s) => (
             <li key={s.mapbox_id} className="list-group-item list-group-item-action" onClick={() => handleSuggestionClick(s)}>
               <strong>{s.name}</strong>
-              <div className="text-muted small">{s.place_name}</div>
+              <div className="text-muted small">{s.full_address || s.place_formatted || s.place_name}</div>
             </li>
           ))}
         </ul>
