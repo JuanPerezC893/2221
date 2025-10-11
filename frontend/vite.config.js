@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => ({
   server: mode === 'development' ? {
     proxy: {
       '/api': {
-	target: 'http://localhost:5000',
+	target: 'https://3332-lilac.vercel.app',
         changeOrigin: true,
         secure: true,
       }

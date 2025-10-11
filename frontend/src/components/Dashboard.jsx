@@ -34,10 +34,10 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [panelsVisible, setPanelsVisible] = useState(true);
+  const [isMapLoaded, setIsMapLoaded] = useState(false);
 
   const mapContainer = useRef(null);
   const map = useRef(null);
-  const markersRef = useRef([]);
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -63,53 +63,179 @@ const Dashboard = () => {
         center: [-70.6693, -33.4489],
         zoom: 4
       });
+
+      map.current.on('load', () => {
+        map.current.addSource('proyectos', {
+          type: 'geojson',
+          data: { type: 'FeatureCollection', features: [] },
+          cluster: true,
+          clusterMaxZoom: 14, // Max zoom to cluster points on
+          clusterRadius: 50   // Radius of each cluster when clustering points (defaults to 50)
+        });
+
+        // Layer for clusters
+        // Define cluster layers with zoom-dependent radius
+        const clusterLayers = [
+          {
+            id: 'clusters-large',
+            filter: ['all', ['has', 'point_count'], ['>=', ['get', 'point_count'], 100]],
+            paint: {
+              'circle-color': '#f28cb1',
+              'circle-radius': ['interpolate', ['linear'], ['zoom'], 4, 16, 8, 28]
+            }
+          },
+          {
+            id: 'clusters-medium',
+            filter: ['all', ['has', 'point_count'], ['<', ['get', 'point_count'], 100], ['>=', ['get', 'point_count'], 20]],
+            paint: {
+              'circle-color': '#f1f075',
+              'circle-radius': ['interpolate', ['linear'], ['zoom'], 4, 12, 8, 20]
+            }
+          },
+          {
+            id: 'clusters-small',
+            filter: ['all', ['has', 'point_count'], ['<', ['get', 'point_count'], 20]],
+            paint: {
+              'circle-color': '#51bbd6',
+              'circle-radius': ['interpolate', ['linear'], ['zoom'], 4, 8, 8, 14]
+            }
+          }
+        ];
+
+        clusterLayers.forEach(layer => {
+          map.current.addLayer({
+            id: layer.id,
+            type: 'circle',
+            source: 'proyectos',
+            filter: layer.filter,
+            paint: layer.paint
+          });
+        });
+
+        // Layer for cluster count
+        map.current.addLayer({
+          id: 'cluster-count',
+          type: 'symbol',
+          source: 'proyectos',
+          filter: ['has', 'point_count'],
+          layout: {
+            'text-field': '{point_count_abbreviated}',
+            'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+            'text-size': 12
+          },
+          paint: {
+            'text-color': '#ffffff'
+          }
+        });
+
+        // Layer for unclustered points
+        map.current.addLayer({
+          id: 'unclustered-point',
+          type: 'circle',
+          source: 'proyectos',
+          filter: ['!', ['has', 'point_count']],
+          paint: {
+            'circle-color': '#0d6efd',
+            'circle-radius': ['interpolate', ['linear'], ['zoom'], 4, 4, 10, 8, 15, 12],
+            'circle-stroke-width': 1,
+            'circle-stroke-color': '#fff'
+          }
+        });
+
+        const clusterLayerIds = clusterLayers.map(l => l.id);
+
+        // Click event for clusters to zoom in
+        map.current.on('click', clusterLayerIds, (e) => {
+          const features = map.current.queryRenderedFeatures(e.point, { layers: clusterLayerIds });
+          const clusterId = features[0].properties.cluster_id;
+          map.current.getSource('proyectos').getClusterExpansionZoom(clusterId, (err, zoom) => {
+            if (err) return;
+            map.current.easeTo({
+              center: features[0].geometry.coordinates,
+              zoom: zoom
+            });
+          });
+        });
+
+        // Click event for unclustered points for popup
+        map.current.on('click', 'unclustered-point', (e) => {
+          const coordinates = e.features[0].geometry.coordinates.slice();
+          const { nombre, ubicacion } = e.features[0].properties;
+          while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+            coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+          }
+          new mapboxgl.Popup()
+            .setLngLat(coordinates)
+            .setHTML(`<div><strong>${nombre}</strong><br/><span class="text-muted">${ubicacion}</span></div>`)
+            .addTo(map.current);
+        });
+
+        const allClusterLayers = [...clusterLayerIds, 'unclustered-point'];
+        allClusterLayers.forEach(layerId => {
+            map.current.on('mouseenter', layerId, () => { map.current.getCanvas().style.cursor = 'pointer'; });
+            map.current.on('mouseleave', layerId, () => { map.current.getCanvas().style.cursor = ''; });
+        });
+
+        setIsMapLoaded(true);
+      });
     }
-  });
+  }, []);
 
   useEffect(() => {
-    if (!map.current || projects.length === 0) return;
+    if (!isMapLoaded || !map.current) return;
 
-    // Clear existing markers
-    markersRef.current.forEach(marker => marker.remove());
-    markersRef.current = [];
+    const source = map.current.getSource('proyectos');
+    if (!source) return;
 
-    const projectsToDisplay = selectedProject === 'all'
-      ? projects
-      : projects.filter(p => p.id_proyecto === parseInt(selectedProject));
-
-    if (projectsToDisplay.length === 0) return;
-
-    projectsToDisplay.forEach(project => {
-      if (project.latitud && project.longitud) {
-        const popup = new mapboxgl.Popup({ offset: 25 })
-          .setHTML(`<div><strong>${project.nombre}</strong><br/><span class="text-muted">${project.ubicacion}</span></div>`);
-        
-        const marker = new mapboxgl.Marker()
-          .setLngLat([project.longitud, project.latitud])
-          .setPopup(popup)
-          .addTo(map.current);
-        
-        markersRef.current.push(marker);
-      }
-    });
-
-    // Center map on the selected project or fit all markers
-    if (projectsToDisplay.length === 1 && projectsToDisplay[0].latitud && projectsToDisplay[0].longitud) {
-      map.current.flyTo({
-        center: [projectsToDisplay[0].longitud, projectsToDisplay[0].latitud],
-        zoom: 12
-      });
-    } else {
-        const bounds = new mapboxgl.LngLatBounds();
-        markersRef.current.forEach(marker => {
-            bounds.extend(marker.getLngLat());
-        });
-        if (!bounds.isEmpty()) {
-            map.current.fitBounds(bounds, { padding: 150 });
+    const features = projects
+      .filter(p => p.latitud && p.longitud)
+      .map(project => ({
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [project.longitud, project.latitud]
+        },
+        properties: {
+          id_proyecto: project.id_proyecto,
+          nombre: project.nombre,
+          ubicacion: project.ubicacion
         }
-    }
+      }));
 
-  }, [projects, selectedProject]);
+    source.setData({ type: 'FeatureCollection', features: features });
+
+    const clusterLayerIds = ['clusters-large', 'clusters-medium', 'clusters-small'];
+
+    if (selectedProject === 'all') {
+      map.current.setFilter('unclustered-point', ['!', ['has', 'point_count']]);
+      map.current.setFilter('cluster-count', ['has', 'point_count']);
+      map.current.setFilter('clusters-large', ['all', ['has', 'point_count'], ['>=', ['get', 'point_count'], 100]]);
+      map.current.setFilter('clusters-medium', ['all', ['has', 'point_count'], ['<', ['get', 'point_count'], 100], ['>=', ['get', 'point_count'], 20]]);
+      map.current.setFilter('clusters-small', ['all', ['has', 'point_count'], ['<', ['get', 'point_count'], 20]]);
+
+      const bounds = new mapboxgl.LngLatBounds();
+      features.forEach(feature => {
+        bounds.extend(feature.geometry.coordinates);
+      });
+      if (!bounds.isEmpty()) {
+        map.current.fitBounds(bounds, { padding: 150, maxZoom: 10 });
+      }
+    } else {
+      const projectId = parseInt(selectedProject);
+      // Hide clusters and only show the selected project
+      map.current.setFilter('unclustered-point', ['==', 'id_proyecto', projectId]);
+      clusterLayerIds.forEach(id => map.current.setFilter(id, ['==', 'id_proyecto', -1]));
+      map.current.setFilter('cluster-count', ['==', 'id_proyecto', -1]);
+
+      const selectedFeature = features.find(f => f.properties.id_proyecto === projectId);
+      if (selectedFeature) {
+        map.current.flyTo({
+          center: selectedFeature.geometry.coordinates,
+          zoom: 12
+        });
+      }
+    }
+  }, [isMapLoaded, projects, selectedProject]);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
