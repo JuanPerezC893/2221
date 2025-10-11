@@ -5,7 +5,7 @@ import QRCode from 'qrcode';
 import AuthContext from '../context/AuthContext';
 import WasteForm from './WasteForm';
 import { getProyectos } from '../api/proyectos';
-import { createResiduo } from '../api/residuos';
+import { createResiduo, generarEtiqueta } from '../api/residuos';
 import { createTrazabilidad } from '../api/trazabilidad';
 import ProfessionalLabel from './ProfessionalLabel'; // Importar el componente de etiqueta
 import './Label.css'; // Importar CSS para la etiqueta
@@ -102,41 +102,25 @@ const AddWaste = () => {
     }
   };
 
-  const handlePrintLabel = () => {
-    const labelElement = document.getElementById('printable-label');
-    if (!labelElement) return;
-
-    const printWindow = window.open('', '_blank', 'width=800,height=600');
-    printWindow.document.write('<html><head><title>Imprimir Etiqueta</title>');
-
-    Array.from(document.styleSheets).forEach(styleSheet => {
-      if (styleSheet.href) {
-        printWindow.document.write(`<link rel="stylesheet" href="${styleSheet.href}">`);
-      } else if (styleSheet.cssRules) {
-        printWindow.document.write('<style>');
-        Array.from(styleSheet.cssRules).forEach(rule => {
-          printWindow.document.write(rule.cssText);
-        });
-        printWindow.document.write('</style>');
-      }
-    });
-
-    printWindow.document.write('</head><body>');
-    printWindow.document.write(labelElement.outerHTML);
-    printWindow.document.write('</body></html>');
-
-    printWindow.document.close();
-
-    // Cierra la ventana solo DESPUÉS de que el diálogo de impresión se haya cerrado.
-    printWindow.onafterprint = () => {
-      printWindow.close();
-    };
-
-    // Llama a imprimir solo DESPUÉS de que toda la página y estilos se hayan cargado.
-    printWindow.onload = () => {
-      printWindow.focus();
-      printWindow.print();
-    };
+  const handleDownloadLabel = async () => {
+    if (!savedWasteData?.id_residuo) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await generarEtiqueta(savedWasteData.id_residuo);
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Etiqueta-Residuo-${savedWasteData.id_residuo}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      setError('Error al descargar la etiqueta.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const resetForm = () => {
@@ -188,7 +172,9 @@ const AddWaste = () => {
             />
           </div>
           <div className="card-footer text-center">
-            <button onClick={handlePrintLabel} className="btn btn-info me-2">Imprimir Etiqueta</button>
+            <button onClick={handleDownloadLabel} className="btn btn-info me-2" disabled={loading}>
+              {loading ? 'Descargando...' : 'Descargar Etiqueta'}
+            </button>
             <button onClick={resetForm} className="btn btn-secondary">Añadir Otro Residuo</button>
           </div>
         </div>

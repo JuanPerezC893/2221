@@ -4,6 +4,7 @@ const pool = require('../db');
 const asyncHandler = require('../utils/asyncHandler');
 const { wasteValidationRules, validateRequest } = require('../middleware/validators');
 const { authMiddleware } = require('../middleware/auth');
+const { crearEtiquetaPDF } = require('../services/pdfService');
 
 // Todas las rutas en este archivo requieren autenticación
 router.use(authMiddleware);
@@ -368,7 +369,40 @@ router.delete('/:id', asyncHandler(async (req, res) => {
   res.status(200).json({ message: 'Residuo y su trazabilidad asociada eliminados correctamente.' });
 }));
 
-module.exports = router;
+// Generar un PDF para la etiqueta de un residuo
+router.get('/:id/etiqueta-pdf', asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const { empresa_rut } = req.user;
 
+    // 1. Obtener datos del residuo y verificar pertenencia
+    const residuoResult = await pool.query(
+        `SELECT r.*, p.nombre as nombre_proyecto, e.razon_social as nombre_empresa
+         FROM residuos r
+         JOIN proyectos p ON r.id_proyecto = p.id_proyecto
+         JOIN empresas e ON p.empresa_rut = e.rut
+         WHERE r.id_residuo = $1 AND p.empresa_rut = $2`,
+        [id, empresa_rut]
+    );
+
+    if (residuoResult.rows.length === 0) {
+        return res.status(404).json({ message: 'Residuo no encontrado o no pertenece a su empresa.' });
+    }
+    const residuo = residuoResult.rows[0];
+
+    // 2. Generar el PDF
+    try {
+        // El frontend URL es necesario para construir el enlace del QR
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+        const pdfBuffer = await crearEtiquetaPDF(residuo, frontendUrl);
+
+        // 3. Enviar el PDF como respuesta
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=Etiqueta-Residuo-${id}.pdf`);
+        res.send(pdfBuffer);
+    } catch (error) {
+        console.error('Error al generar el PDF de la etiqueta:', error);
+        res.status(500).json({ message: 'No se pudo generar la etiqueta en PDF.' });
+    }
+}));
 
 module.exports = router;

@@ -3,10 +3,13 @@ import React, { useState, useEffect } from 'react';
 import QRCode from 'qrcode';
 import ProfessionalLabel from './ProfessionalLabel'; // Importar el componente de etiqueta
 import './Label.css'; // Importar los estilos de la etiqueta profesional
+import { generarEtiqueta } from '../api/residuos';
 
 const LabelModal = ({ residuo, onClose }) => {
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState('');
   const [qrCodeValue, setQrCodeValue] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     if (residuo && residuo.id_residuo) {
@@ -29,41 +32,25 @@ const LabelModal = ({ residuo, onClose }) => {
 
   if (!residuo) return null;
 
-  const handlePrint = () => {
-    const labelElement = document.getElementById('printable-label-modal');
-    if (!labelElement) return;
-
-    const printWindow = window.open('', '_blank', 'width=800,height=600');
-    printWindow.document.write('<html><head><title>Imprimir Etiqueta</title>');
-
-    Array.from(document.styleSheets).forEach(styleSheet => {
-      if (styleSheet.href) {
-        printWindow.document.write(`<link rel="stylesheet" href="${styleSheet.href}">`);
-      } else if (styleSheet.cssRules) {
-        printWindow.document.write('<style>');
-        Array.from(styleSheet.cssRules).forEach(rule => {
-          printWindow.document.write(rule.cssText);
-        });
-        printWindow.document.write('</style>');
-      }
-    });
-
-    printWindow.document.write('</head><body>');
-    printWindow.document.write(labelElement.outerHTML);
-    printWindow.document.write('</body></html>');
-
-    printWindow.document.close();
-
-    // Cierra la ventana solo DESPUÉS de que el diálogo de impresión se haya cerrado.
-    printWindow.onafterprint = () => {
-      printWindow.close();
-    };
-
-    // Llama a imprimir solo DESPUÉS de que toda la página y estilos se hayan cargado.
-    printWindow.onload = () => {
-      printWindow.focus();
-      printWindow.print();
-    };
+  const handleDownloadLabel = async () => {
+    if (!residuo?.id_residuo) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await generarEtiqueta(residuo.id_residuo);
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Etiqueta-Residuo-${residuo.id_residuo}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      setError('Error al descargar la etiqueta.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -101,6 +88,7 @@ const LabelModal = ({ residuo, onClose }) => {
               <button type="button" className="btn-close" onClick={onClose}></button>
             </div>
             <div className="modal-body">
+              {error && <div className="alert alert-danger">{error}</div>}
               <ProfessionalLabel 
                 id="printable-label-modal"
                 residuo={residuo} 
@@ -110,7 +98,9 @@ const LabelModal = ({ residuo, onClose }) => {
             </div>
             <div className="modal-footer modal-footer-print">
               <button type="button" className="btn btn-secondary" onClick={onClose}>Cerrar</button>
-              <button type="button" className="btn btn-primary" onClick={handlePrint}>Imprimir</button>
+              <button type="button" className="btn btn-primary" onClick={handleDownloadLabel} disabled={loading}>
+                {loading ? 'Descargando...' : 'Descargar Etiqueta'}
+              </button>
             </div>
           </div>
         </div>

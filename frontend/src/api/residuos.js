@@ -44,3 +44,9 @@ export const getLatest = async (projectId) => {
     const params = projectId ? { projectId } : {};
     return await api.get('/residuos/latest', { params });
 };
+
+export const generarEtiqueta = async (residuoId) => {
+  return await api.get(`/residuos/${residuoId}/etiqueta-pdf`, {
+    responseType: 'blob', // Important to handle the PDF file
+  });
+};

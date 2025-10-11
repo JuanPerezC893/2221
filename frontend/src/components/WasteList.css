@@ -1,7 +1,7 @@
 /* WasteList.css */
 
 .waste-list-scrollable {
-  max-height: 45rem; /* Altura máxima para aproximadamente 8-9 elementos */
+  max-height: 22.5rem !important; /* Altura máxima para aproximadamente 4-5 elementos */
   overflow-y: auto;   /* Activa el scroll vertical solo cuando es necesario */
   border: 1px solid #dee2e6; /* Borde sutil para delimitar el área */
   border-radius: 0.375rem; /* Bordes redondeados a juego con Bootstrap */

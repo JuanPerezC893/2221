@@ -4,6 +4,7 @@ const pool = require("../db");
 const { generatePieChart, generateBarChart } = require("./chartService");
 const puppeteer = require("puppeteer-core");
 const chromium = require("@sparticuz/chromium");
+const QRCode = require('qrcode');
 
 // Factores de emisión en kg de CO2e ahorrado por kg de material reciclado
 const EMISSION_FACTORS = {
@@ -127,4 +128,59 @@ async function crearPDF(proyecto, residuos) {
   }
 }
 
-module.exports = { crearPDF };
+async function crearEtiquetaPDF(residuo, frontendUrl) {
+    try {
+        const qrCodeValue = `${frontendUrl}/trazabilidad/${residuo.id_residuo}`;
+        const qrCodeDataUrl = await QRCode.toDataURL(qrCodeValue, { errorCorrectionLevel: 'H', width: 200, margin: 2 });
+
+        const htmlPath = path.join(__dirname, "../templates/etiqueta.html");
+        const cssPath = path.join(__dirname, "../templates/etiqueta.css");
+        let html = await fs.readFile(htmlPath, "utf8");
+        const css = await fs.readFile(cssPath, "utf8");
+
+        const data = {
+            nombre_empresa: residuo.nombre_empresa || 'N/A',
+            qr_code_data_url: qrCodeDataUrl,
+            id_residuo: residuo.id_residuo,
+            tipo_residuo: residuo.tipo,
+            cantidad: residuo.cantidad,
+            unidad: residuo.unidad,
+            nombre_proyecto: residuo.nombre_proyecto || 'N/A',
+            fecha_creacion: new Date(residuo.fecha_creacion).toLocaleDateString(),
+            reciclable: residuo.reciclable ? 'SÍ' : 'NO',
+            qr_code_value: qrCodeValue
+        };
+
+        for (const key in data) {
+            const regex = new RegExp(`{{${key}}}`, "g");
+            html = html.replace(regex, data[key]);
+        }
+        html = html.replace("</head>", `<style>${css}</style></head>`);
+
+        const browser = await puppeteer.launch({
+            args: chromium.args,
+            defaultViewport: chromium.defaultViewport,
+            executablePath: await chromium.executablePath(),
+            headless: chromium.headless,
+        });
+
+        const page = await browser.newPage();
+        await page.setContent(html, { waitUntil: "networkidle0" });
+
+        const pdfBuffer = await page.pdf({
+            width: '6in',
+            height: '4in',
+            margin: { top: "0.2in", bottom: "0.2in", left: "0.2in", right: "0.2in" },
+            printBackground: true
+        });
+
+        await browser.close();
+
+        return pdfBuffer;
+    } catch (error) {
+        console.error("Error al generar PDF de etiqueta:", error);
+        throw error;
+    }
+}
+
+module.exports = { crearPDF, crearEtiquetaPDF };

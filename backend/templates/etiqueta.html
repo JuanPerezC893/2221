@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Etiqueta de Residuo</title>
+</head>
+<body>
+    <div class="label-container">
+        <div class="label-header">
+            <h4>ETIQUETA DE IDENTIFICACIÓN DE RESIDUO</h4>
+            <p>{{nombre_empresa}}</p>
+        </div>
+        <div class="label-body">
+            <div class="label-section qr-section">
+                <img src="{{qr_code_data_url}}" alt="Código QR" />
+                <p class="qr-text">ID: {{id_residuo}}</p>
+            </div>
+            <div class="label-section details-section">
+                <div class="detail-item"><strong>TIPO DE RESIDUO:</strong><p>{{tipo_residuo}}</p></div>
+                <div class="detail-item"><strong>CANTIDAD:</strong><p>{{cantidad}} {{unidad}}</p></div>
+                <div class="detail-item"><strong>PROYECTO ORIGEN:</strong><p>{{nombre_proyecto}}</p></div>
+                <div class="detail-item"><strong>FECHA CREACIÓN:</strong><p>{{fecha_creacion}}</p></div>
+                <div class="detail-item"><strong>RECICLABLE:</strong><p>{{reciclable}}</p></div>
+            </div>
+        </div>
+        <div class="label-footer">
+            <p>Verifique la trazabilidad escaneando el código QR.</p>
+            <p class="small">{{qr_code_value}}</p>
+        </div>
+    </div>
+</body>
+</html>
