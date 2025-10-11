@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useForm } from '../hooks/useForm';
 import { register as registerService } from '../api/auth';
 import { checkCompanyByRut } from '../api/empresas';
@@ -10,12 +10,7 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const [rutError, setRutError] = useState('');
 
-  // State for multi-step logic
-  const [companyExists, setCompanyExists] = useState(null);
-  const [isCheckingCompany, setIsCheckingCompany] = useState(false);
-  const [rutChecked, setRutChecked] = useState(false);
-
-  const [formValues, handleInputChange] = useForm({
+  const [formValues, handleInputChange, setFormValues] = useForm({
     nombre: '',
     email: '',
     confirmEmail: '',
@@ -28,20 +23,6 @@ const Register = () => {
   });
 
   const { nombre, email, confirmEmail, password, confirmPassword, empresa_rut, razon_social, direccion } = formValues;
-
-  useEffect(() => {
-    setCompanyExists(null);
-    setRutChecked(false);
-    if (empresa_rut) {
-      if (validarRut(empresa_rut)) {
-        setRutError('');
-      } else {
-        setRutError('El RUT de la empresa no es válido.');
-      }
-    } else {
-      setRutError('');
-    }
-  }, [empresa_rut]);
 
   const handleRutChange = (e) => {
     let value = e.target.value;
@@ -56,31 +37,12 @@ const Register = () => {
         value = '';
     }
 
-    handleInputChange({
-      target: {
-        name: 'empresa_rut',
-        value: value,
-      },
-    });
-  };
+    setFormValues(prev => ({ ...prev, empresa_rut: value }));
 
-  const checkCompany = async () => {
-    if (!empresa_rut || rutError) {
-      return;
-    }
-    setIsCheckingCompany(true);
-    setRutChecked(false);
-    setErrorMessage('');
-    try {
-      const { data } = await checkCompanyByRut(empresa_rut);
-      setCompanyExists(data.exists);
-    } catch (error) {
-      console.error("Error checking company", error);
-      setErrorMessage('Error al verificar la empresa. Inténtalo de nuevo.');
-      setCompanyExists(null);
-    } finally {
-      setIsCheckingCompany(false);
-      setRutChecked(true);
+    if (value && !validarRut(value)) {
+        setRutError('El RUT de la empresa no es válido.');
+    } else {
+        setRutError('');
     }
   };
 
@@ -93,28 +55,27 @@ const Register = () => {
       setErrorMessage('Por favor, corrige el RUT antes de continuar.');
       return;
     }
-    
-    if (companyExists === null) {
-        setErrorMessage('Por favor, verifica el RUT de la empresa antes de continuar.');
-        return;
-    }
-
-    setLoading(true);
 
     if (email !== confirmEmail) {
       setErrorMessage('Los correos electrónicos no coinciden.');
-      setLoading(false);
       return;
     }
 
     if (password !== confirmPassword) {
       setErrorMessage('Las contraseñas no coinciden.');
-      setLoading(false);
       return;
     }
 
+    setLoading(true);
+
     try {
+      // 1. Check if company exists
+      const { data: companyCheck } = await checkCompanyByRut(empresa_rut);
+      const companyExists = companyCheck.exists;
+
       let dataToSend = { nombre, email, password, empresa_rut, rol: 'usuario' };
+
+      // 2. Validate fields based on whether company is new
       if (companyExists === false) {
         if (!razon_social || !direccion) {
             setErrorMessage('La razón social y la dirección son obligatorias para una nueva empresa.');
@@ -124,11 +85,13 @@ const Register = () => {
         dataToSend = { ...dataToSend, razon_social, direccion };
       }
       
+      // 3. Register the user
       await registerService(dataToSend);
       setSuccessMessage('¡Registro exitoso! Por favor, revisa tu correo para verificar la cuenta.');
       setTimeout(() => {
         window.location.href = '/login';
       }, 3000);
+
     } catch (err) {
       console.error(err.response?.data || err.message);
       if (err.response && err.response.data && err.response.data.errors) {
@@ -180,56 +143,42 @@ const Register = () => {
                   name="empresa_rut"
                   value={empresa_rut}
                   onChange={handleRutChange}
-                  onBlur={checkCompany}
                   required
                   className={`form-control ${rutError ? 'is-invalid' : ''}`}
                   autoComplete="organization-id"
                 />
                 {rutError && <div className="invalid-feedback">{rutError}</div>}
-                {isCheckingCompany && <div className="form-text">Verificando empresa...</div>}
               </div>
 
-                {rutChecked && companyExists === true && (
-                  <div className="alert alert-info">
-                    Te estás uniendo a una empresa existente. Un administrador será notificado para aprobar tu cuenta.
-                  </div>
-                )}
+              {/* Fields for new company are always visible for simplicity */}
+              <div className="mb-3">
+                <input
+                  type="text"
+                  placeholder="Razón Social (ej: Constructora S.A.)"
+                  name="razon_social"
+                  value={razon_social}
+                  onChange={handleInputChange}
+                  className="form-control"
+                />
+              </div>
+              <div className="mb-3">
+                <input
+                  type="text"
+                  placeholder="Dirección de la empresa"
+                  name="direccion"
+                  value={direccion}
+                  onChange={handleInputChange}
+                  className="form-control"
+                  autoComplete="street-address"
+                />
+              </div>
 
-                {rutChecked && companyExists === false && (
-                  <>
-                    <p className='text-muted text-center'>Completa los datos de la nueva empresa</p>
-                    <div className="mb-3">
-                      <input
-                        type="text"
-                        placeholder="Razón Social (ej: Constructora S.A.)"
-                        name="razon_social"
-                        value={razon_social}
-                        onChange={handleInputChange}
-                        required
-                        className="form-control"
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <input
-                        type="text"
-                        placeholder="Dirección de la empresa"
-                        name="direccion"
-                        value={direccion}
-                        onChange={handleInputChange}
-                        required
-                        className="form-control"
-                        autoComplete="street-address"
-                      />
-                    </div>
-                  </>
-                )}
-
-                <div className="d-grid">
+              <div className="d-grid">
                   <input
                     type="submit"
                     value={loading ? 'Registrando...' : 'Registrarse'}
                     className="btn btn-primary"
-                    disabled={loading || !!rutError || isCheckingCompany}
+                    disabled={loading || !!rutError}
                   />
                 </div>
               </form>
