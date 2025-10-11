@@ -1,0 +1,15 @@
+/* AddressAutocomplete.css */
+.address-autocomplete-container {
+  position: relative;
+}
+
+.suggestions-list {
+  position: absolute;
+  width: 100%;
+  z-index: 9999; /* Ensure it appears above other elements */
+  border: 1px solid #dee2e6;
+  border-top: none;
+  border-radius: 0 0 0.375rem 0.375rem;
+  max-height: 300px;
+  overflow-y: auto;
+}

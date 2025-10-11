@@ -1,4 +1,5 @@
 import React from 'react';
+import AddressAutocomplete from './AddressAutocomplete';
 
 const CompanyProfile = ({ company, isEditing, formData, handleInputChange }) => {
   return (
@@ -17,12 +18,11 @@ const CompanyProfile = ({ company, isEditing, formData, handleInputChange }) => 
           </div>
           <div className="mb-3">
             <label className="form-label">Dirección</label>
-            <input
-              type="text"
-              className="form-control"
-              name="direccion"
+            <AddressAutocomplete 
               value={formData.direccion}
-              onChange={handleInputChange}
+              onValueChange={(value) => handleInputChange({ target: { name: 'direccion', value: value } })}
+              onAddressSelect={(selected) => handleInputChange({ target: { name: 'direccion', value: selected } })}
+              name="direccion"
             />
           </div>
           <div className="mb-3">

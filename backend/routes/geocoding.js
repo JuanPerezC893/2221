@@ -1,48 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const asyncHandler = require('../utils/asyncHandler');
-const { authMiddleware } = require('../middleware/auth');
 const { getSuggestions, retrieveAddress } = require('../services/geocoding');
 const { v4: uuidv4 } = require('uuid');
 
-// Todas las rutas en este archivo requieren autenticación
-router.use(authMiddleware);
-
-/**
- * @swagger
- * /api/geocoding/suggest:
- *   get:
- *     summary: Obtiene sugerencias de autocompletado para direcciones.
- *     description: Utiliza el servicio de Mapbox para obtener sugerencias de direcciones basadas en una consulta de texto. Se recomienda enviar un token de sesión para agrupar las solicitudes.
- *     tags: [Geocoding]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: q
- *         schema:
- *           type: string
- *         required: true
- *         description: El texto de búsqueda para autocompletar.
- *       - in: query
- *         name: session_token
- *         schema:
- *           type: string
- *         description: Un token de sesión único (UUID) para agrupar la búsqueda y optimizar costos. Si no se provee, se genera uno nuevo.
- *     responses:
- *       200:
- *         description: Una lista de sugerencias de Mapbox.
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *       400:
- *         description: La consulta 'q' es requerida.
- *       500:
- *         description: Error del servidor.
- */
+// NOTA: Estas rutas son públicas para permitir su uso en el formulario de registro.
 router.get('/suggest', asyncHandler(async (req, res) => {
   const { q } = req.query;
   if (!q) {

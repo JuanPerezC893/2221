@@ -1,11 +1,9 @@
-import React, { useState, useEffect, useContext, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { v4 as uuidv4 } from 'uuid';
 import AuthContext from '../context/AuthContext';
 import { useForm } from '../hooks/useForm';
 import { getProyecto, createProyecto, updateProyecto } from '../api/proyectos';
-import { getSuggestions, retrieveSuggestion } from '../api/geocoding';
-import { debounce } from '../utils/debounce'; // Assuming a debounce utility exists
+import AddressAutocomplete from './AddressAutocomplete';
 
 const ProjectForm = () => {
   const { id } = useParams();
@@ -21,18 +19,12 @@ const ProjectForm = () => {
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
 
-  // State for address suggestions
-  const [suggestions, setSuggestions] = useState([]);
-  const [isSuggesting, setIsSuggesting] = useState(false);
-  const sessionToken = useRef(uuidv4());
-
   useEffect(() => {
     if (id) {
       const fetchProject = async () => {
         setLoading(true);
         try {
           const res = await getProyecto(id);
-          // Ensure dates are formatted correctly for the input fields
           const projectData = {
             ...res.data,
             fecha_inicio: res.data.fecha_inicio ? res.data.fecha_inicio.split('T')[0] : '',
@@ -52,42 +44,15 @@ const ProjectForm = () => {
 
   const { nombre, ubicacion, fecha_inicio, fecha_fin } = formValues;
 
-  // Debounced function to fetch suggestions
-  const fetchSuggestions = useCallback(debounce(async (query) => {
-    if (!query || query.length < 3) {
-      setSuggestions([]);
-      return;
-    }
-    setIsSuggesting(true);
-    try {
-      const data = await getSuggestions(query, sessionToken.current);
-      setSuggestions(data.suggestions || []);
-    } catch (error) {
-      console.error('Error fetching suggestions:', error);
-    } finally {
-      setIsSuggesting(false);
-    }
-  }, 300), []);
-
-  const handleUbicacionChange = (e) => {
-    handleInputChange(e); // Update form state immediately
-    fetchSuggestions(e.target.value); // Fetch suggestions with debounce
-  };
-
-  const handleSuggestionClick = async (suggestion) => {
-    setIsSuggesting(true);
-    try {
-      const fullAddress = await retrieveSuggestion(suggestion.mapbox_id, sessionToken.current);
-      setValues({
-        ...formValues,
-        ubicacion: fullAddress.display_name,
-      });
-      setSuggestions([]); // Clear suggestions after selection
-    } catch (error) {
-      console.error('Error retrieving suggestion:', error);
-    } finally {
-      setIsSuggesting(false);
-    }
+  const handleAddressSelect = (addressObject) => {
+    // The component now returns the full address object because fetchFullDetails is true
+    setValues({
+      ...formValues,
+      ubicacion: addressObject.display_name,
+      // Here you could also set lat/lon if your form state handles it
+      // latitud: addressObject.lat,
+      // longitud: addressObject.lon,
+    });
   };
 
   const onSubmit = async (e) => {
@@ -147,29 +112,16 @@ const ProjectForm = () => {
               <input type="text" className="form-control" id="nombre" name="nombre" value={nombre} onChange={handleInputChange} required autoComplete="off" />
             </div>
             
-            <div className="mb-3 position-relative">
+            <div className="mb-3">
               <label htmlFor="ubicacion" className="form-label">Ubicación</label>
-              <input
-                type="text"
-                className="form-control"
-                id="ubicacion"
-                name="ubicacion"
+              <AddressAutocomplete 
                 value={ubicacion}
-                onChange={handleUbicacionChange}
-                required
-                autoComplete="off"
-                placeholder="Ej: Av. Providencia 123, Santiago"
+                onValueChange={(value) => handleInputChange({ target: { name: 'ubicacion', value } })}
+                onAddressSelect={handleAddressSelect}
+                name="ubicacion"
+                required={true}
+                fetchFullDetails={true} // Important: This tells the component to fetch coordinates
               />
-              {suggestions.length > 0 && (
-                <ul className="list-group position-absolute w-100" style={{ zIndex: 1000 }}>
-                  {suggestions.map((s) => (
-                    <li key={s.mapbox_id} className="list-group-item list-group-item-action" onClick={() => handleSuggestionClick(s)}>
-                      <strong>{s.name}</strong>
-                      <div className="text-muted small">{s.full_address || s.place_formatted || s.address}</div>
-                    </li>
-                  ))}
-                </ul>
-              )}
             </div>
 
             <div className="mb-3">
@@ -182,7 +134,7 @@ const ProjectForm = () => {
               <input type="date" className="form-control" id="fecha_fin" name="fecha_fin" value={fecha_fin} onChange={handleInputChange} required />
             </div>
 
-            <button type="submit" className="btn btn-primary w-100" disabled={loading || isSuggesting}>
+            <button type="submit" className="btn btn-primary w-100" disabled={loading}>
               {loading ? (id ? 'Actualizando...' : 'Creando...') : (id ? 'Actualizar Proyecto' : 'Crear Proyecto')}
             </button>
           </form>
