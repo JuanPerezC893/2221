@@ -10,6 +10,10 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const [rutError, setRutError] = useState('');
 
+  // State for staged registration
+  const [companyExists, setCompanyExists] = useState(null);
+  const [isCheckingCompany, setIsCheckingCompany] = useState(false);
+
   const [formValues, handleInputChange, setFormValues] = useForm({
     nombre: '',
     email: '',
@@ -26,6 +30,9 @@ const Register = () => {
 
   const handleRutChange = (e) => {
     let value = e.target.value;
+    // Reset check on change
+    setCompanyExists(null);
+
     let cleaned = value.replace(/[^0-9kK]/gi, '');
 
     if (cleaned) {
@@ -51,11 +58,27 @@ const Register = () => {
     setErrorMessage('');
     setSuccessMessage('');
 
-    if (rutError) {
-      setErrorMessage('Por favor, corrige el RUT antes de continuar.');
-      return;
+    // --- STAGE 1: Check Company --- 
+    if (companyExists === null) {
+        if (rutError || !empresa_rut) {
+            setErrorMessage('Por favor, ingrese un RUT de empresa válido para continuar.');
+            return;
+        }
+        setIsCheckingCompany(true);
+        try {
+            const { data } = await checkCompanyByRut(empresa_rut);
+            setCompanyExists(data.exists);
+        } catch (error) {
+            console.error("Error checking company", error);
+            setErrorMessage('Error al verificar la empresa. Inténtalo de nuevo.');
+            setCompanyExists(null);
+        } finally {
+            setIsCheckingCompany(false);
+        }
+        return; // Stop after check, user will see UI change and click again
     }
 
+    // --- STAGE 2: Register User ---
     if (email !== confirmEmail) {
       setErrorMessage('Los correos electrónicos no coinciden.');
       return;
@@ -69,13 +92,8 @@ const Register = () => {
     setLoading(true);
 
     try {
-      // 1. Check if company exists
-      const { data: companyCheck } = await checkCompanyByRut(empresa_rut);
-      const companyExists = companyCheck.exists;
-
       let dataToSend = { nombre, email, password, empresa_rut, rol: 'usuario' };
 
-      // 2. Validate fields based on whether company is new
       if (companyExists === false) {
         if (!razon_social || !direccion) {
             setErrorMessage('La razón social y la dirección son obligatorias para una nueva empresa.');
@@ -85,7 +103,6 @@ const Register = () => {
         dataToSend = { ...dataToSend, razon_social, direccion };
       }
       
-      // 3. Register the user
       await registerService(dataToSend);
       setSuccessMessage('¡Registro exitoso! Por favor, revisa tu correo para verificar la cuenta.');
       setTimeout(() => {
@@ -150,35 +167,47 @@ const Register = () => {
                 {rutError && <div className="invalid-feedback">{rutError}</div>}
               </div>
 
-              {/* Fields for new company are always visible for simplicity */}
-              <div className="mb-3">
-                <input
-                  type="text"
-                  placeholder="Razón Social (ej: Constructora S.A.)"
-                  name="razon_social"
-                  value={razon_social}
-                  onChange={handleInputChange}
-                  className="form-control"
-                />
-              </div>
-              <div className="mb-3">
-                <input
-                  type="text"
-                  placeholder="Dirección de la empresa"
-                  name="direccion"
-                  value={direccion}
-                  onChange={handleInputChange}
-                  className="form-control"
-                  autoComplete="street-address"
-                />
-              </div>
+              {companyExists === true && (
+                  <div className="alert alert-info">
+                    Te estás uniendo a una empresa existente. Presiona "Registrarse" para continuar.
+                  </div>
+              )}
+
+              {companyExists === false && (
+                  <>
+                    <div className="alert alert-warning">La empresa no existe. Por favor, completa sus datos para crearla.</div>
+                    <div className="mb-3">
+                      <input
+                        type="text"
+                        placeholder="Razón Social (ej: Constructora S.A.)"
+                        name="razon_social"
+                        value={razon_social}
+                        onChange={handleInputChange}
+                        required
+                        className="form-control"
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <input
+                        type="text"
+                        placeholder="Dirección de la empresa"
+                        name="direccion"
+                        value={direccion}
+                        onChange={handleInputChange}
+                        required
+                        className="form-control"
+                        autoComplete="street-address"
+                      />
+                    </div>
+                  </>
+              )}
 
               <div className="d-grid">
                   <input
                     type="submit"
-                    value={loading ? 'Registrando...' : 'Registrarse'}
+                    value={companyExists === null ? (isCheckingCompany ? 'Verificando...' : 'Siguiente') : (loading ? 'Registrando...' : 'Registrarse')}
                     className="btn btn-primary"
-                    disabled={loading || !!rutError}
+                    disabled={loading || isCheckingCompany || !!rutError}
                   />
                 </div>
               </form>
