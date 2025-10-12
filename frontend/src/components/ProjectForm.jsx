@@ -66,13 +66,15 @@ const ProjectForm = ({ projectId: projectIdProp, onSuccess, onClose }) => {
         await updateProyecto(id, formValues);
         setSuccessMessage('¡Proyecto actualizado exitosamente!');
       } else {
-        await createProyecto(formValues);
+        const newProject = await createProyecto(formValues);
         setSuccessMessage('¡Proyecto creado exitosamente!');
+        if (isModalMode && onSuccess) {
+          onSuccess(newProject.data.id_proyecto);
+        }
       }
       triggerDataRefresh();
       
       if (isModalMode) {
-        if (onSuccess) onSuccess();
         onClose();
       } else {
         setTimeout(() => {

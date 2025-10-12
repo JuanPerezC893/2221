@@ -29,6 +29,7 @@ const Dashboard = ({ isAddProjectModalOpen, closeAddProjectModal, isAddWasteModa
   const { auth, dataRefreshKey } = useContext(AuthContext);
   const [projects, setProjects] = useState([]);
   const [selectedProject, setSelectedProject] = useState('all');
+  const [projectToSelect, setProjectToSelect] = useState(null);
   const [wasteSummaryByType, setWasteSummaryByType] = useState([]);
   const [wasteSummaryOverTime, setWasteSummaryOverTime] = useState([]);
   const [environmentalImpact, setEnvironmentalImpact] = useState(null);
@@ -67,6 +68,18 @@ const Dashboard = ({ isAddProjectModalOpen, closeAddProjectModal, isAddWasteModa
       setPanelsVisible(true);
     }
   }, [isAddProjectModalOpen, isAddWasteModalOpen]);
+
+  const handleProjectCreated = (newProjectId) => {
+    fetchProjects();
+    setProjectToSelect(newProjectId);
+  };
+
+  useEffect(() => {
+    if (projectToSelect && projects.some(p => p.id_proyecto === projectToSelect)) {
+      setSelectedProject(projectToSelect);
+      setProjectToSelect(null);
+    }
+  }, [projectToSelect, projects]);
 
   const handleAddWasteSuccess = () => {
     fetchProjects();
@@ -253,7 +266,7 @@ const Dashboard = ({ isAddProjectModalOpen, closeAddProjectModal, isAddWasteModa
       if (selectedFeature) {
         map.current.flyTo({
           center: selectedFeature.geometry.coordinates,
-          zoom: 12
+          zoom: 15
         });
       }
     }
@@ -440,7 +453,7 @@ const Dashboard = ({ isAddProjectModalOpen, closeAddProjectModal, isAddWasteModa
         <AddProjectModal 
           isOpen={isAddProjectModalOpen} 
           onClose={closeAddProjectModal} 
-          onSuccess={fetchProjects} 
+          onSuccess={handleProjectCreated} 
         />
       )}
 
