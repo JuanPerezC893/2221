@@ -1,14 +1,10 @@
 
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
 import { useForm } from '../hooks/useForm';
 import WasteForm from './WasteForm';
-import { getProyectos } from '../api/proyectos';
-import { getResiduo, updateResiduo } from '../api/residuos';
+import { updateResiduo } from '../api/residuos';
 
-const EditWaste = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
+const EditWaste = ({ wasteToEdit, proyectos, onDataChange, onClose }) => {
   const [formValues, handleInputChange, setValues] = useForm({
     tipo: '',
     cantidad: '',
@@ -16,31 +12,34 @@ const EditWaste = () => {
     reciclable: false,
     id_proyecto: '',
   });
-  const [proyectos, setProyectos] = useState([]);
 
   useEffect(() => {
-    const fetchInitialData = async () => {
-      try {
-        const [wasteRes, proyectosRes] = await Promise.all([getResiduo(id), getProyectos()]);
-        setValues(wasteRes.data);
-        setProyectos(proyectosRes.data);
-      } catch (err) {
-        console.error(err.response.data);
-      }
-    };
-
-    fetchInitialData();
-  }, [id, setValues]);
+    if (wasteToEdit) {
+      setValues({
+        tipo: wasteToEdit.tipo || '',
+        cantidad: wasteToEdit.cantidad || '',
+        unidad: wasteToEdit.unidad || '',
+        reciclable: wasteToEdit.reciclable || false,
+        id_proyecto: wasteToEdit.id_proyecto || '',
+      });
+    }
+  }, [wasteToEdit, setValues]);
 
   const onSubmit = async (e) => {
     e.preventDefault();
     try {
-      await updateResiduo(id, formValues);
-      navigate('/residuos');
+      await updateResiduo(wasteToEdit.id_residuo, formValues);
+      if (onDataChange) {
+        onDataChange();
+      }
+      onClose(); // Close modal on success
     } catch (err) {
-      console.error(err.response.data);
+      console.error(err.response?.data || err);
+      // Optionally, display an error message to the user within the modal
     }
   };
+
+  if (!wasteToEdit) return null;
 
   return (
     <div className="container mt-4">
@@ -51,7 +50,7 @@ const EditWaste = () => {
             formData={formValues}
             handleInputChange={handleInputChange}
             proyectos={proyectos}
-            // Pass empty arrays for suggestion-related props
+            // Pass empty arrays for suggestion-related props as they are not needed here
             wasteTypes={[]}
             filteredWasteTypes={[]}
             showSuggestions={false}
@@ -59,7 +58,8 @@ const EditWaste = () => {
             handleSelectWasteType={() => {}}
             suggestionsRef={null}
           />
-          <div className="d-grid">
+          <div className="d-flex justify-content-end mt-4">
+            <button type="button" className="btn btn-secondary me-2" onClick={onClose}>Cancelar</button>
             <button type="submit" className="btn btn-primary">Actualizar Residuo</button>
           </div>
         </form>

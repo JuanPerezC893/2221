@@ -3,7 +3,7 @@ import { deleteProyecto } from '../api/proyectos';
 import ConfirmationModal from './ConfirmationModal';
 import './ProjectWasteTree.css';
 
-const ProjectWasteTree = ({ projects, wastes, onFinishProject, onOpenLabelModal, onDataChange, finalizingProjectId, userRole, className }) => {
+const ProjectWasteTree = ({ projects, wastes, onFinishProject, onOpenLabelModal, onOpenEditWasteModal, onOpenDeleteWasteModal, onDataChange, finalizingProjectId, userRole, className, isTreeEditing, setIsTreeEditing }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState(null);
 
@@ -50,8 +50,11 @@ const ProjectWasteTree = ({ projects, wastes, onFinishProject, onOpenLabelModal,
   return (
     <>
       <div className={`card ${className || ''}`}>
-        <div className="card-header bg-primary text-white">
+        <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
           <h3 className="h5 mb-0">Proyectos y Residuos</h3>
+          <button className="btn btn-light btn-sm" onClick={() => setIsTreeEditing(!isTreeEditing)}>
+            {isTreeEditing ? 'Cancelar' : 'Editar'}
+          </button>
         </div>
         <div className="card-body project-waste-tree-body">
           {projectTree.length > 0 ? (
@@ -60,9 +63,9 @@ const ProjectWasteTree = ({ projects, wastes, onFinishProject, onOpenLabelModal,
                 const isFinalizing = finalizingProjectId === project.id_proyecto;
                 return (
                   <div key={project.id_proyecto} className="card mb-3">
-                    <div className="card-header d-flex justify-content-between align-items-center">
+                    <div className="card-header d-flex justify-content-between align-items-center project-card-header">
                       <strong>{project.nombre}</strong>
-                      <div>
+                      <div style={{ visibility: isTreeEditing ? 'visible' : 'hidden' }}>
                         {userRole === 'admin' && (
                           <button className="btn btn-danger btn-sm me-2" onClick={() => handleOpenDeleteModal(project.id_proyecto)}>Eliminar</button>
                         )}
@@ -86,12 +89,20 @@ const ProjectWasteTree = ({ projects, wastes, onFinishProject, onOpenLabelModal,
                       {project.wastes.length > 0 ? (
                         <ul className="list-group ms-4 waste-list-scrollable">
                           {project.wastes.map(waste => (
-                            <li key={waste.id_residuo} className="list-group-item d-flex justify-content-between align-items-center ps-4">
+                            <li key={waste.id_residuo} className="list-group-item d-flex justify-content-between align-items-center ps-4 waste-list-item">
                               <span>
                                 {waste.tipo} <br />
                                 <small className="text-muted">{waste.nombre_creador || 'N/A'}</small>
                               </span>
-                              <button className="btn btn-secondary btn-sm" onClick={() => onOpenLabelModal(waste)}>Ver / Imprimir</button>
+                              <div>
+                                {isTreeEditing && (
+                                  <>
+                                    <button className="btn btn-danger btn-sm me-2" onClick={() => onOpenDeleteWasteModal(waste)}>Eliminar</button>
+                                    <button className="btn btn-info btn-sm me-2" onClick={() => onOpenEditWasteModal(waste)}>Editar</button>
+                                  </>
+                                )}
+                                <button className="btn btn-secondary btn-sm" onClick={() => onOpenLabelModal(waste)}>Ver / Imprimir</button>
+                              </div>
                             </li>
                           ))}
                         </ul>

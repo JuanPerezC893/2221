@@ -31,11 +31,8 @@ function App() {
 
           {/* Private Routes with Main Layout */}
           <Route path="/dashboard" element={<Layout><PrivateRoute><Dashboard /></PrivateRoute></Layout>} />
-          <Route path="/residuos" element={<Layout><PrivateRoute><WasteList /></PrivateRoute></Layout>} />
           <Route path="/agregar-residuo" element={<Layout><PrivateRoute><AddWaste /></PrivateRoute></Layout>} />
-          <Route path="/agregar-proyecto" element={<Layout><PrivateRoute><ProjectForm /></PrivateRoute></Layout>} />
           <Route path="/edit-project/:id" element={<Layout><PrivateRoute><ProjectForm /></PrivateRoute></Layout>} />
-          <Route path="/edit-residuo/:id" element={<Layout><PrivateRoute><EditWaste /></PrivateRoute></Layout>} />
           <Route path="/perfil" element={<Layout><PrivateRoute><Profile /></PrivateRoute></Layout>} />
           <Route path="/mapa" element={<Layout><PrivateRoute><MapPage /></PrivateRoute></Layout>} /> {/* New Map Route */}
         </Routes>

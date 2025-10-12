@@ -1,10 +1,11 @@
 import React, { useContext } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
 
-const Navbar = () => {
+const Navbar = ({ openAddProjectModal, openAddWasteModal }) => {
   const { auth, logout } = useContext(AuthContext);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
     if (window.confirm('¿Estás seguro de que quieres cerrar sesión?')) {
@@ -25,16 +26,16 @@ const Navbar = () => {
             <li className="nav-item">
               <Link className="nav-link" to="/dashboard">Dashboard</Link>
             </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/agregar-proyecto">Agregar Proyecto</Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/agregar-residuo">Agregar Residuo</Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/residuos">Residuos</Link>
-            </li>
-            
+            {location.pathname !== '/perfil' && (
+              <>
+                <li className="nav-item">
+                  <button className="btn btn-link nav-link" onClick={openAddProjectModal}>Agregar Proyecto</button>
+                </li>
+                <li className="nav-item">
+                  <button className="btn btn-link nav-link" onClick={openAddWasteModal}>Agregar Residuo</button>
+                </li>
+              </>
+            )}
           </ul>
           <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
             {auth.user && (

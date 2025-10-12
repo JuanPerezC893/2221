@@ -18,18 +18,22 @@
 
 .top-bar {
   position: absolute;
-  top: 1rem;
+  top: -150px; /* Start off-screen */
   left: 50%;
   transform: translateX(-50%);
   z-index: 2;
   display: flex;
   align-items: center;
   gap: 1rem;
-  /*background-color: rgba(0, 0, 0, 0.5);*/
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;
   background-color: rgba(255, 255, 255, 0.7) !important;
   backdrop-filter: blur(3px);
+  transition: top 0.5s ease-in-out;
+}
+
+.top-bar.visible {
+  top: 1rem;
 }
 
 .side-panel {
