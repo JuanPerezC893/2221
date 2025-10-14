@@ -47,7 +47,7 @@ const PublicTrazabilidad = () => {
 
         map.current = new mapboxgl.Map({
             container: mapContainer.current,
-            style: 'mapbox://styles/pelisjuan13/cmfbt9qyo000601s4cgrghz71',
+            style: 'mapbox://styles/mapbox/standard',
             center: [-70.6693, -33.4489],
             zoom: 9,
         });
@@ -112,7 +112,7 @@ const PublicTrazabilidad = () => {
 
                 const animate = (timestamp) => {
                     const progress = (timestamp / 3000) % 1; // Cycle every 3 seconds
-                    const tailLength = 0.4;
+                    const tailLength = 1;
                     const start = progress;
                     const end = Math.max(0, start - tailLength);
 
