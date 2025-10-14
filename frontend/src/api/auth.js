@@ -19,3 +19,11 @@ export const updateProfile = async (userData) => {
 export const changePassword = async (passwords) => {
   return await api.post('/users/me/change-password', passwords);
 };
+
+export const forgotPassword = async (email) => {
+  return await api.post('/auth/forgot-password', email);
+};
+
+export const resetPassword = async (token, passwords) => {
+  return await api.post('/auth/reset-password', { token, ...passwords });
+};

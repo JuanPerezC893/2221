@@ -20,8 +20,8 @@ router.get('/', asyncHandler(async (req, res) => {
 
 // Crear un nuevo proyecto
 router.post('/', projectValidationRules(), validateRequest, asyncHandler(async (req, res) => {
-  const { nombre, ubicacion, fecha_inicio, fecha_fin } = req.body;
-  const { empresa_rut } = req.user; // Usar el rut de la empresa del token
+  const { nombre, ubicacion, fecha_inicio, fecha_fin, descripcion } = req.body;
+  const { empresa_rut } = req.user; // Usar el rut del rut de la empresa del token
   
   let latitud = null;
   let longitud = null;
@@ -68,8 +68,8 @@ router.post('/', projectValidationRules(), validateRequest, asyncHandler(async (
   }
 
   const newProject = await pool.query(
-    'INSERT INTO proyectos (nombre, ubicacion, latitud, longitud, fecha_inicio, fecha_fin, empresa_rut) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
-    [nombre, ubicacion, latitud, longitud, fecha_inicio, fecha_fin, empresa_rut]
+    'INSERT INTO proyectos (nombre, ubicacion, latitud, longitud, fecha_inicio, fecha_fin, empresa_rut, descripcion) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
+    [nombre, ubicacion, latitud, longitud, fecha_inicio, fecha_fin, empresa_rut, descripcion]
   );
   
   // Añadir información de geocodificación a la respuesta
@@ -96,7 +96,7 @@ router.get('/:id', asyncHandler(async (req, res) => {
 // Actualizar un proyecto
 router.put('/:id', asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const { nombre, ubicacion, fecha_inicio, fecha_fin } = req.body;
+  const { nombre, ubicacion, fecha_inicio, fecha_fin, descripcion } = req.body;
   const { empresa_rut } = req.user;
 
   let latitud = null;
@@ -167,8 +167,8 @@ router.put('/:id', asyncHandler(async (req, res) => {
   }
 
   const updatedProject = await pool.query(
-    'UPDATE proyectos SET nombre = $1, ubicacion = $2, latitud = $3, longitud = $4, fecha_inicio = $5, fecha_fin = $6 WHERE id_proyecto = $7 AND empresa_rut = $8 RETURNING *',
-    [nombre, ubicacion, latitud, longitud, fecha_inicio, fecha_fin, id, empresa_rut]
+    'UPDATE proyectos SET nombre = $1, ubicacion = $2, latitud = $3, longitud = $4, fecha_inicio = $5, fecha_fin = $6, descripcion = $7 WHERE id_proyecto = $8 AND empresa_rut = $9 RETURNING *',
+    [nombre, ubicacion, latitud, longitud, fecha_inicio, fecha_fin, descripcion, id, empresa_rut]
   );
 
   if (updatedProject.rows.length === 0) {

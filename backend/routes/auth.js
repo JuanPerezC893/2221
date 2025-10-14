@@ -2,10 +2,11 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const pool = require('../db');
 const asyncHandler = require('../utils/asyncHandler');
 const { registerValidationRules, loginValidationRules, validateRequest } = require('../middleware/validators');
-const { sendVerificationEmail, sendNewUserForApprovalEmail } = require('../services/emailService');
+const { sendVerificationEmail, sendNewUserForApprovalEmail, sendPasswordResetEmail } = require('../services/emailService');
 
 // Registrar un nuevo usuario y empresa (si no existe)
 router.post('/register', registerValidationRules(), validateRequest, asyncHandler(async (req, res) => {
@@ -173,6 +174,62 @@ router.post('/login', loginValidationRules(), validateRequest, asyncHandler(asyn
   const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '1h' });
 
   res.json({ token });
+}));
+
+// Ruta para solicitar el restablecimiento de contraseña
+router.post('/forgot-password', asyncHandler(async (req, res) => {
+    const { email } = req.body;
+    const userResult = await pool.query('SELECT * FROM usuarios WHERE email = $1', [email]);
+
+    if (userResult.rows.length > 0) {
+        const user = userResult.rows[0];
+        const token = crypto.randomBytes(20).toString('hex');
+        const expires = new Date(Date.now() + 3600000); // 1 hora de expiración
+
+        await pool.query(
+            'UPDATE usuarios SET reset_password_token = $1, reset_password_expires = $2 WHERE id_usuario = $3',
+            [token, expires, user.id_usuario]
+        );
+
+        try {
+            await sendPasswordResetEmail(user.email, token, user.nombre);
+        } catch (error) {
+            console.error("Error al enviar correo de reseteo. La solicitud del usuario falló pero no se informa al cliente por seguridad.", error);
+        }
+    }
+    
+    // Por seguridad, siempre se devuelve el mismo mensaje, exista o no el correo.
+    res.status(200).json({ message: 'Si existe una cuenta con este correo, se ha enviado un enlace para restablecer la contraseña.' });
+}));
+
+// Ruta para restablecer la contraseña con el token
+router.post('/reset-password', asyncHandler(async (req, res) => {
+    const { token, password, password2 } = req.body;
+
+    if (password !== password2) {
+        return res.status(400).json({ message: 'Las contraseñas no coinciden.' });
+    }
+
+    const userResult = await pool.query(
+        'SELECT * FROM usuarios WHERE reset_password_token = $1 AND reset_password_expires > NOW()',
+        [token]
+    );
+
+    if (userResult.rows.length === 0) {
+        return res.status(400).json({ message: 'El token para restablecer la contraseña es inválido o ha expirado.' });
+    }
+
+    const user = userResult.rows[0];
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    await pool.query(
+        'UPDATE usuarios SET password = $1, reset_password_token = NULL, reset_password_expires = NULL WHERE id_usuario = $2',
+        [hashedPassword, user.id_usuario]
+    );
+
+    res.status(200).json({ message: 'Tu contraseña ha sido actualizada con éxito.' });
 }));
 
 module.exports = router;

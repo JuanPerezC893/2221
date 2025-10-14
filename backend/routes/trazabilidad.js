@@ -51,5 +51,46 @@ router.get('/:id', asyncHandler(async (req, res) => {
   });
 }));
 
+// Confirmar la entrega de un residuo (público)
+router.post('/:id/confirmar-entrega', asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { codigo_entrega } = req.body;
+
+  if (!codigo_entrega) {
+    return res.status(400).json({ message: 'El código de entrega es requerido.' });
+  }
+
+  const residuoResult = await pool.query('SELECT * FROM residuos WHERE id_residuo = $1', [id]);
+
+  if (residuoResult.rows.length === 0) {
+    return res.status(404).json({ message: 'Residuo no encontrado.' });
+  }
+
+  const residuo = residuoResult.rows[0];
+
+  if (residuo.estado === 'entregado') {
+    return res.status(400).json({ message: 'Esta entrega ya fue confirmada anteriormente.' });
+  }
+
+  if (residuo.estado !== 'en camino') {
+    return res.status(400).json({ message: 'Esta entrega aún no ha sido marcada como \'en camino\'.' });
+  }
+
+  if (residuo.codigo_entrega !== codigo_entrega) {
+    return res.status(400).json({ message: 'El código de entrega es incorrecto.' });
+  }
+
+  // Si todo es correcto, actualizar el estado a 'entregado'
+  const updatedResiduo = await pool.query(
+    "UPDATE residuos SET estado = 'entregado' WHERE id_residuo = $1 RETURNING *",
+    [id]
+  );
+
+  res.json({ 
+    message: '¡Entrega confirmada exitosamente!',
+    residuo: updatedResiduo.rows[0]
+  });
+}));
+
 module.exports = router;
 

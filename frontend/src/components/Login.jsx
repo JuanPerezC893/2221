@@ -87,7 +87,7 @@ const Login = () => {
                   </div>
                 </form>
                 <div className="text-center mt-3">
-                  <a href="#" className="text-white d-block mb-2">¿Olvidaste tu contraseña?</a>
+                  <a href="/forgot-password" className="text-white d-block mb-2">¿Olvidaste tu contraseña?</a>
                   <p className="text-white mb-0">
                     ¿No tienes una cuenta? <a href="/register" className="text-white">Regístrate</a>
                   </p>

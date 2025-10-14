@@ -7,7 +7,7 @@ const CompanyProfile = ({ company, isEditing, formData, handleInputChange }) => 
       {isEditing ? (
         <>
           <div className="mb-3">
-            <label className="form-label">Razón Social</label>
+            <label className="form-label">Nombre de empresa</label>
             <input
               type="text"
               className="form-control"
@@ -38,7 +38,7 @@ const CompanyProfile = ({ company, isEditing, formData, handleInputChange }) => 
         </>
       ) : (
         <>
-          <p><strong>Razón Social:</strong> {company.razon_social}</p>
+          <p><strong>Nombre de empresa:</strong> {company.razon_social}</p>
           <p><strong>RUT:</strong> {company.rut}</p>
           <p><strong>Dirección:</strong> {company.direccion}</p>
         </>

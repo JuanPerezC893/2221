@@ -1,10 +1,39 @@
 
 /* Centrado del layout */
 .auth-layout {
+  position: relative; /* Necesario para el posicionamiento del fondo */
+  overflow: hidden;   /* Oculta partes de la imagen que se salgan */
   display: flex;
   flex-direction: column; /* organiza en columna */
   min-height: 100vh;
-  background: linear-gradient(135deg, #3b5998, #8b9dc3); /* Fondo degradado */
+}
+
+/* Contenedor del carrusel de fondo */
+.background-slideshow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1; /* Detrás de todo el contenido */
+  filter: blur(5px); /* --- Controla el desenfoque aquí --- */
+}
+
+/* Cada imagen del carrusel */
+.background-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transition: opacity 1.5s ease-in-out; /* Transición suave */
+}
+
+.background-image.active {
+  opacity: 1; /* Muestra la imagen activa */
 }
 
 .auth-main {
@@ -13,15 +42,20 @@
   align-items: center;   /* Centrado vertical */
   justify-content: center; /* Centrado horizontal */
   padding: 1rem;
+  background-color: rgba(0, 0, 0, 0.2); /* Un ligero velo oscuro para mejorar contraste */
+  position: relative; /* Asegura que esté sobre el fondo */
+  z-index: 1;
 }
 
 /* Tarjeta de login estilo Facebook */
 .login-card-facebook {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
   width: 360px;
   padding: 2rem;
   border-radius: 12px;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
   text-align: center;
   animation: fadeIn 0.6s ease-in-out;
 }
@@ -95,7 +129,10 @@
   padding: 1rem;
   font-size: 0.8rem;
   color: #fff;
-  background: transparent!important;
+  background-color: rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(5px);
+  position: relative; /* Asegura que esté sobre el fondo */
+  z-index: 1;
 }
 
 
@@ -112,11 +149,13 @@
 }
 
 .register-card {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
   width: 450px;
   padding: 2rem;
   border-radius: 12px;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
   text-align: center;
   animation: fadeIn 0.6s ease-in-out;
 }

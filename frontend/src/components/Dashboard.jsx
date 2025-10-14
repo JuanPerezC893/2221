@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../services/api';
 
 import { Pie, Bar } from 'react-chartjs-2';
@@ -320,6 +321,15 @@ const Dashboard = () => {
     return <div className="container mt-5 alert alert-danger">{error}</div>;
   }
 
+  const getStatusBadge = (status) => {
+    const statusStyles = {
+      'pendiente': 'bg-secondary',
+      'en camino': 'bg-primary',
+      'entregado': 'bg-success',
+    };
+    return <span className={`badge ${statusStyles[status] || 'bg-dark'}`}>{status}</span>;
+  };
+
   const totalWaste = (wasteSummaryByType || []).reduce((sum, item) => sum + parseFloat(item.total_cantidad), 0).toFixed(2);
 
   return (
@@ -334,7 +344,10 @@ const Dashboard = () => {
           </div>
         </div>
         <div className="card shadow-sm mt-4">
-          <div className="card-header">Últimos 5 Registros</div>
+          <div className="card-header d-flex justify-content-between align-items-center">
+            Últimos 5 Registros
+            <Link to="/residuos" className="btn btn-outline-primary btn-sm">Gestionar Todos</Link>
+          </div>
           <div className="card-body">
             {latestWasteEntries.length > 0 ? (
               <div className="table-responsive">
@@ -344,7 +357,7 @@ const Dashboard = () => {
                       <tr key={entry.id_residuo}>
                         <td>{entry.tipo}</td>
                         <td>{entry.cantidad} {entry.unidad}</td>
-                        <td><span className="badge bg-secondary">{entry.estado}</span></td>
+                        <td>{getStatusBadge(entry.estado)}</td>
                       </tr>
                     ))}
                   </tbody>
