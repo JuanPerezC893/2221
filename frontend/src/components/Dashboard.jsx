@@ -46,7 +46,6 @@ const Dashboard = ({ isAddProjectModalOpen, closeAddProjectModal, isAddWasteModa
   const map = useRef(null);
   const selectedProjectMarker = useRef(null);
   const animationFrameId = useRef(null);
-
   const fetchProjects = useCallback(async () => {
     if (auth.user) {
       try {
@@ -56,9 +55,12 @@ const Dashboard = ({ isAddProjectModalOpen, closeAddProjectModal, isAddWasteModa
         console.error('Error fetching projects:', err);
         setError('Error al cargar la lista de proyectos.');
       }
-    };
-    fetchProjects();
+    }
   }, [auth.user]);
+
+  useEffect(() => {
+    fetchProjects();
+  }, [fetchProjects]);
 
   useEffect(() => {
     if (map.current) return; // initialize map only once
@@ -254,9 +256,7 @@ const Dashboard = ({ isAddProjectModalOpen, closeAddProjectModal, isAddWasteModa
       warehouseMarker.remove();
       map.current.getSource('route').setData({ type: 'Feature', geometry: { type: 'LineString', coordinates: [] }});
 
-      if (map.current.getLayer('route')) {
-        map.current.setPaintProperty('route', 'line-opacity', 0.8);
-      }
+
 
       map.current.setFilter('unclustered-point', ['!', ['has', 'point_count']]);
       map.current.setFilter('cluster-count', ['has', 'point_count']);
