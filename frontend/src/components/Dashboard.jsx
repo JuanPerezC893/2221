@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext, useRef, useCallback } from 'react';
-import api from '../services/api';
+import { getProyectos } from '../api/proyectos';
+import { getSummaryByType, getSummaryOverTime, getEnvironmentalImpact, getLatest } from '../api/residuos';
 
 import { Pie, Bar } from 'react-chartjs-2';
 import {
@@ -19,6 +20,8 @@ import './Dashboard.css'; // Import new CSS file
 import { getChartColors } from '../utils/colorUtils';
 import AddProjectModal from './AddProjectModal';
 import AddWasteModal from './AddWasteModal';
+import { getDirections } from '../api/mapbox';
+const BODEGA_COORDS = [-70.773829, -33.40862];
 
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, ChartTitle);
@@ -41,11 +44,13 @@ const Dashboard = ({ isAddProjectModalOpen, closeAddProjectModal, isAddWasteModa
 
   const mapContainer = useRef(null);
   const map = useRef(null);
+  const selectedProjectMarker = useRef(null);
+  const animationFrameId = useRef(null);
 
   const fetchProjects = useCallback(async () => {
     if (auth.user) {
       try {
-        const res = await api.get('/proyectos');
+        const res = await getProyectos();
         setProjects(res.data);
       } catch (err) {
         console.error('Error fetching projects:', err);
@@ -94,7 +99,7 @@ const Dashboard = ({ isAddProjectModalOpen, closeAddProjectModal, isAddWasteModa
     if (mapContainer.current) {
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
-        style: 'mapbox://styles/pelisjuan13/cmfbt9qyo000601s4cgrghz71',
+        style: 'mapbox://styles/mapbox/standard',
         center: [-70.6693, -33.4489],
         zoom: 4
       });
@@ -106,6 +111,29 @@ const Dashboard = ({ isAddProjectModalOpen, closeAddProjectModal, isAddWasteModa
           cluster: true,
           clusterMaxZoom: 14, // Max zoom to cluster points on
           clusterRadius: 50   // Radius of each cluster when clustering points (defaults to 50)
+        });
+
+        // Add route source and layer with empty data
+        map.current.addSource('route', {
+            type: 'geojson',
+            data: {
+                type: 'Feature',
+                properties: {},
+                geometry: {
+                    type: 'LineString',
+                    coordinates: []
+                }
+            },
+            lineMetrics: true
+        });
+        map.current.addLayer({
+            id: 'route',
+            type: 'line',
+            source: 'route',
+            paint: {
+                'line-width': 5,
+                'line-gradient': ['step', ['line-progress'], '#0d6efd', 0.1, '#0d6efd']
+            }
         });
 
         // Layer for clusters
@@ -219,6 +247,12 @@ const Dashboard = ({ isAddProjectModalOpen, closeAddProjectModal, isAddWasteModa
   useEffect(() => {
     if (!isMapLoaded || !map.current) return;
 
+    // Cleanup animation from previous render
+    if (animationFrameId.current) {
+        cancelAnimationFrame(animationFrameId.current);
+        animationFrameId.current = null;
+    }
+
     const source = map.current.getSource('proyectos');
     if (!source) return;
 
@@ -233,15 +267,31 @@ const Dashboard = ({ isAddProjectModalOpen, closeAddProjectModal, isAddWasteModa
         properties: {
           id_proyecto: project.id_proyecto,
           nombre: project.nombre,
-          ubicacion: project.ubicacion
+          ubicacion: project.ubicacion,
+          latitud: project.latitud,
+          longitud: project.longitud
         }
       }));
 
     source.setData({ type: 'FeatureCollection', features: features });
 
-    const clusterLayerIds = ['clusters-large', 'clusters-medium', 'clusters-small'];
+    const warehouseMarker = new mapboxgl.Marker({ color: '#198754' })
+        .setLngLat(BODEGA_COORDS)
+        .setPopup(new mapboxgl.Popup().setHTML("<h6>Bodega de Destino</h6>"));
+
+    if (selectedProjectMarker.current) {
+        selectedProjectMarker.current.remove();
+        selectedProjectMarker.current = null;
+    }
 
     if (selectedProject === 'all') {
+      warehouseMarker.remove();
+      map.current.getSource('route').setData({ type: 'Feature', geometry: { type: 'LineString', coordinates: [] }});
+
+      if (map.current.getLayer('route')) {
+        map.current.setPaintProperty('route', 'line-opacity', 0.8);
+      }
+
       map.current.setFilter('unclustered-point', ['!', ['has', 'point_count']]);
       map.current.setFilter('cluster-count', ['has', 'point_count']);
       map.current.setFilter('clusters-large', ['all', ['has', 'point_count'], ['>=', ['get', 'point_count'], 100]]);
@@ -257,19 +307,70 @@ const Dashboard = ({ isAddProjectModalOpen, closeAddProjectModal, isAddWasteModa
       }
     } else {
       const projectId = parseInt(selectedProject);
-      // Hide clusters and only show the selected project
-      map.current.setFilter('unclustered-point', ['==', 'id_proyecto', projectId]);
-      clusterLayerIds.forEach(id => map.current.setFilter(id, ['==', 'id_proyecto', -1]));
-      map.current.setFilter('cluster-count', ['==', 'id_proyecto', -1]);
-
       const selectedFeature = features.find(f => f.properties.id_proyecto === projectId);
+
+      map.current.setFilter('unclustered-point', ['==', 'id_proyecto', -1]);
+      const clusterLayerIds = ['clusters-large', 'clusters-medium', 'clusters-small', 'cluster-count'];
+      clusterLayerIds.forEach(id => map.current.setFilter(id, ['==', 'id_proyecto', -1]));
+
       if (selectedFeature) {
-        map.current.flyTo({
-          center: selectedFeature.geometry.coordinates,
-          zoom: 15
-        });
+        const projectCoords = selectedFeature.geometry.coordinates;
+        const { nombre, ubicacion } = selectedFeature.properties;
+
+        selectedProjectMarker.current = new mapboxgl.Marker({ color: '#0d6efd' })
+            .setLngLat(projectCoords)
+            .setPopup(new mapboxgl.Popup().setHTML(`<div><strong>${nombre}</strong><br/><span class="text-muted">${ubicacion}</span></div>`))
+            .addTo(map.current);
+        
+        warehouseMarker.addTo(map.current);
+
+        const fetchRoute = async () => {
+            try {
+                const routeGeometry = await getDirections(projectCoords, BODEGA_COORDS);
+                map.current.getSource('route').setData(routeGeometry);
+                const bounds = new mapboxgl.LngLatBounds(projectCoords, BODEGA_COORDS);
+                map.current.fitBounds(bounds, { padding: 80 });
+
+                const animate = (timestamp) => {
+                    const progress = (timestamp / 3000) % 1; // Cycle every 3 seconds
+                    const tailLength = 1; // Made the comet longer
+                    const start = progress;
+                    const end = Math.max(0, start - tailLength);
+
+                    const gradient = [
+                        'step',
+                        ['line-progress'],
+                        'rgba(13, 110, 253, 0)', // Transparent before the tail
+                        end, 'rgba(13, 110, 253, 1)', // Opaque at the start of the tail
+                        start, 'rgba(13, 110, 253, 0)'  // Transparent after the head
+                    ];
+
+                    if (map.current && map.current.getLayer('route')) {
+                        map.current.setPaintProperty('route', 'line-gradient', gradient);
+                        animationFrameId.current = requestAnimationFrame(animate);
+                    } else {
+                        if (animationFrameId.current) {
+                            cancelAnimationFrame(animationFrameId.current);
+                            animationFrameId.current = null;
+                        }
+                    }
+                };
+                animationFrameId.current = requestAnimationFrame(animate);
+
+            } catch (routeError) {
+                console.error("Error fetching route for dashboard:", routeError);
+                map.current.flyTo({ center: projectCoords, zoom: 14 });
+            }
+        };
+
+        fetchRoute();
+      } else {
+        map.current.getSource('route').setData({ type: 'Feature', geometry: { type: 'LineString', coordinates: [] }});
+        warehouseMarker.remove();
       }
     }
+    return () => warehouseMarker.remove();
+
   }, [isMapLoaded, projects, selectedProject]);
 
   useEffect(() => {
@@ -279,12 +380,11 @@ const Dashboard = ({ isAddProjectModalOpen, closeAddProjectModal, isAddWasteModa
       setError(null);
       try {
         const projectId = selectedProject === 'all' ? undefined : selectedProject;
-        const params = { projectId };
         const [byTypeRes, overTimeRes, impactRes, latestRes] = await Promise.all([
-          api.get('/residuos/summary-by-type', { params }),
-          api.get('/residuos/summary-over-time', { params }),
-          api.get('/residuos/environmental-impact', { params }),
-          api.get('/residuos/latest', { params })
+          getSummaryByType(projectId),
+          getSummaryOverTime(projectId),
+          getEnvironmentalImpact(projectId),
+          getLatest(projectId)
         ]);
         setWasteSummaryByType(byTypeRes.data);
         setWasteSummaryOverTime(overTimeRes.data);
