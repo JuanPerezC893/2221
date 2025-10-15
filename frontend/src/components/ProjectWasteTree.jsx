@@ -48,12 +48,19 @@ const ProjectWasteTree = ({ projects, wastes, onFinishProject, onOpenLabelModal,
   };
 
   const getStatusBadge = (status) => {
+    if (!status) {
+        return <span className="badge bg-dark">Desconocido</span>;
+    }
+    const lowerCaseStatus = status.trim().toLowerCase();
     const statusStyles = {
-      pendiente: 'bg-secondary',
+      pendiente: 'bg-dark',
       'en camino': 'bg-primary',
       entregado: 'bg-success',
     };
-    return <span className={`badge ${statusStyles[status] || 'bg-dark'}`}>{status}</span>;
+    const displayStatus = lowerCaseStatus.charAt(0).toUpperCase() + lowerCaseStatus.slice(1);
+    const badgeClass = statusStyles[lowerCaseStatus] || 'bg-dark';
+
+    return <span className={`badge ${badgeClass}`}>{displayStatus}</span>;
   };
 
   return (
@@ -109,7 +116,7 @@ const ProjectWasteTree = ({ projects, wastes, onFinishProject, onOpenLabelModal,
                                   <>
                                     <button className="btn btn-danger btn-sm me-2" onClick={() => onOpenDeleteWasteModal(waste)}>Eliminar</button>
                                     <button className="btn btn-warning btn-sm me-2" onClick={() => onOpenEditWasteModal(waste)}>Editar</button>
-                                    <button onClick={() => onMarcarEnCamino(waste.id_residuo)} className="btn btn-info btn-sm me-2" title="Marcar como En Camino">Enviar</button>
+                                    <button onClick={() => onMarcarEnCamino(waste)} className="btn btn-info btn-sm me-2" title="Marcar como En Camino">Enviar</button>
                                   </>
                                 )}
                                 <button className="btn btn-secondary btn-sm" onClick={() => onOpenLabelModal(waste)}>Ver / Imprimir</button>

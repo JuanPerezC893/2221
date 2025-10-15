@@ -80,16 +80,35 @@ router.post('/:id/confirmar-entrega', asyncHandler(async (req, res) => {
     return res.status(400).json({ message: 'El código de entrega es incorrecto.' });
   }
 
-  // Si todo es correcto, actualizar el estado a 'entregado'
-  const updatedResiduo = await pool.query(
-    "UPDATE residuos SET estado = 'entregado' WHERE id_residuo = $1 RETURNING *",
-    [id]
-  );
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
 
-  res.json({ 
-    message: '¡Entrega confirmada exitosamente!',
-    residuo: updatedResiduo.rows[0]
-  });
+    // 1. Actualizar el estado del residuo a 'entregado'
+    const updatedResiduo = await client.query(
+      "UPDATE residuos SET estado = 'entregado' WHERE id_residuo = $1 RETURNING *",
+      [id]
+    );
+
+    // 2. Registrar el evento final en la trazabilidad
+    await client.query(
+      'INSERT INTO trazabilidad (id_residuo, ticket, fecha) VALUES ($1, $2, NOW())',
+      [id, 'Entrega confirmada por el receptor.']
+    );
+
+    await client.query('COMMIT');
+    res.json({ 
+      message: '¡Entrega confirmada exitosamente!',
+      residuo: updatedResiduo.rows[0]
+    });
+
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error en la transacción de confirmación de entrega:', error);
+    res.status(500).json({ message: 'Error al confirmar la entrega.' });
+  } finally {
+    client.release();
+  }
 }));
 
 module.exports = router;

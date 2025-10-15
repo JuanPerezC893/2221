@@ -320,13 +320,18 @@ router.get('/:id/etiqueta-pdf', asyncHandler(async (req, res) => {
 router.put('/:id/en-camino', asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { empresa_rut } = req.user;
+  const { destino } = req.body; // Capturar el destino desde el body
+
+  if (!destino) {
+    return res.status(400).json({ message: 'El destino es un campo requerido.' });
+  }
 
   // Verificar que el residuo pertenece a la empresa del usuario y está en estado 'pendiente'
   const residuoCheck = await pool.query(
     `SELECT r.id_residuo 
      FROM residuos r
      JOIN proyectos p ON r.id_proyecto = p.id_proyecto
-     WHERE r.id_residuo = $1 AND p.empresa_rut = $2 AND r.estado = 'pendiente'`,
+     WHERE r.id_residuo = $1 AND p.empresa_rut = $2 AND lower(r.estado) = 'pendiente'`,
     [id, empresa_rut]
   );
 
@@ -334,12 +339,35 @@ router.put('/:id/en-camino', asyncHandler(async (req, res) => {
     return res.status(404).json({ message: 'Residuo no encontrado, no pertenece a su empresa, o ya no está en estado "pendiente".' });
   }
 
-  const updatedResiduo = await pool.query(
-    "UPDATE residuos SET estado = 'en camino' WHERE id_residuo = $1 RETURNING *",
-    [id]
-  );
+  // Generar un nuevo código de 8 dígitos para el envío
+  const nuevoCodigoEntrega = Math.floor(10000000 + Math.random() * 90000000).toString();
 
-  res.json(updatedResiduo.rows[0]);
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    // 1. Actualizar el estado y el código del residuo
+    const updatedResiduoResult = await client.query(
+      "UPDATE residuos SET estado = 'en camino', codigo_entrega = $1 WHERE id_residuo = $2 RETURNING *",
+      [nuevoCodigoEntrega, id]
+    );
+
+    // 2. Registrar el evento de envío en la tabla de trazabilidad
+    await client.query(
+      'INSERT INTO trazabilidad (id_residuo, ticket, fecha) VALUES ($1, $2, NOW())',
+      [id, `Enviado a: ${destino}`]
+    );
+
+    await client.query('COMMIT');
+    res.json(updatedResiduoResult.rows[0]);
+
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error en la transacción de envío:', error);
+    res.status(500).json({ message: 'Error al procesar el envío.' });
+  } finally {
+    client.release();
+  }
 }));
 
 // Obtener un residuo por ID

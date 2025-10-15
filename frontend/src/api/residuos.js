@@ -51,6 +51,6 @@ export const generarEtiqueta = async (residuoId) => {
   });
 };
 
-export const marcarEnCamino = async (id) => {
-  return await api.put(`/residuos/${id}/en-camino`);
+export const marcarEnCamino = async (id, destino) => {
+  return await api.put(`/residuos/${id}/en-camino`, destino);
 };

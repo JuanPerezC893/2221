@@ -1,17 +1,16 @@
-
 import api from '../services/api';
 
-// Función para crear una nueva entrada de trazabilidad (usada en AddWaste.jsx)
-export const createTrazabilidad = (data) => {
-    return api.post('/trazabilidad', data);
+// Esta función es para uso interno, requiere autenticación
+export const addTrazabilidad = async (data) => {
+  return await api.post('/trazabilidad', data);
 };
 
-// Función para obtener los datos de trazabilidad pública de un residuo
-export const getTrazabilidadPublica = (id) => {
-    return api.get(`/trazabilidad/${id}`);
+// Esta función es pública, no requiere autenticación
+export const getTrazabilidadPublica = async (id) => {
+  return await api.get(`/trazabilidad/${id}`);
 };
 
-// Función para confirmar la entrega de un residuo
-export const confirmarEntrega = (id, codigo_entrega) => {
-    return api.post(`/trazabilidad/${id}/confirmar-entrega`, { codigo_entrega });
+// Nueva función pública para confirmar la entrega
+export const confirmarEntrega = async (id, codigo_entrega) => {
+  return await api.post(`/trazabilidad/${id}/confirmar-entrega`, { codigo_entrega });
 };

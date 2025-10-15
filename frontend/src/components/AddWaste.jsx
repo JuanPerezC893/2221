@@ -5,7 +5,7 @@ import AuthContext from '../context/AuthContext';
 import WasteForm from './WasteForm';
 import { getProyectos } from '../api/proyectos';
 import { createResiduo, generarEtiqueta } from '../api/residuos';
-import { createTrazabilidad } from '../api/trazabilidad';
+import { addTrazabilidad } from '../api/trazabilidad';
 import ProfessionalLabel from './ProfessionalLabel'; // Importar el componente de etiqueta
 import './Label.css'; // Importar CSS para la etiqueta
 
