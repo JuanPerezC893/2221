@@ -58,6 +58,22 @@ a:hover {
   text-decoration: underline;
 }
 
+/* Card Styling Enhancement */
+.card {
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Increased default shadow */
+  transition: box-shadow 0.3s ease-in-out;
+}
+
+.card:hover {
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2); /* Increased hover shadow */
+}
+
+/* Custom style for edit gear buttons */
+.btn-edit-gear i {
+  font-size: 1.1rem;
+  vertical-align: middle; /* Helps with alignment */
+}
+
 /* Button Styling (simplified, Bootstrap handles most of this) */
 button {
   border-radius: 8px;

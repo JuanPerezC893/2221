@@ -14,6 +14,7 @@ import UserProfile from './UserProfile';
 import UserRoles from './UserRoles';
 import ProjectWasteTree from './ProjectWasteTree';
 import './ProfileTabs.css';
+import './Profile.css';
 
 const Profile = () => {
   const { auth, updateUser } = useContext(AuthContext);
@@ -190,23 +191,23 @@ const Profile = () => {
         <div className="col-lg-5 mb-4 mb-lg-0 d-flex flex-column">
           <div className="card mb-4 h-100">
             <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-              <h1 className="h3 mb-0">Perfil</h1>
+              <h1 className="h3 mb-0 d-flex align-items-center"><i className="bi bi-person-fill me-2"></i>Perfil</h1>
               <div>
                 {isEditing ? (
                   <>
-                    <button className="btn btn-success btn-sm me-2" onClick={handleSave}>Guardar</button>
-                    <button className="btn btn-secondary btn-sm" onClick={handleCancel}>Cancelar</button>
+                    <button className="btn btn-success btn-sm me-2" onClick={handleSave}><i className="bi bi-check-lg me-1"></i>Guardar</button>
+                    <button className="btn btn-secondary btn-sm" onClick={handleCancel}><i className="bi bi-x-lg me-1"></i>Cancelar</button>
                   </>
                 ) : (
-                  <button className="btn btn-light btn-sm" onClick={handleEdit}>Editar</button>
+                  <button className="btn btn-light btn-sm btn-edit-gear" onClick={handleEdit} title="Editar Perfil"><i className="bi bi-gear-fill"></i></button>
                 )}
               </div>
             </div>
             <div className="card-body d-flex flex-column">
               <div className="nav-tabs-container">
                 <div className="nav-tabs-animated">
-                  <button ref={userTabRef} className={`nav-link-animated ${activeTab === 'user' ? 'active' : ''}`} onClick={() => setActiveTab('user')}>Personal</button>
-                  <button ref={companyTabRef} className={`nav-link-animated ${activeTab === 'company' ? 'active' : ''}`} onClick={() => setActiveTab('company')}>Empresa</button>
+                  <button ref={userTabRef} className={`nav-link-animated d-flex align-items-center ${activeTab === 'user' ? 'active' : ''}`} onClick={() => setActiveTab('user' )}><i className="bi bi-person me-2"></i>Personal</button>
+                                    <button ref={companyTabRef} className={`nav-link-animated d-flex align-items-center ${activeTab === 'company' ? 'active' : ''}`} onClick={() => setActiveTab('company' )}><i className="bi bi-briefcase me-2"></i>Empresa</button>
                 </div>
                 <div className="tab-indicator" style={indicatorStyle} />
               </div>

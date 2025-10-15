@@ -23,12 +23,12 @@ const UserProfile = ({ user, isEditing, formData, handleInputChange, projects, w
               <hr />
               <div className="row text-center mb-3">
                 <div className="col">
-                  <h5 className="card-title">{projects.length}</h5>
-                  <p className="card-text text-muted">Proyectos</p>
+                  <h5 className="card-title profile-stat-number">{projects.length}</h5>
+                  <p className="card-text text-muted profile-stat-label">Proyectos</p>
                 </div>
                 <div className="col">
-                  <h5 className="card-title">{wastes.length}</h5>
-                  <p className="card-text text-muted">Residuos</p>
+                  <h5 className="card-title profile-stat-number">{wastes.length}</h5>
+                  <p className="card-text text-muted profile-stat-label">Residuos</p>
                 </div>
               </div>    </div>
   );

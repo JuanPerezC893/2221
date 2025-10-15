@@ -60,16 +60,34 @@ const ProjectWasteTree = ({ projects, wastes, onFinishProject, onOpenLabelModal,
     const displayStatus = lowerCaseStatus.charAt(0).toUpperCase() + lowerCaseStatus.slice(1);
     const badgeClass = statusStyles[lowerCaseStatus] || 'bg-dark';
 
-    return <span className={`badge ${badgeClass}`}>{displayStatus}</span>;
+    let icon = null;
+    if (lowerCaseStatus === 'en camino') {
+      icon = <i className="bi bi-truck me-1"></i>;
+    } else if (lowerCaseStatus === 'entregado') {
+      icon = <i className="bi bi-patch-check-fill me-1"></i>;
+    } else if (lowerCaseStatus === 'pendiente') {
+      icon = <i className="bi bi-clock-history me-1"></i>;
+    }
+
+    return (
+      <span className={`badge ${badgeClass}`}>
+        {icon}
+        {displayStatus}
+      </span>
+    );
   };
 
   return (
     <>
       <div className={`card ${className || ''}`}>
         <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-          <h3 className="h5 mb-0">Proyectos y Residuos</h3>
-          <button className="btn btn-light btn-sm" onClick={() => setIsTreeEditing(!isTreeEditing)}>
-            {isTreeEditing ? 'Cancelar' : 'Editar'}
+          <h3 className="h5 mb-0 d-flex align-items-center"><i className="bi bi-building me-2"></i>Proyectos y Residuos</h3>
+          <button className="btn btn-light d-flex align-items-center" onClick={() => setIsTreeEditing(!isTreeEditing)}>
+            {isTreeEditing ? (
+              <><i className="bi bi-x-lg me-1"></i>Cancelar</>
+            ) : (
+              <><i className="bi bi-sliders me-1"></i>Gestionar Proyecto</>
+            )}
           </button>
         </div>
         <div className="card-body project-waste-tree-body">
@@ -83,7 +101,7 @@ const ProjectWasteTree = ({ projects, wastes, onFinishProject, onOpenLabelModal,
                       <strong>{project.nombre}</strong>
                       <div style={{ visibility: isTreeEditing ? 'visible' : 'hidden' }}>
                         {userRole === 'admin' && (
-                          <button className="btn btn-danger btn-sm me-2" onClick={() => handleOpenDeleteModal(project.id_proyecto)}>Eliminar</button>
+                          <button className="btn btn-danger btn-sm me-2" onClick={() => handleOpenDeleteModal(project.id_proyecto)}><i className="bi bi-trash3 me-1"></i>Eliminar</button>
                         )}
                         <button 
                           className="btn btn-success btn-sm" 
@@ -96,7 +114,7 @@ const ProjectWasteTree = ({ projects, wastes, onFinishProject, onOpenLabelModal,
                               <span className="ms-1">Generando...</span>
                             </>
                           ) : (
-                            'Finalizar'
+                            <><i className="bi bi-flag-fill me-1"></i>Finalizar</>
                           )}
                         </button>
                       </div>
@@ -114,12 +132,17 @@ const ProjectWasteTree = ({ projects, wastes, onFinishProject, onOpenLabelModal,
                               <div>
                                 {isTreeEditing && waste.estado?.trim().toLowerCase() === 'pendiente' && (
                                   <>
-                                    <button className="btn btn-danger btn-sm me-2" onClick={() => onOpenDeleteWasteModal(waste)}>Eliminar</button>
-                                    <button className="btn btn-warning btn-sm me-2" onClick={() => onOpenEditWasteModal(waste)}>Editar</button>
-                                    <button onClick={() => onMarcarEnCamino(waste)} className="btn btn-info btn-sm me-2" title="Marcar como En Camino">Enviar</button>
+                                    <button className="btn btn-danger btn-sm me-2" onClick={() => onOpenDeleteWasteModal(waste)} title="Eliminar Residuo"><i className="bi bi-trash3"></i></button>
+                                    <button className="btn btn-warning btn-sm me-2" onClick={() => onOpenEditWasteModal(waste)} title="Editar Residuo"><i className="bi bi-gear"></i></button>
+                                    <button onClick={() => onMarcarEnCamino(waste)} className="btn btn-primary btn-sm me-2" title="Marcar como En Camino"><i className="bi bi-send me-1"></i>Enviar</button>
                                   </>
                                 )}
-                                <button className="btn btn-secondary btn-sm" onClick={() => onOpenLabelModal(waste)}>Ver / Imprimir</button>
+<button className="btn btn-sm icon-btn-neutral me-2" onClick={() => onOpenLabelModal(waste)} title="Ver Etiqueta">
+                                  <i className="bi bi-eye-fill"></i>
+                                </button>
+                                <button className="btn btn-sm icon-btn-neutral" onClick={() => onOpenLabelModal(waste)} title="Imprimir Etiqueta">
+                                  <i className="bi bi-printer-fill"></i>
+                                </button>
                               </div>
                             </li>
                           ))}

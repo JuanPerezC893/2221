@@ -110,18 +110,18 @@ const UserRoles = ({ users, onUsersUpdate }) => {
     return (
         <div className="card">
             <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                <h3 className="h5 mb-0">Gestión de Roles</h3>
+                <h3 className="h5 mb-0 d-flex align-items-center"><i className="bi bi-person-rolodex me-2"></i>Gestión de Roles</h3>
                 {!isEditing ? (
-                    <button className="btn btn-light btn-sm" onClick={() => setIsEditing(true)}>
-                        Editar
+                    <button className="btn btn-light btn-sm btn-edit-gear" onClick={() => setIsEditing(true)} title="Editar Roles">
+                        <i className="bi bi-gear-fill"></i>
                     </button>
                 ) : (
                     <div>
                         <button className="btn btn-success btn-sm me-2" onClick={handleSaveChanges} disabled={loading}>
-                            {loading ? 'Guardando...' : 'Guardar Cambios'}
+                            {loading ? 'Guardando...' : <><i className="bi bi-check-lg me-1"></i>Guardar Cambios</>}
                         </button>
                         <button className="btn btn-secondary btn-sm" onClick={handleCancel} disabled={loading}>
-                            Cancelar
+                            <i className="bi bi-x-lg me-1"></i>Cancelar
                         </button>
                     </div>
                 )}

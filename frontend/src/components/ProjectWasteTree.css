@@ -42,3 +42,32 @@
   min-height: 72px;
   align-content: center;
 }
+
+/* Estilo para el título principal 'Proyectos y Residuos' */
+.card-header h3.h5 {
+  font-family: 'Lato', sans-serif; /* Asegura la fuente de los encabezados */
+  font-size: 1.5rem !important;
+  font-weight: normal; /* Quita el estilo de negrita */
+}
+
+/* Estilo para el nombre de cada proyecto en el árbol */
+.project-card-header strong {
+  font-size: 1.1rem; /* Ajusta este valor según necesites */
+}
+
+/* Estilos para los botones de icono neutrales (ojo, impresora) */
+.icon-btn-neutral {
+  background-color: transparent !important;
+  border: none !important;
+  padding: 0.25rem 0.5rem; /* Ajuste de padding */
+}
+
+.icon-btn-neutral i {
+  color: #606060; /* Gris más oscuro para mejor visibilidad */
+  font-size: 1.2rem; /* Aumenta un poco el tamaño del icono */
+  transition: color 0.3s ease;
+}
+
+.icon-btn-neutral:hover i {
+  color: var(--bs-primary); /* Azul primario de la marca */
+}

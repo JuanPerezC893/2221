@@ -18,3 +18,20 @@
 .profile-grid-right .card {
   flex-grow: 1;
 }
+
+.tab-content .profile-stat-number { /*estilo numeros perfil*/
+  font-size: 2.8rem !important; /* Aumenta el tamaño y fuerza la sobreescritura */
+  font-weight: 600;     /* Hace la fuente un poco más gruesa */
+  line-height: 1.1;
+  color: #000;    /* Ajusta el espaciado vertical */
+}
+
+.profile-stat-label {/* tamaño subtitulo numeros perfil*/
+  font-size: 1.05rem !important;
+  text-transform: uppercase;
+  color: #1f1e1e !important;
+}
+
+.card-header h1.h3 {
+  font-size: 1.5rem !important; /* Ajusta el tamaño para que coincida con el otro título */
+}
