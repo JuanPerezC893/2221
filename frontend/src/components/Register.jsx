@@ -160,7 +160,7 @@ const Register = () => {
                       <div className="mb-3">
                         <input
                           type="text"
-                          placeholder="Razón Social (ej: Constructora S.A.)"
+                          placeholder="Nombre Empresa (ej: Constructora S.A.)"
                           name="razon_social"
                           value={razon_social}
                           onChange={handleInputChange}

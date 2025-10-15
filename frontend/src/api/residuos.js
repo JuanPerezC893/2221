@@ -50,3 +50,7 @@ export const generarEtiqueta = async (residuoId) => {
     responseType: 'blob', // Important to handle the PDF file
   });
 };
+
+export const marcarEnCamino = async (id) => {
+  return await api.put(`/residuos/${id}/en-camino`);
+};

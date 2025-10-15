@@ -10,3 +10,8 @@ export const createTrazabilidad = (data) => {
 export const getTrazabilidadPublica = (id) => {
     return api.get(`/trazabilidad/${id}`);
 };
+
+// Función para confirmar la entrega de un residuo
+export const confirmarEntrega = (id, codigo_entrega) => {
+    return api.post(`/trazabilidad/${id}/confirmar-entrega`, { codigo_entrega });
+};

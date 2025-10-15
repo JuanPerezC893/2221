@@ -67,4 +67,36 @@ const sendNewUserForApprovalEmail = async (adminEmail, adminName, newUserName, n
   }
 };
 
-module.exports = { sendVerificationEmail, sendNewUserForApprovalEmail };
+const sendPasswordResetEmail = async (userEmail, token, userName) => {
+  emailjs.init({
+    publicKey: process.env.EMAILJS_PUBLIC_KEY,
+    privateKey: process.env.EMAILJS_PRIVATE_KEY,
+  });
+
+  const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${token}`;
+
+  const templateParams = {
+    name: userName,
+    link: resetUrl,
+    email: userEmail.trim(),
+  };
+
+  const serviceID = process.env.EMAILJS_SERVICE_ID;
+  const templateID = process.env.EMAILJS_RESET_TEMPLATE_ID; // Nuevo template
+
+  if (!serviceID || !templateID) {
+    console.error('Missing EmailJS environment variables for sending password reset email.');
+    throw new Error('Missing EmailJS environment variables');
+  }
+
+  try {
+    const response = await emailjs.send(serviceID, templateID, templateParams);
+    console.log(`Correo de restablecimiento de contraseña enviado a: ${userEmail}`);
+    return response;
+  } catch (error) {
+    console.error('Error al enviar el correo de restablecimiento con EmailJS:', error);
+    throw new Error('No se pudo enviar el correo de restablecimiento.');
+  }
+};
+
+module.exports = { sendVerificationEmail, sendNewUserForApprovalEmail, sendPasswordResetEmail };

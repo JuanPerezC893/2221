@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import { getTrazabilidadPublica } from '../api/trazabilidad';
+import { getTrazabilidadPublica, confirmarEntrega } from '../api/trazabilidad';
 import { getDirections } from '../api/mapbox';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
@@ -15,11 +15,17 @@ const PublicTrazabilidad = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    // State from confirmation feature
+    const [showConfirmation, setShowConfirmation] = useState(false);
+    const [codigoEntrega, setCodigoEntrega] = useState('');
+    const [confirmationError, setConfirmationError] = useState(null);
+    const [confirmationLoading, setConfirmationLoading] = useState(false);
+
+    // State and refs from map feature
     const mapContainer = useRef(null);
     const map = useRef(null);
     const animationFrameId = useRef(null);
     const [isMapLoaded, setIsMapLoaded] = useState(false);
-
     const BODEGA_COORDS = [-70.773829, -33.40862];
 
     useEffect(() => {
@@ -47,7 +53,7 @@ const PublicTrazabilidad = () => {
 
         map.current = new mapboxgl.Map({
             container: mapContainer.current,
-            style: 'mapbox://styles/pelisjuan13/cmfbt9qyo000601s4cgrghz71',
+            style: 'mapbox://styles/mapbox/standard',
             center: [-70.6693, -33.4489],
             zoom: 9,
         });
@@ -63,7 +69,7 @@ const PublicTrazabilidad = () => {
                         coordinates: [],
                     },
                 },
-                lineMetrics: true // Enable line metrics
+                lineMetrics: true
             });
             map.current.addLayer({
                 id: 'route',
@@ -75,7 +81,6 @@ const PublicTrazabilidad = () => {
                 }
             });
             setIsMapLoaded(true);
-            // Forzar un redimensionamiento para asegurar que el mapa se dibuje
             setTimeout(() => map.current.resize(), 1);
         });
     }, []);
@@ -86,11 +91,9 @@ const PublicTrazabilidad = () => {
         const { latitud, longitud } = data.residuo;
         const projectCoords = [longitud, latitud];
 
-        // Limpiar marcadores anteriores si existen
         const markers = document.querySelectorAll('.mapboxgl-marker');
         markers.forEach(marker => marker.remove());
 
-        // Agregar nuevos marcadores
         new mapboxgl.Marker({ color: '#0d6efd' })
             .setLngLat(projectCoords)
             .setPopup(new mapboxgl.Popup().setHTML("<h6>Punto de Recolección</h6>"))
@@ -104,36 +107,16 @@ const PublicTrazabilidad = () => {
         const fetchRoute = async () => {
             try {
                 const routeGeometry = await getDirections(projectCoords, BODEGA_COORDS);
-                // Actualizar la fuente de datos de la ruta ya existente
                 map.current.getSource('route').setData(routeGeometry);
-
                 const bounds = new mapboxgl.LngLatBounds(projectCoords, BODEGA_COORDS);
                 map.current.fitBounds(bounds, { padding: 80 });
 
-                const animate = (timestamp) => {
-                    const progress = (timestamp / 3000) % 1; // Cycle every 3 seconds
-                    const tailLength = 0.4;
-                    const start = progress;
-                    const end = Math.max(0, start - tailLength);
-
-                    const gradient = [
-                        'step',
-                        ['line-progress'],
-                        'rgba(13, 110, 253, 0)', // Transparent before the tail
-                        end, 'rgba(13, 110, 253, 1)', // Opaque at the start of the tail
-                        start, 'rgba(13, 110, 253, 0)'  // Transparent after the head
-                    ];
-
-                    if (map.current && map.current.getLayer('route')) {
-                        map.current.setPaintProperty('route', 'line-gradient', gradient);
-                        animationFrameId.current = requestAnimationFrame(animate);
-                    } else {
-                        if (animationFrameId.current) {
-                            cancelAnimationFrame(animationFrameId.current);
-                            animationFrameId.current = null;
-                        }
-                    }
+                const animate = () => {
+                    const progress = (performance.now() / 3000) % 1;
+                    map.current.setPaintProperty('route', 'line-gradient', ['step', ['line-progress'], 'rgba(13, 110, 253, 0)', progress, 'rgba(13, 110, 253, 1)', progress + 0.01, 'rgba(13, 110, 253, 0)']);
+                    animationFrameId.current = requestAnimationFrame(animate);
                 };
+                if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
                 animationFrameId.current = requestAnimationFrame(animate);
 
             } catch (routeError) {
@@ -151,6 +134,59 @@ const PublicTrazabilidad = () => {
             }
         };
     }, [isMapLoaded, data]);
+
+    const handleConfirmSubmit = async (e) => {
+        e.preventDefault();
+        setConfirmationLoading(true);
+        setConfirmationError(null);
+        try {
+            const response = await confirmarEntrega(id, codigoEntrega);
+            setData({ ...data, residuo: response.data.residuo });
+            setShowConfirmation(false);
+        } catch (err) {
+            setConfirmationError(err.response?.data?.message || 'Ocurrió un error al confirmar.');
+        } finally {
+            setConfirmationLoading(false);
+        }
+    };
+
+    const getStatusBadge = (status) => {
+        const statusStyles = {
+          pendiente: 'bg-secondary',
+          'en camino': 'bg-primary',
+          entregado: 'bg-success',
+        };
+        return <span className={`badge ${statusStyles[status] || 'bg-dark'}`}>{status}</span>;
+    };
+
+    const renderConfirmationSection = () => {
+        if (data.residuo.estado === 'entregado') {
+            return <div className="alert alert-success mt-4">¡Entrega confirmada exitosamente!</div>;
+        }
+        if (data.residuo.estado === 'en camino') {
+            return (
+                <div className="mt-4">
+                    {!showConfirmation ? (
+                        <button className="btn btn-primary w-100" onClick={() => setShowConfirmation(true)}>Confirmar Entrega</button>
+                    ) : (
+                        <form onSubmit={handleConfirmSubmit} className="border p-3 rounded">
+                            <h3 className="h5">Confirmar Entrega</h3>
+                            <p>Ingrese el código de entrega proporcionado por el transportista.</p>
+                            <div className="mb-3">
+                                <label htmlFor="codigoEntrega" className="form-label">Código de Entrega</label>
+                                <input type="text" className="form-control" id="codigoEntrega" value={codigoEntrega} onChange={(e) => setCodigoEntrega(e.target.value)} required />
+                            </div>
+                            {confirmationError && <div className="alert alert-danger">{confirmationError}</div>}
+                            <button type="submit" className="btn btn-success w-100" disabled={confirmationLoading}>
+                                {confirmationLoading ? 'Confirmando...' : 'Confirmar'}
+                            </button>
+                        </form>
+                    )}
+                </div>
+            );
+        }
+        return null;
+    };
 
     return (
         <div className="trazabilidad-container">
@@ -182,12 +218,12 @@ const PublicTrazabilidad = () => {
                                 <p><strong>ID:</strong> {data.residuo.id_residuo}</p>
                                 <p><strong>Tipo:</strong> {data.residuo.tipo}</p>
                                 <p><strong>Cantidad:</strong> {data.residuo.cantidad} {data.residuo.unidad}</p>
+                                <p><strong>Estado:</strong> {getStatusBadge(data.residuo.estado)}</p>
                                 <p><strong>Proyecto:</strong> {data.residuo.nombre_proyecto}</p>
                                 <p><strong>Empresa:</strong> {data.residuo.nombre_empresa}</p>
-                                <p><strong>Fecha de Creación:</strong> {new Date(data.residuo.fecha_creacion).toLocaleDateString('es-CL')} {new Date(data.residuo.fecha_creacion).toLocaleTimeString('es-CL')}</p>
+                                <p><strong>Fecha de Creación:</strong> {new Date(data.residuo.fecha_creacion).toLocaleDateString('es-CL')}</p>
                             </div>
-
-
+                            {renderConfirmationSection()}
                         </div>
                     </div>
                 </div>

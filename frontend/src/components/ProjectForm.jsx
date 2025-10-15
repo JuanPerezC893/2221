@@ -15,6 +15,7 @@ const ProjectForm = ({ projectId: projectIdProp, onSuccess, onClose }) => {
 
   const [formValues, handleInputChange, setValues] = useForm({
     nombre: '',
+    descripcion: '',
     ubicacion: '',
     fecha_inicio: '',
     fecha_fin: '',
@@ -46,7 +47,7 @@ const ProjectForm = ({ projectId: projectIdProp, onSuccess, onClose }) => {
     }
   }, [id, setValues]);
 
-  const { nombre, ubicacion, fecha_inicio, fecha_fin } = formValues;
+  const { nombre, descripcion, ubicacion, fecha_inicio, fecha_fin } = formValues;
 
   const handleAddressSelect = (addressObject) => {
     setValues({
@@ -118,6 +119,11 @@ const ProjectForm = ({ projectId: projectIdProp, onSuccess, onClose }) => {
             <div className="mb-3">
               <label htmlFor="nombre" className="form-label">Nombre del Proyecto</label>
               <input type="text" className="form-control" id="nombre" name="nombre" value={nombre} onChange={handleInputChange} required autoComplete="off" />
+            </div>
+
+            <div className="mb-3">
+              <label htmlFor="descripcion" className="form-label">Descripción Breve</label>
+              <textarea className="form-control" id="descripcion" name="descripcion" value={descripcion} onChange={handleInputChange} rows="3" maxLength="255"></textarea>
             </div>
             
             <div className="mb-3">

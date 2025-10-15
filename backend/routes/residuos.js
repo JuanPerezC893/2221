@@ -68,7 +68,7 @@ router.get('/', asyncHandler(async (req, res) => {
 
 // Crear un nuevo residuo
 router.post('/', wasteValidationRules(), validateRequest, asyncHandler(async (req, res) => {
-  const { tipo, cantidad, unidad, reciclable, estado, id_proyecto } = req.body;
+  const { tipo, cantidad, unidad, reciclable, id_proyecto } = req.body;
   const { empresa_rut, id: id_usuario_creacion } = req.user;
 
   // Verificar que el proyecto pertenece a la empresa del usuario
@@ -76,6 +76,9 @@ router.post('/', wasteValidationRules(), validateRequest, asyncHandler(async (re
   if (proyecto.rows.length === 0) {
     return res.status(403).json({ message: 'No puede agregar residuos a un proyecto que no le pertenece.' });
   }
+
+  // Generar un código de entrega de 6 dígitos
+  const codigo_entrega = Math.floor(100000 + Math.random() * 900000).toString();
 
   // Convertir la cantidad a kilogramos y normalizar la unidad
   const cantidadOriginal = cantidad;
@@ -86,8 +89,8 @@ router.post('/', wasteValidationRules(), validateRequest, asyncHandler(async (re
   const unidadNormalizada = 'kg';
 
   const newResiduo = await pool.query(
-    'INSERT INTO residuos (tipo, cantidad, unidad, reciclable, estado, id_proyecto, id_usuario_creacion) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
-    [tipo, cantidadEnKg, unidadNormalizada, reciclable, estado, id_proyecto, id_usuario_creacion]
+    'INSERT INTO residuos (tipo, cantidad, unidad, reciclable, id_proyecto, id_usuario_creacion, codigo_entrega) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+    [tipo, cantidadEnKg, unidadNormalizada, reciclable, id_proyecto, id_usuario_creacion, codigo_entrega]
   );
   
   // Agregar información sobre la conversión en la respuesta
@@ -277,6 +280,68 @@ router.get('/latest', asyncHandler(async (req, res) => {
     res.json(result.rows);
 }));
 
+// Generar un PDF para la etiqueta de un residuo
+router.get('/:id/etiqueta-pdf', asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const { empresa_rut } = req.user;
+
+    // 1. Obtener datos del residuo y verificar pertenencia
+    const residuoResult = await pool.query(
+        `SELECT r.*, p.nombre as nombre_proyecto, e.razon_social as nombre_empresa
+         FROM residuos r
+         JOIN proyectos p ON r.id_proyecto = p.id_proyecto
+         JOIN empresas e ON p.empresa_rut = e.rut
+         WHERE r.id_residuo = $1 AND p.empresa_rut = $2`,
+        [id, empresa_rut]
+    );
+
+    if (residuoResult.rows.length === 0) {
+        return res.status(404).json({ message: 'Residuo no encontrado o no pertenece a su empresa.' });
+    }
+    const residuo = residuoResult.rows[0];
+
+    // 2. Generar el PDF
+    try {
+        // El frontend URL es necesario para construir el enlace del QR
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+        const pdfBuffer = await crearEtiquetaPDF(residuo, frontendUrl);
+
+        // 3. Enviar el PDF como respuesta
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=Etiqueta-Residuo-${id}.pdf`);
+        res.send(pdfBuffer);
+    } catch (error) {
+        console.error('Error al generar el PDF de la etiqueta:', error);
+        res.status(500).json({ message: 'No se pudo generar la etiqueta en PDF.' });
+    }
+}));
+
+// Marcar un residuo como "En Camino"
+router.put('/:id/en-camino', asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { empresa_rut } = req.user;
+
+  // Verificar que el residuo pertenece a la empresa del usuario y está en estado 'pendiente'
+  const residuoCheck = await pool.query(
+    `SELECT r.id_residuo 
+     FROM residuos r
+     JOIN proyectos p ON r.id_proyecto = p.id_proyecto
+     WHERE r.id_residuo = $1 AND p.empresa_rut = $2 AND r.estado = 'pendiente'`,
+    [id, empresa_rut]
+  );
+
+  if (residuoCheck.rows.length === 0) {
+    return res.status(404).json({ message: 'Residuo no encontrado, no pertenece a su empresa, o ya no está en estado "pendiente".' });
+  }
+
+  const updatedResiduo = await pool.query(
+    "UPDATE residuos SET estado = 'en camino' WHERE id_residuo = $1 RETURNING *",
+    [id]
+  );
+
+  res.json(updatedResiduo.rows[0]);
+}));
+
 // Obtener un residuo por ID
 router.get('/:id', asyncHandler(async (req, res) => {
   const { id } = req.params;
@@ -367,42 +432,6 @@ router.delete('/:id', asyncHandler(async (req, res) => {
   await pool.query('DELETE FROM residuos WHERE id_residuo = $1', [id]);
   
   res.status(200).json({ message: 'Residuo y su trazabilidad asociada eliminados correctamente.' });
-}));
-
-// Generar un PDF para la etiqueta de un residuo
-router.get('/:id/etiqueta-pdf', asyncHandler(async (req, res) => {
-    const { id } = req.params;
-    const { empresa_rut } = req.user;
-
-    // 1. Obtener datos del residuo y verificar pertenencia
-    const residuoResult = await pool.query(
-        `SELECT r.*, p.nombre as nombre_proyecto, e.razon_social as nombre_empresa
-         FROM residuos r
-         JOIN proyectos p ON r.id_proyecto = p.id_proyecto
-         JOIN empresas e ON p.empresa_rut = e.rut
-         WHERE r.id_residuo = $1 AND p.empresa_rut = $2`,
-        [id, empresa_rut]
-    );
-
-    if (residuoResult.rows.length === 0) {
-        return res.status(404).json({ message: 'Residuo no encontrado o no pertenece a su empresa.' });
-    }
-    const residuo = residuoResult.rows[0];
-
-    // 2. Generar el PDF
-    try {
-        // El frontend URL es necesario para construir el enlace del QR
-        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-        const pdfBuffer = await crearEtiquetaPDF(residuo, frontendUrl);
-
-        // 3. Enviar el PDF como respuesta
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename=Etiqueta-Residuo-${id}.pdf`);
-        res.send(pdfBuffer);
-    } catch (error) {
-        console.error('Error al generar el PDF de la etiqueta:', error);
-        res.status(500).json({ message: 'No se pudo generar la etiqueta en PDF.' });
-    }
 }));
 
 module.exports = router;
