@@ -5,10 +5,14 @@ import { useForm } from '../hooks/useForm';
 import { getProyecto, createProyecto, updateProyecto } from '../api/proyectos';
 import AddressAutocomplete from './AddressAutocomplete';
 
-const ProjectForm = () => {
-  const { id } = useParams();
+const ProjectForm = ({ projectId: projectIdProp, onSuccess, onClose }) => {
+  const { id: idFromParams } = useParams();
   const navigate = useNavigate();
   const { triggerDataRefresh } = useContext(AuthContext);
+
+  const id = projectIdProp !== undefined ? projectIdProp : idFromParams;
+  const isModalMode = typeof onClose === 'function';
+
   const [formValues, handleInputChange, setValues] = useForm({
     nombre: '',
     ubicacion: '',
@@ -45,13 +49,9 @@ const ProjectForm = () => {
   const { nombre, ubicacion, fecha_inicio, fecha_fin } = formValues;
 
   const handleAddressSelect = (addressObject) => {
-    // The component now returns the full address object because fetchFullDetails is true
     setValues({
       ...formValues,
       ubicacion: addressObject.display_name,
-      // Here you could also set lat/lon if your form state handles it
-      // latitud: addressObject.lat,
-      // longitud: addressObject.lon,
     });
   };
 
@@ -66,14 +66,21 @@ const ProjectForm = () => {
         await updateProyecto(id, formValues);
         setSuccessMessage('¡Proyecto actualizado exitosamente!');
       } else {
-        await createProyecto(formValues);
+        const newProject = await createProyecto(formValues);
         setSuccessMessage('¡Proyecto creado exitosamente!');
+        if (isModalMode && onSuccess) {
+          onSuccess(newProject.data.id_proyecto);
+        }
       }
       triggerDataRefresh();
       
-      setTimeout(() => {
-        navigate('/dashboard');
-      }, 2000);
+      if (isModalMode) {
+        onClose();
+      } else {
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 2000);
+      }
 
     } catch (err) {
       console.error('Error guardando el proyecto:', err.response?.data || err.message);
@@ -83,7 +90,8 @@ const ProjectForm = () => {
     }
   };
 
-  if (successMessage) {
+  // Standalone page success message
+  if (!isModalMode && successMessage) {
     return (
       <div className="container mt-5">
         <div className="alert alert-success" role="alert">{successMessage}</div>
@@ -93,17 +101,17 @@ const ProjectForm = () => {
   }
 
   return (
-    <div className="container mt-4">
+    <div className={isModalMode ? '' : 'container mt-4'}>
       <h1 className="display-5 fw-bold mb-2 text-center text-dark">{id ? 'Editar Proyecto' : 'Crear Nuevo Proyecto'}</h1>
       <p className="lead text-muted text-center mb-4">
         {id ? 'Modifica los detalles de tu proyecto.' : 'Registra un nuevo proyecto para tu empresa.'}
       </p>
       
-      <div className="card">
-        <div className="card-header bg-primary text-white">
+      <div className={isModalMode ? '' : 'card'}>
+        <div className={`card-header bg-primary text-white ${isModalMode ? 'd-none' : ''}`}>
           {id ? 'Editar Proyecto' : 'Crear Nuevo Proyecto'}
         </div>
-        <div className="card-body">
+        <div className={isModalMode ? '' : 'card-body'}>
           {error && <div className="alert alert-danger">{error}</div>}
 
           <form onSubmit={onSubmit}>
@@ -120,23 +128,31 @@ const ProjectForm = () => {
                 onAddressSelect={handleAddressSelect}
                 name="ubicacion"
                 required={true}
-                fetchFullDetails={true} // Important: This tells the component to fetch coordinates
+                fetchFullDetails={true}
               />
             </div>
 
-            <div className="mb-3">
-              <label htmlFor="fecha_inicio" className="form-label">Fecha de Inicio</label>
-              <input type="date" className="form-control" id="fecha_inicio" name="fecha_inicio" value={fecha_inicio} onChange={handleInputChange} required />
-            </div>
-            
-            <div className="mb-3">
-              <label htmlFor="fecha_fin" className="form-label">Fecha de Fin</label>
-              <input type="date" className="form-control" id="fecha_fin" name="fecha_fin" value={fecha_fin} onChange={handleInputChange} required />
+            <div className="row">
+              <div className="col-md-6 mb-3">
+                <label htmlFor="fecha_inicio" className="form-label">Fecha de Inicio</label>
+                <input type="date" className="form-control" id="fecha_inicio" name="fecha_inicio" value={fecha_inicio} onChange={handleInputChange} required />
+              </div>
+              <div className="col-md-6 mb-3">
+                <label htmlFor="fecha_fin" className="form-label">Fecha de Fin</label>
+                <input type="date" className="form-control" id="fecha_fin" name="fecha_fin" value={fecha_fin} onChange={handleInputChange} required />
+              </div>
             </div>
 
-            <button type="submit" className="btn btn-primary w-100" disabled={loading}>
-              {loading ? (id ? 'Actualizando...' : 'Creando...') : (id ? 'Actualizar Proyecto' : 'Crear Proyecto')}
-            </button>
+            <div className="d-flex justify-content-end">
+              {isModalMode && (
+                <button type="button" className="btn btn-secondary me-2" onClick={onClose} disabled={loading}>
+                  Cancelar
+                </button>
+              )}
+              <button type="submit" className="btn btn-primary" disabled={loading}>
+                {loading ? (id ? 'Actualizando...' : 'Creando...') : (id ? 'Actualizar Proyecto' : 'Crear Proyecto')}
+              </button>
+            </div>
           </form>
         </div>
       </div>

@@ -32,3 +32,13 @@
 .waste-list-scrollable::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
+
+.project-card-header {
+  min-height: 54px;
+  align-content: center;
+}
+
+.waste-list-item {
+  min-height: 72px;
+  align-content: center;
+}

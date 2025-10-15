@@ -2,8 +2,11 @@ import React, { useContext, useState, useEffect, useCallback, useRef } from 'rea
 import AuthContext from '../context/AuthContext';
 import api from '../services/api';
 import { generarInforme } from '../api/proyectos';
+import { deleteResiduo } from '../api/residuos'; // Importar la función para eliminar residuos
 import LabelModal from './LabelModal';
 import ChangePasswordModal from './ChangePasswordModal';
+import EditWasteModal from './EditWasteModal'; // Importar el nuevo modal
+import DeleteWasteModal from './DeleteWasteModal';
 import CompanyProfile from './CompanyProfile';
 import UserProfile from './UserProfile';
 import UserRoles from './UserRoles';
@@ -25,9 +28,14 @@ const Profile = () => {
   const [selectedWaste, setSelectedWaste] = useState(null);
   const [isLabelModalOpen, setIsLabelModalOpen] = useState(false);
   const [isChangePasswordModalOpen, setChangePasswordModalOpen] = useState(false);
+  const [isEditWasteModalOpen, setEditWasteModalOpen] = useState(false);
+  const [wasteToEdit, setWasteToEdit] = useState(null);
+  const [isDeleteWasteModalOpen, setDeleteWasteModalOpen] = useState(false);
+  const [wasteToDelete, setWasteToDelete] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [isTreeEditing, setIsTreeEditing] = useState(false);
   const [indicatorStyle, setIndicatorStyle] = useState({});
   const [finalizingProjectId, setFinalizingProjectId] = useState(null);
 
@@ -158,6 +166,38 @@ const Profile = () => {
     setSelectedWaste(null);
   };
 
+  const handleOpenEditWasteModal = (waste) => {
+    setWasteToEdit(waste);
+    setEditWasteModalOpen(true);
+  };
+
+  const handleCloseEditWasteModal = () => {
+    setWasteToEdit(null);
+    setEditWasteModalOpen(false);
+  };
+
+  const handleOpenDeleteWasteModal = (waste) => {
+    setWasteToDelete(waste);
+    setDeleteWasteModalOpen(true);
+  };
+
+  const handleCloseDeleteWasteModal = () => {
+    setWasteToDelete(null);
+    setDeleteWasteModalOpen(false);
+  };
+
+  const handleConfirmDeleteWaste = async () => {
+    if (!wasteToDelete) return;
+    try {
+      await deleteResiduo(wasteToDelete.id_residuo);
+      handleCloseDeleteWasteModal();
+      fetchData(); // Recargar los datos
+    } catch (err) {
+      setError('Error al eliminar el residuo.');
+      console.error('Delete waste error:', err);
+    }
+  };
+
   if (loading) {
     return <div className="container mt-4 text-center"><div className="spinner-border"></div></div>;
   }
@@ -236,15 +276,35 @@ const Profile = () => {
             wastes={wastes}
             onFinishProject={handleFinishProject}
             onOpenLabelModal={handleOpenLabelModal}
+            onOpenEditWasteModal={handleOpenEditWasteModal} // Pasar la nueva función
+            onOpenDeleteWasteModal={handleOpenDeleteWasteModal} // Pasar la nueva función
             onDataChange={fetchData}
             finalizingProjectId={finalizingProjectId}
             userRole={auth.user?.rol}
+            isTreeEditing={isTreeEditing}
+            setIsTreeEditing={setIsTreeEditing}
           />
         </div>
       </div>
 
       {isLabelModalOpen && <LabelModal residuo={selectedWaste} onClose={handleCloseLabelModal} />}
       {isChangePasswordModalOpen && <ChangePasswordModal onClose={() => setChangePasswordModalOpen(false)} />}
+      <EditWasteModal
+        isOpen={isEditWasteModalOpen}
+        onClose={handleCloseEditWasteModal}
+        wasteToEdit={wasteToEdit}
+        proyectos={projects}
+        onDataChange={() => {
+          fetchData();
+          handleCloseEditWasteModal();
+        }}
+      />
+      <DeleteWasteModal
+        isOpen={isDeleteWasteModalOpen}
+        onClose={handleCloseDeleteWasteModal}
+        onConfirm={handleConfirmDeleteWaste}
+        wasteToDelete={wasteToDelete}
+      />
     </div>
   );
 };

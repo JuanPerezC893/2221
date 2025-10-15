@@ -11,15 +11,15 @@ import {
   CategoryScale,
   LinearScale,
   BarElement,
-  Title as ChartTitle
+  ChartTitle
 } from 'chart.js';
 import AuthContext from '../context/AuthContext';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import './Dashboard.css'; // Import new CSS file
 import { getChartColors } from '../utils/colorUtils';
-//import AddProjectModal from './AddProjectModal';
-//import AddWasteModal from './AddWasteModal';
+import AddProjectModal from './AddProjectModal';
+import AddWasteModal from './AddWasteModal';
 import { getDirections } from '../api/mapbox';
 const BODEGA_COORDS = [-70.773829, -33.40862];
 
@@ -46,6 +46,7 @@ const Dashboard = ({ isAddProjectModalOpen, closeAddProjectModal, isAddWasteModa
   const map = useRef(null);
   const selectedProjectMarker = useRef(null);
   const animationFrameId = useRef(null);
+
   const fetchProjects = useCallback(async () => {
     if (auth.user) {
       try {
@@ -61,6 +62,37 @@ const Dashboard = ({ isAddProjectModalOpen, closeAddProjectModal, isAddWasteModa
   useEffect(() => {
     fetchProjects();
   }, [fetchProjects]);
+
+  useEffect(() => {
+    if (isAddProjectModalOpen || isAddWasteModalOpen) {
+      setPanelsVisible(false);
+      if (map.current) {
+        map.current.zoomTo(2, { duration: 1000 });
+      }
+    } else {
+      setPanelsVisible(true);
+    }
+  }, [isAddProjectModalOpen, isAddWasteModalOpen]);
+
+  const handleProjectCreated = (newProjectId) => {
+    fetchProjects();
+    setProjectToSelect(newProjectId);
+  };
+
+  useEffect(() => {
+    if (projectToSelect && projects.some(p => p.id_proyecto === projectToSelect)) {
+      setSelectedProject(projectToSelect);
+      setProjectToSelect(null);
+    }
+  }, [projectToSelect, projects]);
+
+  const handleAddWasteSuccess = () => {
+    fetchProjects();
+    // Also need to trigger a refresh of dashboard data
+    // The dataRefreshKey from AuthContext can be used for this if available and appropriate
+    // Or I can call fetchDashboardData directly.
+    // For now, let's assume fetching projects is enough, but this might need adjustment.
+  };
 
   useEffect(() => {
     if (map.current) return; // initialize map only once
@@ -256,7 +288,9 @@ const Dashboard = ({ isAddProjectModalOpen, closeAddProjectModal, isAddWasteModa
       warehouseMarker.remove();
       map.current.getSource('route').setData({ type: 'Feature', geometry: { type: 'LineString', coordinates: [] }});
 
-
+      if (map.current.getLayer('route')) {
+        map.current.setPaintProperty('route', 'line-opacity', 0.8);
+      }
 
       map.current.setFilter('unclustered-point', ['!', ['has', 'point_count']]);
       map.current.setFilter('cluster-count', ['has', 'point_count']);
@@ -497,21 +531,40 @@ const Dashboard = ({ isAddProjectModalOpen, closeAddProjectModal, isAddWasteModa
         </div>
       </div>
 
-      <div className="top-bar">
+      <div className={`top-bar ${!isAddProjectModalOpen && !isAddWasteModalOpen ? 'visible' : ''}`}>
         <h1 className="h2 text-black">{selectedProject === 'all' ? 'Dashboard General' : `Proyecto: ${currentProjectDetails?.nombre}`}</h1>
-        <div className="col-4">
-          <select className="form-select" value={selectedProject} onChange={handleProjectChange}>
-            <option value="all">Todos los Proyectos</option>
-            {projects.map(p => (
-              <option key={p.id_proyecto} value={p.id_proyecto}>{p.nombre}</option>
-            ))}
-          </select>
+        <div className="d-flex align-items-center">
+          <div className="col-auto me-2">
+            <select className="form-select" value={selectedProject} onChange={handleProjectChange}>
+              <option value="all">Todos los Proyectos</option>
+              {projects.map(p => (
+                <option key={p.id_proyecto} value={p.id_proyecto}>{p.nombre}</option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
       <button onClick={() => setPanelsVisible(!panelsVisible)} className="btn btn-secondary toggle-panels-btn">
         {panelsVisible ? 'Ocultar Paneles' : 'Mostrar Paneles'}
       </button>
+
+      {isAddProjectModalOpen && (
+        <AddProjectModal 
+          isOpen={isAddProjectModalOpen} 
+          onClose={closeAddProjectModal} 
+          onSuccess={handleProjectCreated} 
+        />
+      )}
+
+      {isAddWasteModalOpen && (
+        <AddWasteModal 
+          isOpen={isAddWasteModalOpen} 
+          onClose={closeAddWasteModal} 
+          onSuccess={fetchProjects} 
+          proyectos={projects}
+        />
+      )}
 
       {loading && (
         <div className="loading-overlay">
