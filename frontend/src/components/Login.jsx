@@ -59,28 +59,34 @@ const Login = () => {
                 <h1 className="card-title text-center mb-4 text-white">Iniciar Sesión</h1>
                 <form onSubmit={onSubmit}>
                   <div className="mb-3">
-                    <input
-                      type="email"
-                      placeholder="Email"
-                      name="email"
-                      value={email}
-                      onChange={handleInputChange}
-                      required
-                      className="form-control"
-                      autoComplete="username"
-                    />
+                    <div className="input-group">
+                      <span className="input-group-text"><i className="bi bi-envelope-fill"></i></span>
+                      <input
+                        type="email"
+                        placeholder="Email"
+                        name="email"
+                        value={email}
+                        onChange={handleInputChange}
+                        required
+                        className="form-control"
+                        autoComplete="username"
+                      />
+                    </div>
                   </div>
                   <div className="mb-3">
-                    <input
-                      type="password"
-                      placeholder="Contraseña"
-                      name="password"
-                      value={password}
-                      onChange={handleInputChange}
-                      required
-                      className="form-control"
-                      autoComplete="current-password"
-                    />
+                    <div className="input-group">
+                      <span className="input-group-text"><i className="bi bi-lock-fill"></i></span>
+                      <input
+                        type="password"
+                        placeholder="Contraseña"
+                        name="password"
+                        value={password}
+                        onChange={handleInputChange}
+                        required
+                        className="form-control"
+                        autoComplete="current-password"
+                      />
+                    </div>
                   </div>
                   <div className="d-grid">
                     <input type="submit" value={loading ? 'Iniciando...' : 'Iniciar Sesión'} className="btn btn-primary" disabled={loading} />

@@ -125,58 +125,82 @@ const Register = () => {
                 <p className='text-muted text-center'>Tus Datos</p>
                 {/* ... user data inputs ... */}
                 <div className="mb-3">
-                  <input type="text" placeholder="Tu Nombre Completo" name="nombre" value={nombre} onChange={handleInputChange} required className="form-control" autoComplete="name" />
+                  <div className="input-group">
+                    <span className="input-group-text"><i className="bi bi-person-fill"></i></span>
+                    <input type="text" placeholder="Tu Nombre Completo" name="nombre" value={nombre} onChange={handleInputChange} required className="form-control" autoComplete="name" />
+                  </div>
                 </div>
                 <div className="mb-3">
-                  <input type="email" placeholder="Email de Contacto" name="email" value={email} onChange={handleInputChange} required className="form-control" autoComplete="email" />
+                  <div className="input-group">
+                    <span className="input-group-text"><i className="bi bi-envelope-fill"></i></span>
+                    <input type="email" placeholder="Email de Contacto" name="email" value={email} onChange={handleInputChange} required className="form-control" autoComplete="email" />
+                  </div>
                 </div>
                 <div className="mb-3">
-                  <input type="email" placeholder="Confirmar Email" name="confirmEmail" value={confirmEmail} onChange={handleInputChange} required className="form-control" autoComplete="email" />
+                  <div className="input-group">
+                    <span className="input-group-text"><i className="bi bi-envelope-check-fill"></i></span>
+                    <input type="email" placeholder="Confirmar Email" name="confirmEmail" value={confirmEmail} onChange={handleInputChange} required className="form-control" autoComplete="email" />
+                  </div>
                 </div>
                 <div className="mb-3">
-                  <input type="password" placeholder="Contraseña" name="password" value={password} onChange={handleInputChange} minLength="8" required className="form-control" autoComplete="new-password" />
+                  <div className="input-group">
+                    <span className="input-group-text"><i className="bi bi-lock-fill"></i></span>
+                    <input type="password" placeholder="Contraseña" name="password" value={password} onChange={handleInputChange} minLength="8" required className="form-control" autoComplete="new-password" />
+                  </div>
                 </div>
                 <div className="mb-3">
-                  <input type="password" placeholder="Confirmar Contraseña" name="confirmPassword" value={confirmPassword} onChange={handleInputChange} required className="form-control" autoComplete="new-password" />
+                  <div className="input-group">
+                    <span className="input-group-text"><i className="bi bi-lock-fill"></i></span>
+                    <input type="password" placeholder="Confirmar Contraseña" name="confirmPassword" value={confirmPassword} onChange={handleInputChange} required className="form-control" autoComplete="new-password" />
+                  </div>
                 </div>
                 <hr />
                 <p className='text-muted text-center'>Datos de la Empresa</p>
                 <div className="mb-3">
-                  <input
-                    type="text"
-                    placeholder="RUT de la empresa"
-                    name="empresa_rut"
-                    value={empresa_rut}
-                    onChange={handleRutChange}
-                    required
-                    className={`form-control ${rutError ? 'is-invalid' : ''}`}
-                    autoComplete="organization-id"
-                  />
-                  {rutError && <div className="invalid-feedback">{rutError}</div>}
+                  <div className="input-group">
+                    <span className="input-group-text"><i class="bi bi-person-vcard"></i></span>
+                    <input
+                      type="text"
+                      placeholder="RUT de la empresa"
+                      name="empresa_rut"
+                      value={empresa_rut}
+                      onChange={handleRutChange}
+                      required
+                      className={`form-control ${rutError ? 'is-invalid' : ''}`}
+                      autoComplete="organization-id"
+                    />
+                  </div>
+                  {rutError && <div className="invalid-feedback d-block">{rutError}</div>}
                 </div>
   
                   {companyExists === false && (
                     <>
                       <div className="mb-3">
-                        <input
-                          type="text"
-                          placeholder="Nombre Empresa (ej: Constructora S.A.)"
-                          name="razon_social"
-                          value={razon_social}
-                          onChange={handleInputChange}
-                          required
-                          className="form-control"
-                        />
+                        <div className="input-group">
+                          <span className="input-group-text"><i className="bi bi-building"></i></span>
+                          <input
+                            type="text"
+                            placeholder="Nombre Empresa (ej: Constructora S.A.)"
+                            name="razon_social"
+                            value={razon_social}
+                            onChange={handleInputChange}
+                            required
+                            className="form-control"
+                          />
+                        </div>
                       </div>
                       <div className="mb-3">
-                        <AddressAutocomplete 
-                            value={direccion}
-                            onValueChange={(value) => handleInputChange({ target: { name: 'direccion', value: value } })}
-                            onAddressSelect={(selected) => handleInputChange({ target: { name: 'direccion', value: selected } })}
-                            placeholder="Dirección de la empresa"
-                            name="direccion"
-                            required={true}
-                        />
+                        <div className="input-group">
+                          <span className="input-group-text"><i className="bi bi-geo-alt-fill"></i></span>
+                          <AddressAutocomplete 
+                              value={direccion}
+                              onValueChange={(value) => handleInputChange({ target: { name: 'direccion', value: value } })}
+                              onAddressSelect={(selected) => handleInputChange({ target: { name: 'direccion', value: selected } })}
+                              placeholder="Dirección de la empresa"
+                              name="direccion"
+                              required={true}
+                          />
+                        </div>
                       </div>
                     </>
                   )}

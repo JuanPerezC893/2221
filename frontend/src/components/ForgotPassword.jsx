@@ -34,14 +34,17 @@ const ForgotPassword = () => {
             <p className="text-center text-white">Ingresa tu correo y te enviaremos un enlace para restablecer tu contraseña.</p>
             <form onSubmit={handleSubmit}>
               <div className="mb-3">
-                <input
-                  type="email"
-                  placeholder="Email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="form-control"
-                />
+                <div className="input-group">
+                  <span className="input-group-text"><i className="bi bi-envelope-fill"></i></span>
+                  <input
+                    type="email"
+                    placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="form-control"
+                  />
+                </div>
               </div>
               <div className="d-grid">
                 <button type="submit" className="btn btn-primary" disabled={loading}>
