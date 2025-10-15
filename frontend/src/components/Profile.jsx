@@ -2,7 +2,7 @@ import React, { useContext, useState, useEffect, useCallback, useRef } from 'rea
 import AuthContext from '../context/AuthContext';
 import api from '../services/api';
 import { generarInforme } from '../api/proyectos';
-import { deleteResiduo } from '../api/residuos'; // Importar la función para eliminar residuos
+import { deleteResiduo, marcarEnCamino } from '../api/residuos'; // Importar la función para eliminar residuos
 import LabelModal from './LabelModal';
 import ChangePasswordModal from './ChangePasswordModal';
 import EditWasteModal from './EditWasteModal'; // Importar el nuevo modal
@@ -198,6 +198,16 @@ const Profile = () => {
     }
   };
 
+  const handleMarcarEnCamino = async (id) => {
+    try {
+      await marcarEnCamino(id);
+      fetchData(); // Recargar los datos para reflejar el cambio de estado
+    } catch (err) {
+      console.error("Error updating status:", err);
+      setError('Error al actualizar el estado del residuo.');
+    }
+  };
+
   if (loading) {
     return <div className="container mt-4 text-center"><div className="spinner-border"></div></div>;
   }
@@ -278,6 +288,7 @@ const Profile = () => {
             onOpenLabelModal={handleOpenLabelModal}
             onOpenEditWasteModal={handleOpenEditWasteModal} // Pasar la nueva función
             onOpenDeleteWasteModal={handleOpenDeleteWasteModal} // Pasar la nueva función
+            onMarcarEnCamino={handleMarcarEnCamino} // Pasar la nueva función
             onDataChange={fetchData}
             finalizingProjectId={finalizingProjectId}
             userRole={auth.user?.rol}

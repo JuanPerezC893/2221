@@ -3,7 +3,7 @@ import { deleteProyecto } from '../api/proyectos';
 import ConfirmationModal from './ConfirmationModal';
 import './ProjectWasteTree.css';
 
-const ProjectWasteTree = ({ projects, wastes, onFinishProject, onOpenLabelModal, onOpenEditWasteModal, onOpenDeleteWasteModal, onDataChange, finalizingProjectId, userRole, className, isTreeEditing, setIsTreeEditing }) => {
+const ProjectWasteTree = ({ projects, wastes, onFinishProject, onOpenLabelModal, onOpenEditWasteModal, onOpenDeleteWasteModal, onDataChange, finalizingProjectId, userRole, className, isTreeEditing, setIsTreeEditing, onMarcarEnCamino }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState(null);
 
@@ -45,6 +45,15 @@ const ProjectWasteTree = ({ projects, wastes, onFinishProject, onOpenLabelModal,
         handleCloseModal();
       }
     }
+  };
+
+  const getStatusBadge = (status) => {
+    const statusStyles = {
+      pendiente: 'bg-secondary',
+      'en camino': 'bg-primary',
+      entregado: 'bg-success',
+    };
+    return <span className={`badge ${statusStyles[status] || 'bg-dark'}`}>{status}</span>;
   };
 
   return (
@@ -94,11 +103,13 @@ const ProjectWasteTree = ({ projects, wastes, onFinishProject, onOpenLabelModal,
                                 {waste.tipo} <br />
                                 <small className="text-muted">{waste.nombre_creador || 'N/A'}</small>
                               </span>
+                              {getStatusBadge(waste.estado)}
                               <div>
-                                {isTreeEditing && (
+                                {isTreeEditing && waste.estado?.trim().toLowerCase() === 'pendiente' && (
                                   <>
                                     <button className="btn btn-danger btn-sm me-2" onClick={() => onOpenDeleteWasteModal(waste)}>Eliminar</button>
-                                    <button className="btn btn-info btn-sm me-2" onClick={() => onOpenEditWasteModal(waste)}>Editar</button>
+                                    <button className="btn btn-warning btn-sm me-2" onClick={() => onOpenEditWasteModal(waste)}>Editar</button>
+                                    <button onClick={() => onMarcarEnCamino(waste.id_residuo)} className="btn btn-info btn-sm me-2" title="Marcar como En Camino">Enviar</button>
                                   </>
                                 )}
                                 <button className="btn btn-secondary btn-sm" onClick={() => onOpenLabelModal(waste)}>Ver / Imprimir</button>
