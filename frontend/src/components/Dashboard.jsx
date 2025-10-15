@@ -11,7 +11,7 @@ import {
   CategoryScale,
   LinearScale,
   BarElement,
-  ChartTitle
+  Title
 } from 'chart.js';
 import AuthContext from '../context/AuthContext';
 import mapboxgl from 'mapbox-gl';
@@ -24,7 +24,7 @@ import { getDirections } from '../api/mapbox';
 const BODEGA_COORDS = [-70.773829, -33.40862];
 
 
-ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, ChartTitle);
+ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
 
