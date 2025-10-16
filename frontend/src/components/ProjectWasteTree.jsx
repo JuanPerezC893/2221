@@ -124,11 +124,13 @@ const ProjectWasteTree = ({ projects, wastes, onFinishProject, onOpenLabelModal,
                         <ul className="list-group ms-4 waste-list-scrollable">
                           {project.wastes.map(waste => (
                             <li key={waste.id_residuo} className="list-group-item d-flex justify-content-between align-items-center ps-4 waste-list-item">
-                              <span>
-                                {waste.tipo} <br />
-                                <small className="text-muted">{waste.nombre_creador || 'N/A'}</small>
-                              </span>
-                              {getStatusBadge(waste.estado)}
+                              <div className="d-flex align-items-center">
+                                <span className="me-3" style={{width: '140px', flexShrink: 0}}>
+                                  {waste.tipo} <br />
+                                  <small className="text-muted">{waste.nombre_creador || 'N/A'}</small>
+                                </span>
+                                {getStatusBadge(waste.estado)}
+                              </div>
                               <div>
                                 {isTreeEditing && waste.estado?.trim().toLowerCase() === 'pendiente' && (
                                   <>
