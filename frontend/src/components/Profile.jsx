@@ -13,6 +13,8 @@ import CompanyProfile from './CompanyProfile';
 import UserProfile from './UserProfile';
 import UserRoles from './UserRoles';
 import ProjectWasteTree from './ProjectWasteTree';
+import Toast from './Toast';
+import './Toast.css';
 import './ProfileTabs.css';
 import './Profile.css';
 
@@ -38,7 +40,7 @@ const Profile = () => {
   const [isConfirmarEnvioModalOpen, setConfirmarEnvioModalOpen] = useState(false);
   const [wasteToSend, setWasteToSend] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [toast, setToast] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isTreeEditing, setIsTreeEditing] = useState(false);
   const [indicatorStyle, setIndicatorStyle] = useState({});
@@ -73,9 +75,9 @@ const Profile = () => {
       setProjects(projectsRes.data);
       setWastes(wastesRes.data);
       setFormData({ nombre: auth.user.nombre, razon_social: companyRes.data?.razon_social || '', direccion: companyRes.data?.direccion || '' });
-      setError(null);
+      setToast(null);
     } catch (err) {
-      setError('Error al cargar los datos del perfil.');
+      setToast({ message: 'Error al cargar los datos del perfil.', type: 'error' });
       console.error('Fetch profile data error:', err);
     } finally {
       setLoading(false);
@@ -96,14 +98,14 @@ const Profile = () => {
 
   const handleCancel = () => {
     setIsEditing(false);
-    setError(null);
+    setToast(null);
     setFormData({ nombre: auth.user.nombre, razon_social: companyData?.razon_social || '', direccion: companyData?.direccion || '' });
   };
 
   const handleInputChange = (e) => { setFormData({ ...formData, [e.target.name]: e.target.value }); };
 
   const handleSave = async () => {
-    setError(null);
+    setToast(null);
     try {
       if (activeTab === 'user') {
         const userRes = await api.put('/users/me', { nombre: formData.nombre });
@@ -115,13 +117,13 @@ const Profile = () => {
       setIsEditing(false);
     } catch (err) {
       console.error('Error updating profile:', err);
-      setError('No se pudo actualizar el perfil.');
+      setToast({ message: 'No se pudo actualizar el perfil.', type: 'error' });
     }
   };
 
   const handleFinishProject = async (projectId) => {
     setFinalizingProjectId(projectId);
-    setError(null);
+    setToast(null);
     try {
       const response = await generarInforme(projectId);
       const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -133,7 +135,7 @@ const Profile = () => {
       link.parentNode.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (err) {
-      setError('Error al generar el informe del proyecto.');
+      setToast({ message: 'Error al generar el informe del proyecto.', type: 'error' });
       console.error('Generate report error:', err);
     } finally {
       setFinalizingProjectId(null);
@@ -153,14 +155,14 @@ const Profile = () => {
   const handleCloseDeleteWasteModal = () => { setWasteToDelete(null); setDeleteWasteModalOpen(false); };
 
   const handleConfirmDeleteWaste = async () => {
-    setError(null);
+    setToast(null);
     if (!wasteToDelete) return;
     try {
       await deleteResiduo(wasteToDelete.id_residuo);
       handleCloseDeleteWasteModal();
       fetchData();
     } catch (err) {
-      setError('Error al eliminar el residuo.');
+      setToast({ message: 'Error al eliminar el residuo.', type: 'error' });
       console.error('Delete waste error:', err);
     }
   };
@@ -169,7 +171,7 @@ const Profile = () => {
 
   const handleConfirmarEnvio = async (residuoId, destino) => {
     setEnvioLoading(true);
-    setError(null);
+    setToast(null);
     try {
       const response = await marcarEnCamino(residuoId, { destino });
       setSuccessModal({ show: true, code: response.data.codigo_entrega });
@@ -177,7 +179,7 @@ const Profile = () => {
       fetchData();
     } catch (err) {
       console.error("Error updating status:", err);
-      setError(err.response?.data?.message || 'Error al actualizar el estado.');
+      setToast({ message: err.response?.data?.message || 'Error al actualizar el estado.', type: 'error' });
     } finally {
       setEnvioLoading(false);
     }
@@ -187,6 +189,9 @@ const Profile = () => {
 
   return (
     <div className="container mt-4">
+      <div className="toast-container">
+        {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+      </div>
       <div className="row">
         <div className="col-lg-5 mb-4 mb-lg-0 d-flex flex-column">
           <div className="card mb-4 h-100">
@@ -206,13 +211,13 @@ const Profile = () => {
             <div className="card-body d-flex flex-column">
               <div className="nav-tabs-container">
                 <div className="nav-tabs-animated">
-                  <button ref={userTabRef} className={`nav-link-animated d-flex align-items-center ${activeTab === 'user' ? 'active' : ''}`} onClick={() => setActiveTab('user' )}><i className="bi bi-person me-2"></i>Personal</button>
-                                    <button ref={companyTabRef} className={`nav-link-animated d-flex align-items-center ${activeTab === 'company' ? 'active' : ''}`} onClick={() => setActiveTab('company' )}><i className="bi bi-briefcase me-2"></i>Empresa</button>
+                  <button ref={userTabRef} className={`nav-link-animated d-flex align-items-center justify-content-center ${activeTab === 'user' ? 'active' : ''}`} onClick={() => setActiveTab('user' )}><i className="bi bi-person me-2"></i>Personal</button>
+                                    <button ref={companyTabRef} className={`nav-link-animated d-flex align-items-center justify-content-center ${activeTab === 'company' ? 'active' : ''}`} onClick={() => setActiveTab('company' )}><i className="bi bi-briefcase me-2"></i>Empresa</button>
                 </div>
                 <div className="tab-indicator" style={indicatorStyle} />
               </div>
 
-              {error && <div className="alert alert-danger mt-3">{error}</div>}
+              
 
               <div className="tab-content mt-3 flex-grow-1">
                 {activeTab === 'user' && <UserProfile user={auth.user} isEditing={isEditing} formData={formData} handleInputChange={handleInputChange} projects={projects} wastes={wastes} onOpenChangePassword={() => setChangePasswordModalOpen(true)} />}

@@ -21,6 +21,8 @@ import { getChartColors } from '../utils/colorUtils';
 import AddProjectModal from './AddProjectModal';
 import AddWasteModal from './AddWasteModal';
 import { getDirections } from '../api/mapbox';
+import Toast from './Toast';
+import './Toast.css';
 const BODEGA_COORDS = [-70.773829, -33.40862];
 
 
@@ -38,10 +40,9 @@ const Dashboard = ({ isAddProjectModalOpen, closeAddProjectModal, isAddWasteModa
   const [environmentalImpact, setEnvironmentalImpact] = useState(null);
   const [latestWasteEntries, setLatestWasteEntries] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [toast, setToast] = useState(null);
   const [panelsVisible, setPanelsVisible] = useState(true);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
-
   const mapContainer = useRef(null);
   const map = useRef(null);
   const selectedProjectMarker = useRef(null);
@@ -54,7 +55,7 @@ const Dashboard = ({ isAddProjectModalOpen, closeAddProjectModal, isAddWasteModa
         setProjects(res.data);
       } catch (err) {
         console.error('Error fetching projects:', err);
-        setError('Error al cargar la lista de proyectos.');
+        setToast({ message: 'Error al cargar la lista de proyectos.', type: 'error' });
       }
     }
   }, [auth.user]);
@@ -392,7 +393,7 @@ const Dashboard = ({ isAddProjectModalOpen, closeAddProjectModal, isAddWasteModa
         setLatestWasteEntries(latestRes.data);
       } catch (err) {
         console.error('Error fetching dashboard data:', err);
-        setError('Error al cargar los datos del dashboard.');
+        setToast({ message: 'Error al cargar los datos del dashboard.', type: 'error' });
       } finally {
         setLoading(false);
       }
@@ -451,14 +452,13 @@ const Dashboard = ({ isAddProjectModalOpen, closeAddProjectModal, isAddWasteModa
     return <div className="container mt-5">Por favor, inicia sesión para ver el dashboard.</div>;
   }
 
-  if (error) {
-    return <div className="container mt-5 alert alert-danger">{error}</div>;
-  }
-
   const totalWaste = (wasteSummaryByType || []).reduce((sum, item) => sum + parseFloat(item.total_cantidad), 0).toFixed(2);
 
   return (
     <div className="dashboard-container">
+      <div className="toast-container">
+        {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+      </div>
       <div ref={mapContainer} className="map-background" />
       
       <div className={`side-panel left-panel ${panelsVisible ? 'visible' : ''}`}>

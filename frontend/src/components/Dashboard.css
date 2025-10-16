@@ -87,3 +87,43 @@
 .card {
     background-color: rgba(255, 255, 255, 0.7) !important;
 }
+
+@media (max-width: 992px) {
+  .side-panel {
+    width: calc(100% - 40px);
+    height: 45%;
+    left: 20px;
+    right: 20px;
+    bottom: auto;
+    transition: transform 0.5s ease-in-out;
+  }
+
+  .left-panel {
+    top: 80px;
+    transform: translateY(-150%);
+  }
+
+  .right-panel {
+    top: auto;
+    bottom: 20px;
+    transform: translateY(150%);
+  }
+
+  .side-panel.visible {
+    transform: translateY(0);
+  }
+
+  .toggle-panels-btn {
+    bottom: 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  .top-bar {
+    flex-direction: column;
+    padding: 0.5rem;
+  }
+  .top-bar h1 {
+    font-size: 1.2rem;
+  }
+}
