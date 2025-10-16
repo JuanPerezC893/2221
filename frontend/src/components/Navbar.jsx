@@ -19,7 +19,7 @@ const Navbar = ({ openAddProjectModal, openAddWasteModal }) => {
       <div className="container-fluid">
         <span className="navbar-brand">EcoObra</span>
         <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-          <i className="bi bi-list" style="color: cornflowerblue;"></i>
+          <span className="navbar-toggler-icon"></span>
         </button>
         <div className="collapse navbar-collapse justify-content-between" id="navbarNav">
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
