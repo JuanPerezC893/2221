@@ -58,7 +58,7 @@ const Dashboard = ({ isAddProjectModalOpen, closeAddProjectModal, isAddWasteModa
         setToast({ message: 'Error al cargar la lista de proyectos.', type: 'error' });
       }
     }
-  }, [auth.user]);
+  }, [auth.user?.id]);
 
   useEffect(() => {
     fetchProjects();
@@ -378,7 +378,7 @@ const Dashboard = ({ isAddProjectModalOpen, closeAddProjectModal, isAddWasteModa
     const fetchDashboardData = async () => {
       if (!auth.user) return;
       setLoading(true);
-      setError(null);
+      setToast(null);
       try {
         const projectId = selectedProject === 'all' ? undefined : selectedProject;
         const [byTypeRes, overTimeRes, impactRes, latestRes] = await Promise.all([
@@ -399,7 +399,7 @@ const Dashboard = ({ isAddProjectModalOpen, closeAddProjectModal, isAddWasteModa
       }
     };
     fetchDashboardData();
-  }, [selectedProject, auth.user, dataRefreshKey]);
+  }, [selectedProject, auth.user?.id, dataRefreshKey]);
 
   const handleProjectChange = (e) => {
     setSelectedProject(e.target.value);
