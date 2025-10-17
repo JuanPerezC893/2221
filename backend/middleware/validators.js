@@ -56,6 +56,8 @@ const registerValidationRules = () => {
         return true;
       }),
     body('tipo_empresa')
+      .if(body('razon_social').exists()) // Solo validar si se está creando una empresa
+      .notEmpty().withMessage('El tipo de empresa es requerido al crear una nueva empresa')
       .isIn(['constructora', 'gestora'])
       .withMessage('El tipo de empresa debe ser "constructora" o "gestora"'),
   ];
