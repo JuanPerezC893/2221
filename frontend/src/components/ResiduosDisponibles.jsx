@@ -32,7 +32,9 @@ const ResiduosDisponibles = () => {
 
   return (
     <>
-      <FiltroResiduos onFilterChange={handleFilterChange} isLoading={loading} />
+      <div className="my-3">
+        <FiltroResiduos onFilterChange={handleFilterChange} isLoading={loading} />
+      </div>
       {loading && <p className="text-center">Cargando residuos disponibles...</p>}
       {error && <p className="text-center text-danger">{error}</p>}
       {!loading && !error && (

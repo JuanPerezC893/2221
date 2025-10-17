@@ -1,0 +1,47 @@
+.card {
+  border-radius: 8px !important;
+  transition: all 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.card-body {
+  padding: 20px !important;
+}
+
+.btn-reclamar {
+  background-color: #00ACC1 !important;
+  border-color: #00ACC1 !important;
+  color: white !important;
+  transition: all 0.2s ease;
+}
+
+.btn-reclamar:hover {
+  background-color: #00838F !important;
+  border-color: #00838F !important;
+}
+
+.chip {
+  display: inline-block;
+  padding: .25em .6em;
+  font-size: 75%;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  border-radius: .25rem;
+}
+
+.chip-success {
+  color: #fff;
+  background-color: #198754;
+}
+
+.chip-danger {
+  color: #fff;
+  background-color: #dc3545;
+}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getTiposResiduoOptions, getCiudadesOptions, getEmpresasOptions } from '../api/filtros';
+import './FiltroResiduos.css';
 
 const FiltroResiduos = ({ onFilterChange, isLoading }) => {
   const initialFilters = { tipo: '', ciudad: '', empresa: '' };
@@ -42,9 +43,9 @@ const FiltroResiduos = ({ onFilterChange, isLoading }) => {
   };
 
   return (
-    <div className="card mb-4">
-      <div className="card-header">
-        <h5 className="mb-0">
+    <div className="card mb-4 filtro-card">
+      <div className="card-header text-center">
+        <h5 className="mb-0 text-dark fw-bold">
           <i className="bi bi-funnel-fill me-2"></i>
           Filtrar Residuos Disponibles
         </h5>
@@ -74,12 +75,12 @@ const FiltroResiduos = ({ onFilterChange, isLoading }) => {
               </select>
             </div>
             <div className="col-md-auto">
-              <button type="submit" className="btn btn-primary w-100" disabled={isLoading}>
+              <button type="submit" className="btn btn-aplicar w-100" disabled={isLoading}>
                 {isLoading ? <span className="spinner-border spinner-border-sm"></span> : 'Aplicar'}
               </button>
             </div>
             <div className="col-md-auto">
-              <button type="button" className="btn btn-outline-secondary w-100" onClick={handleResetFilters} disabled={isLoading}>
+              <button type="button" className="btn btn-limpiar w-100" onClick={handleResetFilters} disabled={isLoading}>
                 Limpiar
               </button>
             </div>

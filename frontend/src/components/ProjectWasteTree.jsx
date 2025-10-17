@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { deleteProyecto } from '../api/proyectos';
-import ConfirmationModal from './ConfirmationModal';
+import { ConfirmationModal } from './ConfirmationModal';
 import './ProjectWasteTree.css';
 
 const ProjectWasteTree = ({ projects, wastes, onFinishProject, onOpenLabelModal, onOpenEditWasteModal, onOpenDeleteWasteModal, onDataChange, finalizingProjectId, userRole, className, isTreeEditing, setIsTreeEditing, onMarcarEnCamino }) => {
