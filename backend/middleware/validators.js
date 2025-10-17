@@ -55,6 +55,9 @@ const registerValidationRules = () => {
         }
         return true;
       }),
+    body('tipo_empresa')
+      .isIn(['constructora', 'gestora'])
+      .withMessage('El tipo de empresa debe ser "constructora" o "gestora"'),
   ];
 };
 

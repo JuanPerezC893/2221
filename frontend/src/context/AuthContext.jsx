@@ -19,7 +19,7 @@ export const AuthProvider = ({ children }) => {
           setAuth({ token: null, isAuthenticated: false, user: null });
         } else {
           api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-          setAuth({ token, isAuthenticated: true, user: { id: decoded.id, rol: decoded.rol, empresa_rut: decoded.empresa_rut, nombre: decoded.nombre, nombre_empresa: decoded.nombre_empresa } });
+          setAuth({ token, isAuthenticated: true, user: { id: decoded.id, rol: decoded.rol, empresa_rut: decoded.empresa_rut, nombre: decoded.nombre, nombre_empresa: decoded.nombre_empresa, tipo_empresa: decoded.tipo_empresa } });
         }
       } catch (err) {
         console.error('Error decoding token', err);
@@ -39,7 +39,12 @@ export const AuthProvider = ({ children }) => {
     const res = await api.post('/auth/login', { email, password });
     const { token } = res.data;
     localStorage.setItem('token', token);
-    loadUserFromToken(); // Load user from the new token
+    
+    const decoded = jwtDecode(token);
+    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    setAuth({ token, isAuthenticated: true, user: { id: decoded.id, rol: decoded.rol, empresa_rut: decoded.empresa_rut, nombre: decoded.nombre, nombre_empresa: decoded.nombre_empresa, tipo_empresa: decoded.tipo_empresa } });
+    
+    return decoded; // Devolver el usuario decodificado
   };
 
   const logout = () => {

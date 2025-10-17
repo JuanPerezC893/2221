@@ -1,13 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
+import { Link } from 'react-router-dom';
 import { useForm } from '../hooks/useForm';
 import { register as registerService } from '../api/auth';
 import { checkCompanyByRut } from '../api/empresas';
 import { validarRut } from '../utils/validation.js';
 import Toast from './Toast';
 import './Toast.css';
-import AddressAutocomplete from './AddressAutocomplete'; // Import the new component
+import AddressAutocomplete from './AddressAutocomplete';
+import ModeContext from '../context/ModeContext';
 
 const Register = () => {
+  const { mode } = useContext(ModeContext); // Usar el modo global
   const [toast, setToast] = useState(null);
   const [loading, setLoading] = useState(false);
   const [rutError, setRutError] = useState('');
@@ -95,10 +98,10 @@ const Register = () => {
             setLoading(false);
             return;
         }
-        dataToSend = { ...dataToSend, razon_social, direccion };
+        dataToSend = { ...dataToSend, razon_social, direccion, tipo_empresa: mode };
       }
       await registerService(dataToSend);
-      setToast({ message: '¡Registro exitoso! Redirigiendo al login...', type: 'success' });
+      setToast({ message: '¡Registro exitoso! Se ha enviado un correo de verificación. Redirigiendo al login...', type: 'success' });
       setTimeout(() => {
         window.location.href = '/login';
       }, 3000);
@@ -118,9 +121,9 @@ const Register = () => {
       </div>
       <div className="container d-flex justify-content-center align-items-center">
         <div className="auth-card">
-          <div className="card register-card">
+          <div className={`card ${mode === 'gestora' ? 'login-card-gestor' : 'register-card'}`}>
             <div className="card-body">
-              <h1 className="card-title text-center mb-4">Registrarse</h1>
+              <h1 className="card-title text-center mb-4">{mode === 'constructora' ? 'Registro de Constructora' : 'Registro de Gestor'}</h1>
                <form onSubmit={onSubmit}>
                 <p className='text-muted text-center'>Tus Datos</p>
                 {/* ... user data inputs ... */}
@@ -158,7 +161,7 @@ const Register = () => {
                 <p className='text-muted text-center'>Datos de la Empresa</p>
                 <div className="mb-3">
                   <div className="input-group">
-                    <span className="input-group-text"><i class="bi bi-person-vcard"></i></span>
+                    <span className="input-group-text"><i className="bi bi-person-vcard"></i></span>
                     <input
                       type="text"
                       placeholder="RUT de la empresa"
@@ -216,7 +219,7 @@ const Register = () => {
                 </form>
                 <div className="text-center mt-3">
                   <p>
-                    ¿Ya tienes una cuenta? <a href="/login">Inicia sesión</a>
+                    ¿Ya tienes una cuenta? <Link to="/login">Inicia sesión</Link>
                   </p>
                 </div>
               </div>

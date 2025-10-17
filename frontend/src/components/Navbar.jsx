@@ -24,15 +24,15 @@ const Navbar = ({ openAddProjectModal, openAddWasteModal }) => {
         <div className="collapse navbar-collapse justify-content-between" id="navbarNav">
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
             <li className="nav-item">
-              <Link className="nav-link d-flex align-items-center" to="/dashboard"><i class="bi bi-grid-1x2 me-2"></i>Dashboard</Link>
+              <Link className="nav-link d-flex align-items-center" to="/dashboard"><i className="bi bi-grid-1x2 me-2"></i>Dashboard</Link>
             </li>
             {location.pathname !== '/perfil' && (
               <>
                 <li className="nav-item">
-                  <button className="btn btn-link nav-link d-flex align-items-center" onClick={openAddProjectModal}><i class="bi bi-building-add me-2"></i>Agregar Proyecto</button>
+                  <button className="btn btn-link nav-link d-flex align-items-center" onClick={openAddProjectModal}><i className="bi bi-building-add me-2"></i>Agregar Proyecto</button>
                 </li>
                 <li className="nav-item">
-                  <button className="btn btn-link nav-link d-flex align-items-center" onClick={openAddWasteModal}><i class="bi bi-plus-lg me-2"></i>Agregar Residuo</button>
+                  <button className="btn btn-link nav-link d-flex align-items-center" onClick={openAddWasteModal}><i className="bi bi-plus-lg me-2"></i>Agregar Residuo</button>
                 </li>
               </>
             )}
@@ -40,11 +40,11 @@ const Navbar = ({ openAddProjectModal, openAddWasteModal }) => {
           <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
             {auth.user && (
               <li className="nav-item">
-                <Link className="nav-link d-flex align-items-center" to="/perfil"><i class="bi bi-person-circle me-2"></i>Hola, {auth.user.nombre}</Link>
+                <Link className="nav-link d-flex align-items-center" to="/perfil"><i className="bi bi-person-circle me-2"></i>Hola, {auth.user.nombre}</Link>
               </li>
             )}
             <li className="nav-item">
-              <button className="btn btn-link nav-link d-flex align-items-center" onClick={handleLogout}><i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión</button>
+              <button className="btn btn-link nav-link d-flex align-items-center" onClick={handleLogout}><i className="bi bi-box-arrow-right me-2"></i>Cerrar Sesión</button>
             </li>
           </ul>
         </div>

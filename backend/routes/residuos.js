@@ -9,6 +9,99 @@ const { crearEtiquetaPDF } = require('../services/pdfService');
 // Todas las rutas en este archivo requieren autenticación
 router.use(authMiddleware);
 
+// Ruta para que los gestores vean los residuos disponibles
+router.get('/disponibles', asyncHandler(async (req, res) => {
+  const { tipo_empresa } = req.user;
+  const { tipo, ciudad, empresa } = req.query; // Capturar filtros
+
+  if (tipo_empresa !== 'gestora') {
+    return res.status(403).json({ message: 'Acceso denegado. Esta función es solo para gestores de residuos.' });
+  }
+
+  let queryParams = [];
+  let whereClauses = ["LOWER(r.estado) = 'pendiente'"];
+
+  if (tipo) {
+    queryParams.push(tipo.toLowerCase());
+    whereClauses.push(`LOWER(r.tipo) = $${queryParams.length}`);
+  }
+  if (ciudad) {
+    queryParams.push(`%${ciudad.toLowerCase()}%`);
+    whereClauses.push(`LOWER(p.ubicacion) LIKE $${queryParams.length}`);
+  }
+  if (empresa) {
+    queryParams.push(`%${empresa.toLowerCase()}%`);
+    whereClauses.push(`LOWER(e.razon_social) LIKE $${queryParams.length}`);
+  }
+
+  const query = `
+    SELECT
+      r.id_residuo,
+      r.tipo,
+      r.cantidad,
+      r.unidad,
+      r.reciclable,
+      p.nombre AS nombre_proyecto,
+      p.ubicacion AS ubicacion_proyecto,
+      e.razon_social AS nombre_empresa_constructora
+    FROM
+      residuos r
+    JOIN
+      proyectos p ON r.id_proyecto = p.id_proyecto
+    JOIN
+      empresas e ON p.empresa_rut = e.rut
+    WHERE
+      ${whereClauses.join(' AND ' )}
+    ORDER BY
+      r.id_residuo DESC
+  `;
+
+  const disponibles = await pool.query(query, queryParams);
+
+  res.json(disponibles.rows);
+}));
+
+// Obtener el detalle de UN residuo pendiente (para GESTORES)
+router.get('/detalle/:id', asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { tipo_empresa } = req.user;
+
+  if (tipo_empresa !== 'gestora') {
+    return res.status(403).json({ message: 'Acceso denegado. Esta función es solo para gestores.' });
+  }
+
+  const query = `
+    SELECT
+      r.id_residuo,
+      r.tipo,
+      r.cantidad,
+      r.unidad,
+      r.reciclable,
+      r.estado,
+      p.nombre AS nombre_proyecto,
+      p.ubicacion AS ubicacion_proyecto,
+      p.latitud,
+      p.longitud,
+      e.razon_social AS nombre_empresa_constructora
+    FROM
+      residuos r
+    JOIN
+      proyectos p ON r.id_proyecto = p.id_proyecto
+    JOIN
+      empresas e ON p.empresa_rut = e.rut
+    WHERE
+      r.id_residuo = $1 AND LOWER(r.estado) = 'pendiente'
+  `;
+
+  const result = await pool.query(query, [id]);
+
+  if (result.rows.length === 0) {
+    return res.status(404).json({ message: 'Residuo no encontrado o ya no está disponible.' });
+  }
+
+  res.json(result.rows[0]);
+}));
+
 // Función para convertir unidades a kilogramos
 const convertToKg = (cantidad, unidad) => {
   const conversiones = {
@@ -89,8 +182,8 @@ router.post('/', wasteValidationRules(), validateRequest, asyncHandler(async (re
   const unidadNormalizada = 'kg';
 
   const newResiduo = await pool.query(
-    'INSERT INTO residuos (tipo, cantidad, unidad, reciclable, id_proyecto, id_usuario_creacion, codigo_entrega) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
-    [tipo, cantidadEnKg, unidadNormalizada, reciclable, id_proyecto, id_usuario_creacion, codigo_entrega]
+    'INSERT INTO residuos (tipo, cantidad, unidad, reciclable, id_proyecto, id_usuario_creacion, estado) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+    [tipo, cantidadEnKg, unidadNormalizada, reciclable, id_proyecto, id_usuario_creacion, 'pendiente']
   );
   
   // Agregar información sobre la conversión en la respuesta
@@ -159,7 +252,7 @@ router.get('/summary-over-time', asyncHandler(async (req, res) => {
 
     if (projectId) {
         query = `
-            SELECT TO_CHAR(t.fecha, 'YYYY-MM') AS month, SUM(r.cantidad) AS total_cantidad 
+            SELECT TO_CHAR(t.fecha_evento, 'YYYY-MM') AS month, SUM(r.cantidad) AS total_cantidad 
             FROM residuos r 
             JOIN trazabilidad t ON r.id_residuo = t.id_residuo 
             WHERE r.id_proyecto = $1 
@@ -169,7 +262,7 @@ router.get('/summary-over-time', asyncHandler(async (req, res) => {
         params = [projectId];
     } else {
         query = `
-            SELECT COALESCE(TO_CHAR(t.fecha, 'YYYY-MM'), 'Sin Fecha') AS month, SUM(r.cantidad) AS total_cantidad
+            SELECT COALESCE(TO_CHAR(t.fecha_evento, 'YYYY-MM'), 'Sin Fecha') AS month, SUM(r.cantidad) AS total_cantidad
             FROM residuos r
             LEFT JOIN trazabilidad t ON r.id_residuo = t.id_residuo
             JOIN proyectos p ON r.id_proyecto = p.id_proyecto

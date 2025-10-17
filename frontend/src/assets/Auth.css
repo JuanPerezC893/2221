@@ -93,7 +93,7 @@
   padding: 0.8rem;
   border: none;
   border-radius: 6px;
-  background-color: #3b5998;
+  background-color: #0943be;
   color: #fff!important;
   font-size: 1rem;
   font-weight: bold;
@@ -110,7 +110,7 @@
   display: inline-block;
   margin-top: 1rem;
   font-size: 0.9rem;
-  color: #3b5998!important;
+  color: #0d46c2!important;
   text-decoration: none;
 }
 
@@ -191,3 +191,53 @@
   width: 100%;
   overflow-wrap: break-word; /* Ensure long text wraps and doesn't expand the card */
 }
+
+/* Estilo para la tarjeta de GESTOR (con alta especificidad y estética completa) */
+.card.login-card-gestor {
+  background: rgba(255, 255, 255, 0.25)!important;
+  backdrop-filter: blur(12px)!important;
+  border-radius: 16px!important;
+  border: 1px solid rgba(255, 255, 255, 0.3)!important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15)!important;
+}
+
+.card.login-card-gestor h1 {
+  font-size: 1.5rem !important;      /* Tamaño aumentado */
+  font-weight: bold !important;   /* Asegurar negrita */
+  color: #000 !important;
+}
+
+/* Forzar texto blanco para el resto de la tarjeta */
+.card.login-card-gestor p {
+  font-size: 1rem !important;      /* Tamaño aumentado */
+  font-weight: normal !important;   /* Asegurar negrita */
+  color: #000 !important;
+}
+.card.login-card-gestor a {
+  font-size: 1rem !important;      /* Tamaño aumentado */
+  font-weight: bold !important;   /* Asegurar negrita */
+  color: #0400ff !important;
+}
+.card.login-card-gestor .text-white,
+
+.card.login-card-gestor .text-white-50 {
+  color: #fff !important;
+}
+
+.card.login-card-gestor a:hover {
+  color: #eee !important; /* Mantener el enlace claro en hover */
+}
+
+/* Estilo personalizado para el botón de cambio de modo */
+.btn-mode-switch {
+  background-color: #D0D0D0 !important; /* Gris un poco más oscuro */
+  color: #333333 !important;
+  border: 1px solid #BDBDBD !important;
+  font-weight: bold;
+}
+
+.btn-mode-switch:hover {
+  background-color: #C0C0C0 !important; /* Gris hover más oscuro */
+  color: #333333 !important;
+}
+

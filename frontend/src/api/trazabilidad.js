@@ -14,3 +14,7 @@ export const getTrazabilidadPublica = async (id) => {
 export const confirmarEntrega = async (id, codigo_entrega) => {
   return await api.post(`/trazabilidad/${id}/confirmar-entrega`, { codigo_entrega });
 };
+
+export const reclamarResiduo = (idResiduo) => {
+  return api.post(`/trazabilidad/reclamar/${idResiduo}`);
+};

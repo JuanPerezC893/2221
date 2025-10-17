@@ -54,3 +54,11 @@ export const generarEtiqueta = async (residuoId) => {
 export const marcarEnCamino = async (id, destino) => {
   return await api.put(`/residuos/${id}/en-camino`, destino);
 };
+
+export const getResiduosDisponibles = (filters) => {
+  return api.get('/residuos/disponibles', { params: filters });
+};
+
+export const getResiduoDetalle = (id) => {
+  return api.get(`/residuos/detalle/${id}`);
+};

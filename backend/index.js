@@ -51,6 +51,12 @@ app.use('/api/empresas', empresasRouter);
 const geocodingRoutes = require('./routes/geocoding');
 app.use('/api/geocoding', geocodingRoutes);
 
+const gestorRoutes = require('./routes/gestor');
+app.use('/api/gestor', gestorRoutes);
+
+const filtroRoutes = require('./routes/filtros');
+app.use('/api/filtros', filtroRoutes);
+
 const errorHandler = require('./middleware/errorHandler');
 app.use(errorHandler);
 

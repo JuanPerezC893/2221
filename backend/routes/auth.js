@@ -10,7 +10,7 @@ const { sendVerificationEmail, sendNewUserForApprovalEmail, sendPasswordResetEma
 
 // Registrar un nuevo usuario y empresa (si no existe)
 router.post('/register', registerValidationRules(), validateRequest, asyncHandler(async (req, res) => {
-  const { nombre, empresa_rut, razon_social, direccion, email, password } = req.body;
+  const { nombre, empresa_rut, razon_social, direccion, email, password, tipo_empresa } = req.body;
 
   const client = await pool.connect();
   try {
@@ -32,8 +32,8 @@ router.post('/register', registerValidationRules(), validateRequest, asyncHandle
     if (empresaResult.rows.length === 0) {
       // Si la empresa NO existe, la crea y el primer usuario es 'admin'
       await client.query(
-        'INSERT INTO empresas (rut, razon_social, direccion) VALUES ($1, $2, $3)',
-        [empresa_rut, razon_social, direccion]
+        'INSERT INTO empresas (rut, razon_social, direccion, tipo_empresa) VALUES ($1, $2, $3, $4)',
+        [empresa_rut, razon_social, direccion, tipo_empresa]
       );
       userRole = 'admin'; // First user of a new company is admin
     } else {
@@ -156,19 +156,20 @@ router.post('/login', loginValidationRules(), validateRequest, asyncHandler(asyn
   }
 
   // Verificar la integridad de los datos: la empresa asociada debe existir
-  const empresaResult = await pool.query('SELECT razon_social FROM empresas WHERE rut = $1', [user.empresa_rut]);
+  const empresaResult = await pool.query('SELECT razon_social, tipo_empresa FROM empresas WHERE rut = $1', [user.empresa_rut]);
   if (empresaResult.rows.length === 0) {
     console.error(`Error de integridad de datos: El usuario ${user.email} está asociado a una empresa con RUT ${user.empresa_rut} que no existe.`);
     return res.status(500).json({ message: 'Error en la configuración de la cuenta. La empresa asociada a tu usuario no fue encontrada. Por favor, contacta a soporte.' });
   }
-  const nombre_empresa = empresaResult.rows[0].razon_social;
+  const { razon_social, tipo_empresa } = empresaResult.rows[0];
 
   const tokenPayload = {
     id: user.id_usuario,
     rol: user.rol,
     empresa_rut: user.empresa_rut,
     nombre: user.nombre,
-    nombre_empresa: nombre_empresa // Añadir el nombre de la empresa al payload
+    nombre_empresa: razon_social, // Corregido para usar la variable correcta
+    tipo_empresa: tipo_empresa // Añadir el tipo de empresa al payload
   };
 
   const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '1h' });
