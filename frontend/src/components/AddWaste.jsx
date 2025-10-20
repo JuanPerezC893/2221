@@ -95,7 +95,7 @@ const AddWaste = ({ isModalMode = false, proyectos: proyectosProp, onSuccess, on
     setLoading(true);
     setError(null);
     try {
-      await createTrazabilidad({
+      await addTrazabilidad({
         id_residuo: savedWasteData.id_residuo,
         qr: qrCodeValue,
         ticket: uuidv4(),
@@ -224,11 +224,20 @@ const AddWaste = ({ isModalMode = false, proyectos: proyectosProp, onSuccess, on
             </div>
           </div>
           <div className="card-footer d-flex justify-content-end">
-            <button onClick={handleDownloadLabel} className="btn btn-info me-2" disabled={loading}>
+            <button onClick={handleDownloadLabel} className="btn btn-outline-primary me-2" disabled={loading}>
+              <i className="bi bi-download me-1"></i>
               {loading ? 'Descargando...' : 'Descargar Etiqueta'}
             </button>
-            <button onClick={resetForm} className="btn btn-secondary me-2">Añadir Otro Residuo</button>
-            {isModalMode && <button onClick={onClose} className="btn btn-primary">Finalizar</button>}
+            <button onClick={resetForm} className="btn btn-secondary me-2">
+              <i className="bi bi-plus-circle me-1"></i>
+              Añadir Otro Residuo
+            </button>
+            {isModalMode && 
+              <button onClick={onClose} className="btn btn-primary">
+                <i className="bi bi-check-circle me-1"></i>
+                Finalizar
+              </button>
+            }
           </div>
         </div>
       );

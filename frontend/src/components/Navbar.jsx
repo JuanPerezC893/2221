@@ -9,6 +9,10 @@ const Navbar = ({ openAddProjectModal, openAddWasteModal }) => {
   const location = useLocation();
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
+  const userRole = auth.user?.rol;
+  const canAddProject = userRole === 'admin' || userRole === 'gerente';
+  const canAddWaste = userRole === 'admin' || userRole === 'gerente' || userRole === 'subgerente' || userRole === 'operador';
+
   const handleLogoutClick = () => {
     setIsLogoutModalOpen(true);
   };
@@ -38,12 +42,16 @@ const Navbar = ({ openAddProjectModal, openAddWasteModal }) => {
               </li>
               {location.pathname !== '/perfil' && (
                 <>
-                  <li className="nav-item">
-                    <button className="btn btn-link nav-link d-flex align-items-center" onClick={openAddProjectModal}><i className="bi bi-building-add me-2"></i>Agregar Proyecto</button>
-                  </li>
-                  <li className="nav-item">
-                    <button className="btn btn-link nav-link d-flex align-items-center" onClick={openAddWasteModal}><i className="bi bi-plus-lg me-2"></i>Agregar Residuo</button>
-                  </li>
+                  {canAddProject && (
+                    <li className="nav-item">
+                      <button className="btn btn-link nav-link d-flex align-items-center" onClick={openAddProjectModal}><i className="bi bi-building-add me-2"></i>Agregar Proyecto</button>
+                    </li>
+                  )}
+                  {canAddWaste && (
+                    <li className="nav-item">
+                      <button className="btn btn-link nav-link d-flex align-items-center" onClick={openAddWasteModal}><i className="bi bi-plus-lg me-2"></i>Agregar Residuo</button>
+                    </li>
+                  )}
                 </>
               )}
             </ul>
@@ -66,7 +74,7 @@ const Navbar = ({ openAddProjectModal, openAddWasteModal }) => {
         onConfirm={handleConfirmLogout}
         title="Confirmar cierre de sesión"
       >
-        ¿Estás seguro de que quieres cerrar sesión?
+        ¿Estás seguro de que deseas cerrar tu sesión? Perderás el acceso a la plataforma hasta que vuelvas a iniciar sesión.
       </ConfirmationModal>
     </>
   );

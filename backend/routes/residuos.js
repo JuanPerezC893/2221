@@ -3,7 +3,7 @@ const router = express.Router();
 const pool = require('../db');
 const asyncHandler = require('../utils/asyncHandler');
 const { wasteValidationRules, validateRequest } = require('../middleware/validators');
-const { authMiddleware } = require('../middleware/auth');
+const { authMiddleware, authorize } = require('../middleware/auth');
 const { crearEtiquetaPDF } = require('../services/pdfService');
 
 // Todas las rutas en este archivo requieren autenticación
@@ -160,7 +160,7 @@ router.get('/', asyncHandler(async (req, res) => {
 }));
 
 // Crear un nuevo residuo
-router.post('/', wasteValidationRules(), validateRequest, asyncHandler(async (req, res) => {
+router.post('/', authorize(['subgerente', 'operador']), wasteValidationRules(), validateRequest, asyncHandler(async (req, res) => {
   const { tipo, cantidad, unidad, reciclable, id_proyecto } = req.body;
   const { empresa_rut, id: id_usuario_creacion } = req.user;
 
@@ -447,7 +447,7 @@ router.put('/:id/en-camino', asyncHandler(async (req, res) => {
 
     // 2. Registrar el evento de envío en la tabla de trazabilidad
     await client.query(
-      'INSERT INTO trazabilidad (id_residuo, ticket, fecha) VALUES ($1, $2, NOW())',
+      'INSERT INTO trazabilidad (id_residuo, ticket, fecha_evento) VALUES ($1, $2, NOW())',
       [id, `Enviado a: ${destino}`]
     );
 
@@ -483,7 +483,7 @@ router.get('/:id', asyncHandler(async (req, res) => {
 }));
 
 // Actualizar un residuo
-router.put('/:id', asyncHandler(async (req, res) => {
+router.put('/:id', authorize(['subgerente']), asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { tipo, cantidad, unidad, reciclable, estado } = req.body;
   const { empresa_rut } = req.user;
@@ -530,7 +530,7 @@ router.put('/:id', asyncHandler(async (req, res) => {
 }));
 
 // Eliminar un residuo
-router.delete('/:id', asyncHandler(async (req, res) => {
+router.delete('/:id', authorize(['subgerente']), asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { empresa_rut } = req.user;
 

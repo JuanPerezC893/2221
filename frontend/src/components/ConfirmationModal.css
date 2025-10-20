@@ -13,7 +13,7 @@
 
 .modal-content-custom {
   background: white;
-  padding: 20px;
+  padding: 30px; /* Increased padding */
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   width: 90%;
@@ -31,8 +31,40 @@
 .modal-footer-custom {
   border-top: 1px solid #dee2e6;
   padding-top: 10px;
-  margin-top: 15px;
+  margin-top: 25px; /* Increased space */
   display: flex;
-  justify-content: flex-end;
-  gap: 10px;
+  justify-content: center; /* Centered buttons */
+  gap: 15px; /* Increased spacing */
+}
+
+.modal-header-custom .modal-title {
+  font-weight: 600;
+  color: #343a40;
+  display: flex;
+  align-items: center;
+}
+
+.modal-body p {
+  font-size: 0.95rem;
+  color: #495057;
+}
+
+.modal-footer-custom .btn {
+  border-radius: 6px;
+  padding: 10px 20px;
+  border: none;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.modal-footer-custom .btn-secondary {
+  background-color: #E0E0E0;
+  color: #343a40;
+}
+
+.modal-footer-custom .btn-secondary:hover {
+  background-color: #d5d5d5;
+}
+
+.modal-footer-custom .btn-danger:hover {
+  background-color: #c82333;
 }

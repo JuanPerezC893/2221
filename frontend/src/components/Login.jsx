@@ -74,7 +74,7 @@ const Login = () => {
         {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       </div>
       <div className="login-page-center-container">
-            <div className={`card ${mode === 'gestora' ? 'login-card-gestor' : 'login-card-facebook'}`}>
+            <div className={`card ${mode === 'gestora' ? 'login-card-gestor' : 'login-card-constructora'}`}>
               <div className="card-body">
                 <div className="text-center mb-4">
                   <h1 className="card-title">{mode === 'constructora' ? 'Acceso Constructora' : 'Acceso Gestor'}</h1>

@@ -57,7 +57,7 @@ const GestorNavbar = () => {
         onConfirm={handleConfirmLogout}
         title="Confirmar cierre de sesión"
       >
-        ¿Estás seguro de que quieres cerrar sesión?
+        ¿Estás seguro de que deseas cerrar tu sesión? Perderás el acceso a la plataforma hasta que vuelvas a iniciar sesión.
       </ConfirmationModal>
     </>
   );

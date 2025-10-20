@@ -37,7 +37,7 @@ const ResiduoAccordion = ({ residuos }) => {
                 <button 
                   className="btn btn-reclamar w-100" 
                   onClick={() => handleNavigateToDetail(residuo.id_residuo)}>
-                  Ver Detalles y Reclamar
+                  Ver Detalles y Solicitar
                 </button>
               </div>
             </div>

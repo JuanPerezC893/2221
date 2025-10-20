@@ -1,0 +1,24 @@
+.detalle-residuo-header {
+  background-color: #198754; /* Darker, desaturated green */
+  color: white;
+  padding: 1.5rem;
+}
+
+.detalle-residuo-header h2 {
+  font-weight: 600; /* semi-bold */
+  margin-bottom: 0;
+  display: flex;
+  align-items: center;
+  color: white;
+}
+
+.card-footer .btn {
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.card-footer .btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}

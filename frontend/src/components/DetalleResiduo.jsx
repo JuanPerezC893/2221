@@ -4,6 +4,7 @@ import { getResiduoDetalle } from '../api/residuos';
 import { reclamarResiduo } from '../api/trazabilidad';
 import Toast from './Toast';
 import AuthContext from '../context/AuthContext';
+import './DetalleResiduo.css';
 
 const DetalleResiduo = () => {
   const { id } = useParams();
@@ -38,16 +39,16 @@ const DetalleResiduo = () => {
     }
   }, [id, auth, navigate]);
 
-  const handleConfirmarReclamo = async () => {
+  const handleConfirmarSolicitud = async () => {
     setIsClaiming(true);
     try {
       const { data } = await reclamarResiduo(id);
-      setToast({ message: `¡Residuo reclamado exitosamente! Código de entrega: ${data.codigo_entrega}. Serás redirigido al dashboard.`, type: 'success' });
+      setToast({ message: `¡Residuo solicitado exitosamente! Código de entrega: ${data.codigo_entrega}. Serás redirigido al dashboard.`, type: 'success' });
       setTimeout(() => {
         navigate('/gestor/dashboard');
       }, 3000);
     } catch (err) {
-      const errorMessage = err.response?.data?.message || 'Error al reclamar el residuo.';
+      const errorMessage = err.response?.data?.message || 'Error al solicitar el residuo.';
       setToast({ message: errorMessage, type: 'error' });
       setIsClaiming(false);
     }
@@ -64,33 +65,53 @@ const DetalleResiduo = () => {
       </div>
       <div className="container mt-4">
         <div className="card">
-          <div className="card-header bg-success text-white">
-            <h2>Detalle del Residuo a Reclamar</h2>
+          <div className="detalle-residuo-header">
+            <h2><i className="bi bi-recycle me-3"></i>Detalle del Residuo a Solicitar</h2>
           </div>
-          <div className="card-body">
-            <h3 className="card-title mb-3">{residuo.tipo}</h3>
-            <ul className="list-group list-group-flush">
-              <li className="list-group-item"><strong>Cantidad:</strong> {residuo.cantidad} {residuo.unidad}</li>
-              <li className="list-group-item"><strong>Reciclable:</strong> {residuo.reciclable ? 'Sí' : 'No'}</li>
-              <li className="list-group-item"><strong>Estado Actual:</strong> <span className="badge bg-warning text-dark">{residuo.estado}</span></li>
-              <li className="list-group-item"><strong>Empresa Constructora:</strong> {residuo.nombre_empresa_constructora}</li>
-              <li className="list-group-item"><strong>Proyecto:</strong> {residuo.nombre_proyecto}</li>
-              <li className="list-group-item"><strong>Ubicación del Proyecto:</strong> {residuo.ubicacion_proyecto}</li>
+          <div className="card-body p-4">
+            <h3 className="card-title mb-4">{residuo.tipo}</h3>
+            <ul className="list-group list-group-flush list-group-striped">
+              <li className="list-group-item d-flex align-items-center">
+                <div><i className="bi bi-box me-2"></i><strong>Cantidad</strong></div>
+                <span className="ms-2">{residuo.cantidad} {residuo.unidad}</span>
+              </li>
+              <li className="list-group-item d-flex align-items-center">
+                <div><i className="bi bi-recycle me-2"></i><strong>Reciclable</strong></div>
+                <span className="ms-2">{residuo.reciclable ? 'Sí' : 'No'}</span>
+              </li>
+              <li className="list-group-item d-flex align-items-center">
+                <div><i className="bi bi-info-circle me-2"></i><strong>Estado Actual</strong></div>
+                <span className="badge bg-warning text-dark ms-2">{residuo.estado}</span>
+              </li>
+              <li className="list-group-item d-flex align-items-center">
+                <div><i className="bi bi-building me-2"></i><strong>Empresa Constructora</strong></div>
+                <span className="ms-2">{residuo.nombre_empresa_constructora}</span>
+              </li>
+              <li className="list-group-item d-flex align-items-center">
+                <div><i className="bi bi-file-earmark-text me-2"></i><strong>Proyecto</strong></div>
+                <span className="ms-2">{residuo.nombre_proyecto}</span>
+              </li>
+              <li className="list-group-item d-flex align-items-center">
+                <div><i className="bi bi-geo-alt me-2"></i><strong>Ubicación del Proyecto</strong></div>
+                <span className="ms-2">{residuo.ubicacion_proyecto}</span>
+              </li>
             </ul>
           </div>
           <div className="card-footer text-center">
             <button 
               className="btn btn-success btn-lg"
-              onClick={handleConfirmarReclamo}
+              onClick={handleConfirmarSolicitud}
               disabled={isClaiming}
             >
-              {isClaiming ? 'Confirmando...' : 'Confirmar Reclamo'}
+              <i className="bi bi-check-circle me-2"></i>
+              {isClaiming ? 'Confirmando...' : 'Confirmar Solicitud'}
             </button>
             <button 
               className="btn btn-secondary btn-lg ms-3" 
               onClick={() => navigate('/gestor/dashboard')}
               disabled={isClaiming}
             >
+              <i className="bi bi-x-circle me-2"></i>
               Cancelar
             </button>
           </div>

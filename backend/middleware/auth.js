@@ -27,4 +27,17 @@ const adminOnly = (req, res, next) => {
   }
 };
 
-module.exports = { authMiddleware, adminOnly };
+const authorize = (allowedRoles) => {
+  return (req, res, next) => {
+    // Admin and Gerente have all permissions
+    if (req.user && (req.user.rol === 'admin' || req.user.rol === 'gerente')) {
+      return next();
+    }
+    if (req.user && allowedRoles.some(role => role === req.user.rol)) {
+      return next();
+    }
+    res.status(403).json({ message: 'Acceso denegado. No tiene los permisos necesarios.' });
+  };
+};
+
+module.exports = { authMiddleware, adminOnly, authorize };

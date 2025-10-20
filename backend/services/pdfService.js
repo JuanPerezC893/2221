@@ -29,7 +29,7 @@ async function crearPDF(proyecto, residuos) {
       [projectId]
     );
     const summaryOverTimeQuery = pool.query(
-      `SELECT TO_CHAR(t.fecha, 'YYYY-MM') as month, SUM(r.cantidad) as total_cantidad FROM residuos r JOIN trazabilidad t ON r.id_residuo = t.id_residuo WHERE r.id_proyecto = $1 GROUP BY month ORDER BY month`,
+      `SELECT TO_CHAR(t.fecha_evento, 'YYYY-MM') as month, SUM(r.cantidad) as total_cantidad FROM residuos r JOIN trazabilidad t ON r.id_residuo = t.id_residuo WHERE r.id_proyecto = $1 GROUP BY month ORDER BY month`,
       [projectId]
     );
 

@@ -2,13 +2,12 @@ import React, { useContext, useState, useEffect, useCallback, useRef } from 'rea
 import AuthContext from '../context/AuthContext';
 import api from '../services/api';
 import { generarInforme } from '../api/proyectos';
-import { deleteResiduo, marcarEnCamino } from '../api/residuos';
+import { deleteResiduo } from '../api/residuos';
 import LabelModal from './LabelModal';
 import ChangePasswordModal from './ChangePasswordModal';
 import EditWasteModal from './EditWasteModal';
 import DeleteWasteModal from './DeleteWasteModal';
-import ConfirmarEnvioModal from './ConfirmarEnvioModal';
-import SuccessCodeModal from './SuccessCodeModal';
+
 import CompanyProfile from './CompanyProfile';
 import UserProfile from './UserProfile';
 import UserRoles from './UserRoles';
@@ -37,16 +36,14 @@ const Profile = () => {
   const [wasteToEdit, setWasteToEdit] = useState(null);
   const [isDeleteWasteModalOpen, setDeleteWasteModalOpen] = useState(false);
   const [wasteToDelete, setWasteToDelete] = useState(null);
-  const [isConfirmarEnvioModalOpen, setConfirmarEnvioModalOpen] = useState(false);
-  const [wasteToSend, setWasteToSend] = useState(null);
+  
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isTreeEditing, setIsTreeEditing] = useState(false);
   const [indicatorStyle, setIndicatorStyle] = useState({});
   const [finalizingProjectId, setFinalizingProjectId] = useState(null);
-  const [envioLoading, setEnvioLoading] = useState(false);
-  const [successModal, setSuccessModal] = useState({ show: false, code: '' });
+  
 
   // Refs for tabs
   const userTabRef = useRef(null);
@@ -167,23 +164,7 @@ const Profile = () => {
     }
   };
 
-  const handleMarcarEnCamino = (residuo) => { setWasteToSend(residuo); setConfirmarEnvioModalOpen(true); };
-
-  const handleConfirmarEnvio = async (residuoId, destino) => {
-    setEnvioLoading(true);
-    setToast(null);
-    try {
-      const response = await marcarEnCamino(residuoId, { destino });
-      setSuccessModal({ show: true, code: response.data.codigo_entrega });
-      setConfirmarEnvioModalOpen(false);
-      fetchData();
-    } catch (err) {
-      console.error("Error updating status:", err);
-      setToast({ message: err.response?.data?.message || 'Error al actualizar el estado.', type: 'error' });
-    } finally {
-      setEnvioLoading(false);
-    }
-  };
+  
 
   if (loading) { return <div className="container mt-4 text-center"><div className="spinner-border"></div></div>; }
 
@@ -237,7 +218,7 @@ const Profile = () => {
             onOpenLabelModal={handleOpenLabelModal}
             onOpenEditWasteModal={handleOpenEditWasteModal}
             onOpenDeleteWasteModal={handleOpenDeleteWasteModal}
-            onMarcarEnCamino={handleMarcarEnCamino}
+            
             onDataChange={fetchData}
             finalizingProjectId={finalizingProjectId}
             userRole={auth.user?.rol}
@@ -251,14 +232,7 @@ const Profile = () => {
       {isChangePasswordModalOpen && <ChangePasswordModal onClose={() => setChangePasswordModalOpen(false)} />}
       <EditWasteModal isOpen={isEditWasteModalOpen} onClose={handleCloseEditWasteModal} wasteToEdit={wasteToEdit} proyectos={projects} onDataChange={() => { fetchData(); handleCloseEditWasteModal(); }} />
       <DeleteWasteModal isOpen={isDeleteWasteModalOpen} onClose={handleCloseDeleteWasteModal} onConfirm={handleConfirmDeleteWaste} wasteToDelete={wasteToDelete} />
-      {isConfirmarEnvioModalOpen && <ConfirmarEnvioModal residuo={wasteToSend} onClose={() => setConfirmarEnvioModalOpen(false)} onConfirm={handleConfirmarEnvio} loading={envioLoading} />}
       
-      {successModal.show && (
-        <SuccessCodeModal 
-          code={successModal.code} 
-          onClose={() => setSuccessModal({ show: false, code: '' })} 
-        />
-      )}
     </div>
   );
 };
