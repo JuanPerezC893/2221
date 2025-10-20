@@ -72,7 +72,7 @@ const loginValidationRules = () => {
 
 const projectValidationRules = () => {
   return [
-    body('nombre').notEmpty().withMessage('El nombre es requerido'),
+    body('nombre').notEmpty().withMessage('El nombre es requerido').matches(/^[a-zA-Z0-9\s]+$/).withMessage('El nombre solo puede contener letras, números y espacios'),
     body('ubicacion').notEmpty().withMessage('La ubicación es requerida'),
     body('fecha_inicio').isISO8601().toDate().withMessage('La fecha de inicio debe ser una fecha válida'),
     body('fecha_fin').notEmpty().withMessage('La fecha de fin es obligatoria').isISO8601().toDate().withMessage('La fecha de fin debe ser una fecha válida'),

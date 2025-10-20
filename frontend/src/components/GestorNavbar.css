@@ -1,7 +1,7 @@
-.navbar-gestor {
-  background-color: #2E7D32 !important;
-  padding-top: 12px !important;
-  padding-bottom: 12px !important;
+.navbar.navbar-gestor {
+  background-color: #2E7D32;
+  padding-top: 12px;
+  padding-bottom: 12px;
 }
 
 .navbar-brand-gestor {

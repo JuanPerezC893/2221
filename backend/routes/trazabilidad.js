@@ -126,20 +126,33 @@ router.post('/:id/confirmar-entrega', asyncHandler(async (req, res) => {
   try {
     await client.query('BEGIN');
 
-    const updatedResiduo = await client.query(
-      "UPDATE residuos SET estado = 'entregado' WHERE id_residuo = $1 RETURNING *",
+    // Actualizar el estado del residuo a 'entregado'
+    await client.query(
+      "UPDATE residuos SET estado = 'entregado' WHERE id_residuo = $1",
       [id]
     );
 
+    // Añadir el evento de trazabilidad para la entrega
     await client.query(
       'INSERT INTO trazabilidad (id_residuo, tipo_evento, fecha_evento, ticket) VALUES ($1, $2, NOW(), $3)',
       [id, 'entregado', 'Entrega confirmada por el receptor.']
     );
 
+    // Después de actualizar, obtener el objeto completo del residuo para devolverlo
+    const fullResiduoQuery = `
+      SELECT r.*, p.nombre as nombre_proyecto, p.latitud, p.longitud, e.razon_social as nombre_empresa 
+      FROM residuos r 
+      JOIN proyectos p ON r.id_proyecto = p.id_proyecto 
+      JOIN empresas e ON p.empresa_rut = e.rut 
+      WHERE r.id_residuo = $1
+    `;
+    const updatedResiduoResult = await client.query(fullResiduoQuery, [id]);
+
     await client.query('COMMIT');
+    
     res.json({
       message: '¡Entrega confirmada exitosamente!',
-      residuo: updatedResiduo.rows[0]
+      residuo: updatedResiduoResult.rows[0]
     });
 
   } catch (error) {

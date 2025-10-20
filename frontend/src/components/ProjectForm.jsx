@@ -23,6 +23,7 @@ const ProjectForm = ({ projectId: projectIdProp, onSuccess, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
+  const [formErrors, setFormErrors] = useState({});
 
   useEffect(() => {
     if (id) {
@@ -49,6 +50,27 @@ const ProjectForm = ({ projectId: projectIdProp, onSuccess, onClose }) => {
 
   const { nombre, descripcion, ubicacion, fecha_inicio, fecha_fin } = formValues;
 
+  const validateField = (name, value) => {
+    const errors = { ...formErrors };
+    if (name === 'nombre') {
+      const regex = /^[a-zA-Z0-9\s]+$/;
+      if (!value) {
+        errors.nombre = 'El nombre es requerido.';
+      } else if (!regex.test(value)) {
+        errors.nombre = 'El nombre solo puede contener letras, números y espacios.';
+      } else {
+        delete errors.nombre;
+      }
+    }
+    setFormErrors(errors);
+  };
+
+  const handleValidatedInputChange = (e) => {
+    const { name, value } = e.target;
+    handleInputChange(e);
+    validateField(name, value);
+  };
+
   const handleAddressSelect = (addressObject) => {
     setValues({
       ...formValues,
@@ -58,6 +80,13 @@ const ProjectForm = ({ projectId: projectIdProp, onSuccess, onClose }) => {
 
   const onSubmit = async (e) => {
     e.preventDefault();
+
+    // Re-validar antes de enviar
+    validateField('nombre', nombre);
+    if (Object.keys(formErrors).length > 0 || !nombre) {
+      return; // Detener si hay errores
+    }
+
     setLoading(true);
     setError(null);
     setSuccessMessage('');
@@ -118,7 +147,8 @@ const ProjectForm = ({ projectId: projectIdProp, onSuccess, onClose }) => {
           <form onSubmit={onSubmit}>
             <div className="mb-3">
               <label htmlFor="nombre" className="form-label">Nombre del Proyecto</label>
-              <input type="text" className="form-control" id="nombre" name="nombre" value={nombre} onChange={handleInputChange} required autoComplete="off" />
+              <input type="text" className={`form-control ${formErrors.nombre ? 'is-invalid' : ''}`} id="nombre" name="nombre" value={nombre} onChange={handleValidatedInputChange} required autoComplete="off" />
+              {formErrors.nombre && <div className="invalid-feedback">{formErrors.nombre}</div>}
             </div>
 
             <div className="mb-3">
@@ -155,7 +185,7 @@ const ProjectForm = ({ projectId: projectIdProp, onSuccess, onClose }) => {
                   Cancelar
                 </button>
               )}
-              <button type="submit" className="btn btn-primary" disabled={loading}>
+              <button type="submit" className="btn btn-primary" disabled={loading || Object.keys(formErrors).length > 0}>
                 {loading ? (id ? 'Actualizando...' : 'Creando...') : (id ? 'Actualizar Proyecto' : 'Crear Proyecto')}
               </button>
             </div>

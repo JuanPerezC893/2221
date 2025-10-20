@@ -1,11 +1,11 @@
 import api from '../services/api';
 
-/**
- * Updates a user's role and status.
- * @param {number} userId The ID of the user to update.
- * @param {object} data The data to update, e.g., { rol: 'admin', estado: 'aprobado' }.
- * @returns {Promise} The API response.
- */
-export const updateUserStatus = (userId, data) => {
-  return api.put(`/users/${userId}/status`, data);
+// Obtener el perfil completo del usuario autenticado
+export const getMyProfile = () => {
+  return api.get('/users/me');
+};
+
+// Actualizar el rol y estado de un usuario (para administradores)
+export const updateUserStatus = (userId, statusData) => {
+  return api.put(`/users/${userId}/status`, statusData);
 };

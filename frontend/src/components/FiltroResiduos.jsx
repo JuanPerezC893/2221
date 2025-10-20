@@ -53,33 +53,33 @@ const FiltroResiduos = ({ onFilterChange, isLoading }) => {
       <div className="card-body">
         <form onSubmit={handleApplyFilters}>
           <div className="row g-3 align-items-end">
-            <div className="col-md">
+            <div className="col-12 col-md">
               <label htmlFor="tipo" className="form-label">Tipo de Residuo</label>
               <select id="tipo" name="tipo" className="form-select" value={filters.tipo} onChange={handleInputChange} disabled={isLoading}>
                 <option value="">Todos</option>
                 {tipos.map(t => <option key={t} value={t}>{t}</option>)} 
               </select>
             </div>
-            <div className="col-md">
+            <div className="col-12 col-md">
               <label htmlFor="ciudad" className="form-label">Ciudad</label>
               <select id="ciudad" name="ciudad" className="form-select" value={filters.ciudad} onChange={handleInputChange} disabled={isLoading}>
                 <option value="">Todas</option>
                 {ciudades.map(c => <option key={c} value={c}>{c}</option>)} 
               </select>
             </div>
-            <div className="col-md">
+            <div className="col-12 col-md">
               <label htmlFor="empresa" className="form-label">Empresa Constructora</label>
               <select id="empresa" name="empresa" className="form-select" value={filters.empresa} onChange={handleInputChange} disabled={isLoading}>
                 <option value="">Todas</option>
                 {empresas.map(e => <option key={e} value={e}>{e}</option>)} 
               </select>
             </div>
-            <div className="col-md-auto">
+            <div className="col-12 col-md-auto">
               <button type="submit" className="btn btn-aplicar w-100" disabled={isLoading}>
                 {isLoading ? <span className="spinner-border spinner-border-sm"></span> : 'Aplicar'}
               </button>
             </div>
-            <div className="col-md-auto">
+            <div className="col-12 col-md-auto">
               <button type="button" className="btn btn-limpiar w-100" onClick={handleResetFilters} disabled={isLoading}>
                 Limpiar
               </button>

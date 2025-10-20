@@ -45,10 +45,24 @@ router.post('/create-by-admin',
 
 // Obtener datos del usuario autenticado (reemplaza a /api/auth/me)
 router.get('/me', asyncHandler(async (req, res) => {
-  const user = await pool.query(
-    'SELECT id_usuario, nombre, rol, empresa_rut, email FROM usuarios WHERE id_usuario = $1',
-    [req.user.id] // req.user es establecido por authMiddleware
-  );
+  const profileQuery = `
+    SELECT
+      u.id_usuario,
+      u.nombre,
+      u.email,
+      u.rol,
+      e.rut AS empresa_rut,
+      e.razon_social AS nombre_empresa,
+      e.direccion AS direccion_empresa
+    FROM
+      usuarios u
+    JOIN
+      empresas e ON u.empresa_rut = e.rut
+    WHERE
+      u.id_usuario = $1
+  `;
+  const user = await pool.query(profileQuery, [req.user.id]);
+
   if (user.rows.length === 0) {
     return res.status(404).json({ message: 'Usuario no encontrado.' });
   }

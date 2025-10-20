@@ -1,0 +1,154 @@
+/* --- Variables y Estilos Globales --- */
+:root {
+    --primary-color: #005A9C;
+    --light-gray: #f4f7fa;
+    --border-color: #e1e5e8;
+    --text-color: #333333;
+    --text-secondary: #6c757d;
+    --card-bg: #ffffff;
+    --font-family: 'Inter', sans-serif;
+}
+
+/* Estilos base del body (afectan globalmente, se mantienen) */
+body {
+    font-family: var(--font-family);
+    background-color: var(--light-gray);
+    color: var(--text-color);
+}
+
+/* --- Contenedor Principal (Namespace) --- */
+.profile-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+}
+
+/* --- Estilos Encapsulados para GestorProfile --- */
+
+.profile-container .card {
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    margin-bottom: 2rem;
+    border: none; /* Override bootstrap border */
+}
+
+.profile-container .profile-header h1 {
+    margin-top: 0;
+    color: var(--primary-color);
+    font-size: 2.25rem;
+}
+
+.profile-container .card h2 {
+    margin-top: 0;
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 0.5rem;
+    display: inline-block;
+    color: var(--primary-color);
+    font-size: 1.5rem;
+}
+
+.profile-container .card p {
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+.profile-container .table-responsive {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.profile-container .waste-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.profile-container .waste-table th, .profile-container .waste-table td {
+    padding: 1rem;
+    vertical-align: middle;
+}
+
+.profile-container .waste-table thead {
+    background-color: var(--light-gray);
+}
+
+.profile-container .waste-table th {
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.85em;
+    color: var(--text-secondary);
+}
+
+.profile-container .waste-table tbody tr {
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.2s ease;
+}
+
+.profile-container .waste-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.profile-container .waste-table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.profile-container .code-badge {
+    background-color: #e7f3ff;
+    color: var(--primary-color);
+    padding: 0.4em 0.8em;
+    border-radius: 15px;
+    font-weight: 500;
+    font-family: monospace;
+    font-size: 0.9em;
+}
+
+.profile-container .status-badge {
+    padding: 0.5em 0.9em;
+    border-radius: 15px;
+    font-weight: 600;
+    font-size: 0.8em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.profile-container .waste-table .status-badge.status-recolectado {
+    background-color: #d4edda;
+    color: #0f5132;
+}
+
+.profile-container .waste-table .status-badge.status-en-recoleccion {
+    background-color: #fff3cd;
+    color: #664d03;
+}
+
+.profile-container .profile-summary-grid {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+}
+
+.profile-container .profile-summary-grid > div {
+    flex-shrink: 0;
+}
+
+.profile-container .profile-summary-grid .profile-info-container {
+    flex: 2;
+}
+
+.profile-container .profile-summary-grid .summary-info-container {
+    flex: 1;
+}
+
+@media (max-width: 768px) {
+    .profile-container .profile-summary-grid {
+        flex-direction: column;
+    }
+
+    .profile-container .profile-summary-grid .profile-info-container,
+    .profile-container .profile-summary-grid .summary-info-container {
+        width: 100%;
+        flex: 1 1 100%;
+    }
+}
