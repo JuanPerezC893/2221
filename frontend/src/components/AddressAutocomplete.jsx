@@ -52,16 +52,19 @@ const AddressAutocomplete = ({ value, onValueChange, onAddressSelect, placeholde
 
   return (
     <div className="address-autocomplete-container">
-      <input
-        type="text"
-        className="form-control"
-        name={name}
-        value={value}
-        onChange={handleInputChange}
-        required={required}
-        autoComplete="off"
-        placeholder={placeholder || 'Ej: Av. Providencia 123, Santiago'}
-      />
+      <div className="input-group">
+        <span className="input-group-text"><i className="bi bi-geo-alt-fill"></i></span>
+        <input
+          type="text"
+          className="form-control"
+          name={name}
+          value={value}
+          onChange={handleInputChange}
+          required={required}
+          autoComplete="off"
+          placeholder={placeholder || 'Ej: Av. Providencia 123, Santiago'}
+        />
+      </div>
       {suggestions.length > 0 && (
         <ul className="list-group suggestions-list">
           {suggestions.map((s) => (

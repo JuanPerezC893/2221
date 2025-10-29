@@ -139,6 +139,11 @@ const ProjectWasteTree = ({ projects, wastes, onFinishProject, onOpenLabelModal,
                                 {getStatusBadge(waste.estado)}
                               </div>
                               <div>
+                                {waste.estado?.trim().toLowerCase() === 'entregado' && waste.url_certificado && (
+                                  <a href={waste.url_certificado} target="_blank" rel="noopener noreferrer" className="btn-view-certificate me-2" title="Ver Certificado">
+                                    <i className="bi bi-eye"></i> Ver Certificado
+                                  </a>
+                                )}
                                 {isTreeEditing && canManageWastes && waste.estado?.trim().toLowerCase() === 'pendiente' && (
                                   <>
                                     <button className="btn btn-danger btn-sm me-2" onClick={() => onOpenDeleteWasteModal(waste)} title="Eliminar Residuo"><i className="bi bi-trash3"></i></button>

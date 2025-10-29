@@ -39,7 +39,7 @@ const validarRut = (rut) => {
 
 const registerValidationRules = () => {
   return [
-    body('nombre').notEmpty().withMessage('El nombre es requerido'),
+    body('nombre').notEmpty().withMessage('El nombre es requerido').matches(/^[a-zA-Z\s]+$/).withMessage('El nombre solo puede contener letras y espacios'),
     body('email').isEmail().withMessage('Debe ser un email válido'),
     body('password')
       .isLength({ min: 8 }).withMessage('La contraseña debe tener al menos 8 caracteres')
@@ -47,6 +47,10 @@ const registerValidationRules = () => {
       .matches(/[a-z]/).withMessage('La contraseña debe contener al menos una letra minúscula')
       .matches(/[0-9]/).withMessage('La contraseña debe contener al menos un número')
       .matches(/[^A-Za-z0-9]/).withMessage('La contraseña debe contener al menos un carácter especial'),
+    body('razon_social')
+      .optional()
+      .matches(/^[a-zA-Z\s&]+$/)
+      .withMessage('El nombre de la empresa solo puede contener letras, espacios y el símbolo &'),
     body('empresa_rut')
       .notEmpty().withMessage('El RUT de la empresa es requerido')
       .custom(value => {

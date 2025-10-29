@@ -1,39 +1,72 @@
 import React, { useState, useEffect } from 'react';
 import { getMisResiduos } from '../api/gestor';
-import { getMyProfile } from '../api/users'; // Importar la nueva función
+import { getMyProfile } from '../api/users';
+import { uploadCertificate } from '../api/residuos'; // Importar la función de subida
+import Toast from './Toast'; // Importar el componente Toast
 import './GestorProfile.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
 const GestorProfile = () => {
   const [misResiduos, setMisResiduos] = useState([]);
-  const [profileData, setProfileData] = useState(null); // Estado para el perfil
+  const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedFile, setSelectedFile] = useState({}); // Para manejar archivos por residuoId
+  const [isUploading, setIsUploading] = useState({}); // Para manejar el estado de subida por residuoId
+  const [toast, setToast] = useState(null); // Para mostrar mensajes
+
+  const fetchData = async () => {
+    try {
+      const [profileRes, residuosRes] = await Promise.all([
+        getMyProfile(),
+        getMisResiduos()
+      ]);
+      setProfileData(profileRes.data);
+      setMisResiduos(residuosRes.data);
+    } catch (err) {
+      setError('No se pudieron cargar los datos del perfil.');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Obtener ambos datos en paralelo
-        const [profileRes, residuosRes] = await Promise.all([
-          getMyProfile(),
-          getMisResiduos()
-        ]);
-        setProfileData(profileRes.data);
-        setMisResiduos(residuosRes.data);
-      } catch (err) {
-        setError('No se pudieron cargar los datos del perfil.');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchData();
   }, []);
 
   const formatDate = (dateString) => {
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
     return new Date(dateString).toLocaleDateString(undefined, options);
+  };
+
+  const handleFileChange = (residuoId, event) => {
+    setSelectedFile(prev => ({ ...prev, [residuoId]: event.target.files[0] }));
+  };
+
+  const handleUploadCertificate = async (residuoId) => {
+    const file = selectedFile[residuoId];
+    if (!file) {
+      setToast({ message: 'Por favor, selecciona un archivo para subir.', type: 'error' });
+      return;
+    }
+    setIsUploading(prev => ({ ...prev, [residuoId]: true }));
+    try {
+      await uploadCertificate(residuoId, file);
+      setToast({ message: 'Certificado subido exitosamente.', type: 'success' });
+      // Refrescar la lista de residuos para mostrar la nueva URL
+      await fetchData(); 
+      setSelectedFile(prev => {
+        const newState = { ...prev };
+        delete newState[residuoId];
+        return newState;
+      }); // Limpiar el archivo seleccionado para este residuo
+    } catch (err) {
+      const errorMessage = err.response?.data?.message || 'Error al subir el certificado.';
+      setToast({ message: errorMessage, type: 'error' });
+    } finally {
+      setIsUploading(prev => ({ ...prev, [residuoId]: false }));
+    }
   };
 
   // Calcular contadores para la tarjeta de resumen
@@ -43,6 +76,7 @@ const GestorProfile = () => {
 
   return (
     <div className="profile-container">
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       <div className="profile-summary-grid">
         {/* Tarjeta de Perfil de Empresa (Columna Izquierda) */}
         <div className="profile-info-container">
@@ -92,12 +126,7 @@ const GestorProfile = () => {
               <table className="waste-table">
                 <thead>
                   <tr>
-                    <th><i className="bi bi-recycle"></i> Tipo de Residuo</th>
-                    <th><i className="bi bi-box-seam"></i> Cantidad</th>
-                    <th><i className="bi bi-building"></i> Proyecto</th>
-                    <th><i className="bi bi-calendar-event"></i> Fecha de Recolección</th>
-                    <th><i className="bi bi-hash"></i> Código de Entrega</th>
-                    <th><i className="bi bi-info-circle"></i> Estado</th>
+                    <th><i className="bi bi-recycle"></i> Tipo de Residuo</th><th><i className="bi bi-box-seam"></i> Cantidad</th><th><i className="bi bi-building"></i> Proyecto</th><th><i className="bi bi-calendar-event"></i> Fecha de Recolección</th><th><i className="bi bi-hash"></i> Código de Entrega</th><th><i className="bi bi-info-circle"></i> Estado</th><th><i className="bi bi-file-earmark-check"></i> Certificado</th> {/* Nueva columna */}
                   </tr>
                 </thead>
                 <tbody>
@@ -114,6 +143,34 @@ const GestorProfile = () => {
                           <span className={`status-badge ${esEstadoFinal ? 'status-recolectado' : 'status-en-recoleccion'}`}>
                             {esEstadoFinal ? <><i className="bi bi-check-circle-fill"></i> Recolectado</> : residuo.estado}
                           </span>
+                        </td>
+                        <td>
+                          {residuo.estado.toLowerCase().trim() === 'entregado' ? (
+                            residuo.url_certificado ? (
+                              <a href={residuo.url_certificado} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-primary">
+                                Ver <i className="bi bi-box-arrow-up-right ms-1"></i>
+                              </a>
+                            ) : (
+                              <div className="d-flex flex-column align-items-start">
+                                <input
+                                  type="file"
+                                  className="form-control form-control-sm mb-1"
+                                  onChange={(e) => handleFileChange(residuo.id_residuo, e)}
+                                  accept=".pdf,image/*"
+                                  disabled={isUploading[residuo.id_residuo]}
+                                />
+                                <button
+                                  className="btn btn-sm btn-success w-100"
+                                  onClick={() => handleUploadCertificate(residuo.id_residuo)}
+                                  disabled={!selectedFile[residuo.id_residuo] || isUploading[residuo.id_residuo]}
+                                >
+                                  {isUploading[residuo.id_residuo] ? 'Subiendo...' : 'Subir Certificado'}
+                                </button>
+                              </div>
+                            )
+                          ) : (
+                            <span className="text-muted">N/A</span>
+                          )}
                         </td>
                       </tr>
                     );

@@ -24,6 +24,7 @@ router.get('/mis-residuos', asyncHandler(async (req, res) => {
       r.cantidad,
       r.unidad,
       r.estado,
+      r.url_certificado, -- Añadir url_certificado
       p.nombre AS nombre_proyecto,
       t.fecha_evento AS fecha_recoleccion,
       t.codigo_entrega

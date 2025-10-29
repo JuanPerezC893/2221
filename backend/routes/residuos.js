@@ -5,9 +5,56 @@ const asyncHandler = require('../utils/asyncHandler');
 const { wasteValidationRules, validateRequest } = require('../middleware/validators');
 const { authMiddleware, authorize } = require('../middleware/auth');
 const { crearEtiquetaPDF } = require('../services/pdfService');
+const multer = require('multer'); // Importar multer
+const { uploadFile } = require('../services/cloudinaryService'); // Importar el servicio de Cloudinary
+
+// Configuración de Multer para almacenar archivos en memoria
+const upload = multer({ storage: multer.memoryStorage() });
 
 // Todas las rutas en este archivo requieren autenticación
 router.use(authMiddleware);
+
+// Ruta para subir un certificado de disposición final a un residuo
+router.post('/:id/upload-certificate', authorize(['gestor', 'admin']), upload.single('certificate'), asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { empresa_rut, tipo_empresa } = req.user; // Extraer tipo_empresa de req.user
+
+  if (!req.file) {
+    return res.status(400).json({ message: 'No se ha proporcionado ningún archivo.' });
+  }
+
+  // 1. Verificar que el residuo existe y no está en estado 'pendiente'
+  //    También verificar que el usuario es de tipo 'gestora'
+  const residuoCheck = await pool.query(
+    `SELECT r.id_residuo
+           FROM residuos r
+           JOIN proyectos p ON r.id_proyecto = p.id_proyecto
+           WHERE r.id_residuo = $1 AND LOWER(r.estado) = 'entregado' AND $2 = 'gestora'`,
+          [id, tipo_empresa]
+        );
+        
+        if (residuoCheck.rows.length === 0) {
+          return res.status(403).json({ message: 'Acceso denegado. El residuo no existe, no está en estado "entregado", o su rol no es de gestor.' });
+        }  try {
+    // 2. Subir el archivo a Cloudinary
+    // Multer memoryStorage almacena el archivo en req.file.buffer
+    // Pasamos el buffer directamente a Cloudinary junto con el mimetype
+    const fileContent = req.file.buffer;
+    const secure_url = await uploadFile(fileContent, req.file.mimetype);
+
+    // 3. Actualizar la base de datos con la URL del certificado
+    await pool.query(
+      'UPDATE residuos SET url_certificado = $1 WHERE id_residuo = $2',
+      [secure_url, id]
+    );
+
+    res.status(200).json({ message: 'Certificado subido exitosamente.', url_certificado: secure_url });
+
+  } catch (error) {
+    console.error('Error al subir el certificado:', error);
+    res.status(500).json({ message: 'Error al subir el certificado.' });
+  }
+}));
 
 // Ruta para que los gestores vean los residuos disponibles
 router.get('/disponibles', asyncHandler(async (req, res) => {
@@ -78,6 +125,7 @@ router.get('/detalle/:id', asyncHandler(async (req, res) => {
       r.unidad,
       r.reciclable,
       r.estado,
+      r.url_certificado, -- Añadir url_certificado
       p.nombre AS nombre_proyecto,
       p.ubicacion AS ubicacion_proyecto,
       p.latitud,

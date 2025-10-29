@@ -32,6 +32,13 @@ const Register = () => {
 
   const { nombre, email, confirmEmail, password, confirmPassword, empresa_rut, razon_social, direccion } = formValues;
 
+  const handleNombreChange = (e) => {
+    const { name, value } = e.target;
+    // Permite solo letras y espacios
+    const filteredValue = value.replace(/[^a-zA-Z\s]/g, '');
+    setFormValues(prev => ({ ...prev, [name]: filteredValue }));
+  };
+
   const handleRutChange = (e) => {
     let value = e.target.value;
     setCompanyExists(null);
@@ -130,7 +137,7 @@ const Register = () => {
                 <div className="mb-3">
                   <div className="input-group">
                     <span className="input-group-text"><i className="bi bi-person-fill"></i></span>
-                    <input type="text" placeholder="Tu Nombre Completo" name="nombre" value={nombre} onChange={handleInputChange} required className="form-control" autoComplete="name" />
+                    <input type="text" placeholder="Tu Nombre Completo" name="nombre" value={nombre} onChange={handleNombreChange} required className="form-control" autoComplete="name" />
                   </div>
                 </div>
                 <div className="mb-3">
@@ -186,24 +193,25 @@ const Register = () => {
                             placeholder="Nombre Empresa (ej: Constructora S.A.)"
                             name="razon_social"
                             value={razon_social}
-                            onChange={handleInputChange}
+                            onChange={(e) => {
+                              const { name, value } = e.target;
+                              const filteredValue = value.replace(/[^a-zA-Z\s&]/g, '');
+                              setFormValues(prev => ({ ...prev, [name]: filteredValue }));
+                            }}
                             required
                             className="form-control"
                           />
                         </div>
                       </div>
                       <div className="mb-3">
-                        <div className="input-group">
-                          <span className="input-group-text"><i className="bi bi-geo-alt-fill"></i></span>
-                          <AddressAutocomplete 
-                              value={direccion}
-                              onValueChange={(value) => handleInputChange({ target: { name: 'direccion', value: value } })}
-                              onAddressSelect={(selected) => handleInputChange({ target: { name: 'direccion', value: selected } })}
-                              placeholder="Dirección de la empresa"
-                              name="direccion"
-                              required={true}
-                          />
-                        </div>
+                        <AddressAutocomplete 
+                            value={direccion}
+                            onValueChange={(value) => handleInputChange({ target: { name: 'direccion', value: value } })}
+                            onAddressSelect={(selected) => handleInputChange({ target: { name: 'direccion', value: selected } })}
+                            placeholder="Dirección de la empresa"
+                            name="direccion"
+                            required={true}
+                        />
                       </div>
                     </>
                   )}

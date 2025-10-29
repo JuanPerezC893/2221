@@ -62,3 +62,14 @@ export const getResiduosDisponibles = (filters) => {
 export const getResiduoDetalle = (id) => {
   return api.get(`/residuos/detalle/${id}`);
 };
+
+export const uploadCertificate = async (residuoId, file) => {
+  const formData = new FormData();
+  formData.append('certificate', file); // 'certificate' debe coincidir con el nombre del campo en multer.single('certificate')
+
+  return await api.post(`/residuos/${residuoId}/upload-certificate`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+};
