@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import 'bootstrap-icons/font/bootstrap-icons.css'; // Import Bootstrap Icons
 import '../assets/Auth.css';
 
 import image1 from '../assets/background/Antofa.png';
@@ -38,7 +39,15 @@ const AuthLayout = ({ children }) => {
         {children}
       </main>
       <footer className="auth-footer">
-        <p>© 2025 EcoObra. Todos los derechos reservados.</p>
+        <div className="auth-footer-content">
+          <a href="#" className="auth-footer-link">
+            <i className="bi bi-file-text"></i> Términos y condiciones
+          </a>
+          <p className="auth-footer-copyright">© 2025 EcoObra. Todos los derechos reservados.</p>
+          <a href="#" className="auth-footer-link">
+            <i className="bi bi-headset"></i> Contacto
+          </a>
+        </div>
       </footer>
     </div>
   );
