@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import './ResiduoAccordion.css';
 
-const ResiduoAccordion = ({ residuos }) => {
+const ResiduoAccordion = ({ residuos = [] }) => {
   const navigate = useNavigate();
 
   const handleNavigateToDetail = (idResiduo) => {

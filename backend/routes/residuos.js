@@ -59,7 +59,7 @@ router.post('/:id/upload-certificate', authorize(['gestor', 'admin']), upload.si
 // Ruta para que los gestores vean los residuos disponibles
 router.get('/disponibles', asyncHandler(async (req, res) => {
   const { tipo_empresa } = req.user;
-  const { tipo, ciudad, empresa } = req.query; // Capturar filtros
+  const { tipo, ciudad, empresa, page = 1, limit = 9 } = req.query; // Capturar filtros y paginación
 
   if (tipo_empresa !== 'gestora') {
     return res.status(403).json({ message: 'Acceso denegado. Esta función es solo para gestores de residuos.' });
@@ -81,6 +81,16 @@ router.get('/disponibles', asyncHandler(async (req, res) => {
     whereClauses.push(`LOWER(e.razon_social) LIKE $${queryParams.length}`);
   }
 
+  const whereCondition = whereClauses.join(' AND ');
+
+  // Contar el total de residuos para la paginación
+  const totalQuery = `SELECT COUNT(*) FROM residuos r JOIN proyectos p ON r.id_proyecto = p.id_proyecto JOIN empresas e ON p.empresa_rut = e.rut WHERE ${whereCondition}`;
+  const totalResult = await pool.query(totalQuery, queryParams);
+  const totalResiduos = parseInt(totalResult.rows[0].count, 10);
+  const totalPages = Math.ceil(totalResiduos / limit);
+
+  // Consulta para obtener los residuos paginados
+  const offset = (page - 1) * limit;
   const query = `
     SELECT
       r.id_residuo,
@@ -98,14 +108,19 @@ router.get('/disponibles', asyncHandler(async (req, res) => {
     JOIN
       empresas e ON p.empresa_rut = e.rut
     WHERE
-      ${whereClauses.join(' AND ' )}
+      ${whereCondition}
     ORDER BY
       r.id_residuo DESC
+    LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}
   `;
 
-  const disponibles = await pool.query(query, queryParams);
+  const disponibles = await pool.query(query, [...queryParams, limit, offset]);
 
-  res.json(disponibles.rows);
+  res.json({
+    residuos: disponibles.rows,
+    totalPages,
+    currentPage: parseInt(page, 10)
+  });
 }));
 
 // Obtener el detalle de UN residuo pendiente (para GESTORES)

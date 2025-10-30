@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { getMisResiduos } from '../api/gestor';
 import { getMyProfile } from '../api/users';
 import { uploadCertificate } from '../api/residuos'; // Importar la función de subida
 import Toast from './Toast'; // Importar el componente Toast
+import './ProjectWasteTree.css';
 import './GestorProfile.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
@@ -122,61 +123,74 @@ const GestorProfile = () => {
           misResiduos.length === 0 ? (
             <p>Aún no has reclamado ningún residuo.</p>
           ) : (
-            <div className="table-responsive">
-              <table className="waste-table">
-                <thead>
-                  <tr>
-                    <th><i className="bi bi-recycle"></i> Tipo de Residuo</th><th><i className="bi bi-box-seam"></i> Cantidad</th><th><i className="bi bi-building"></i> Proyecto</th><th><i className="bi bi-calendar-event"></i> Fecha de Recolección</th><th><i className="bi bi-hash"></i> Código de Entrega</th><th><i className="bi bi-info-circle"></i> Estado</th><th><i className="bi bi-file-earmark-check"></i> Certificado</th> {/* Nueva columna */}
-                  </tr>
-                </thead>
-                <tbody>
-                  {misResiduos.map((residuo) => {
-                    const esEstadoFinal = residuo.estado.toLowerCase().trim() === 'entregado';
-                    return (
-                      <tr key={residuo.id_residuo}>
-                        <td>{residuo.tipo}</td>
-                        <td>{residuo.cantidad} {residuo.unidad}</td>
-                        <td>{residuo.nombre_proyecto}</td>
-                        <td>{formatDate(residuo.fecha_recoleccion)}</td>
-                        <td><span className="code-badge">{residuo.codigo_entrega}</span></td>
-                        <td>
-                          <span className={`status-badge ${esEstadoFinal ? 'status-recolectado' : 'status-en-recoleccion'}`}>
-                            {esEstadoFinal ? <><i className="bi bi-check-circle-fill"></i> Recolectado</> : residuo.estado}
-                          </span>
-                        </td>
-                        <td>
-                          {residuo.estado.toLowerCase().trim() === 'entregado' ? (
-                            residuo.url_certificado ? (
-                              <a href={residuo.url_certificado} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-primary">
-                                Ver <i className="bi bi-box-arrow-up-right ms-1"></i>
-                              </a>
-                            ) : (
-                              <div className="d-flex flex-column align-items-start">
-                                <input
-                                  type="file"
-                                  className="form-control form-control-sm mb-1"
-                                  onChange={(e) => handleFileChange(residuo.id_residuo, e)}
-                                  accept=".pdf,image/*"
-                                  disabled={isUploading[residuo.id_residuo]}
-                                />
-                                <button
-                                  className="btn btn-sm btn-success w-100"
-                                  onClick={() => handleUploadCertificate(residuo.id_residuo)}
-                                  disabled={!selectedFile[residuo.id_residuo] || isUploading[residuo.id_residuo]}
-                                >
-                                  {isUploading[residuo.id_residuo] ? 'Subiendo...' : 'Subir Certificado'}
-                                </button>
-                              </div>
-                            )
-                          ) : (
-                            <span className="text-muted">N/A</span>
-                          )}
-                        </td>
+            <div className="card mb-3">
+              <div className="card-header d-flex justify-content-between align-items-center project-card-header">
+                <strong>Mis Residuos Reclamados</strong>
+              </div>
+              <div className="card-body">
+                <div className="table-responsive">
+                  <table className="waste-table">
+                    <thead>
+                      <tr>
+                        <th><i className="bi bi-recycle"></i> Tipo de Residuo</th>
+                        <th><i className="bi bi-box-seam"></i> Cantidad</th>
+                        <th><i className="bi bi-building"></i> Proyecto</th>
+                        <th><i className="bi bi-calendar-event"></i> Fecha de Recolección</th>
+                        <th><i className="bi bi-hash"></i> Código de Entrega</th>
+                        <th><i className="bi bi-info-circle"></i> Estado</th>
+                        <th><i className="bi bi-file-earmark-check"></i> Certificado</th>
                       </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                    </thead>
+                    <tbody>
+                      {misResiduos.map((residuo) => {
+                        const esEstadoFinal = residuo.estado.toLowerCase().trim() === 'entregado';
+                        return (
+                          <tr key={residuo.id_residuo}>
+                            <td>{residuo.tipo}</td>
+                            <td>{residuo.cantidad} {residuo.unidad}</td>
+                            <td>{residuo.nombre_proyecto}</td>
+                            <td>{formatDate(residuo.fecha_recoleccion)}</td>
+                            <td><span className="code-badge">{residuo.codigo_entrega}</span></td>
+                            <td>
+                              <span className={`status-badge ${esEstadoFinal ? 'status-recolectado' : 'status-en-recoleccion'}`}>
+                                {esEstadoFinal ? <><i className="bi bi-check-circle-fill"></i> Recolectado</> : residuo.estado}
+                              </span>
+                            </td>
+                            <td>
+                              {residuo.estado.toLowerCase().trim() === 'entregado' ? (
+                                residuo.url_certificado ? (
+                                  <a href={residuo.url_certificado} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-primary">
+                                    Ver <i className="bi bi-box-arrow-up-right ms-1"></i>
+                                  </a>
+                                ) : (
+                                  <div className="d-flex flex-column align-items-start">
+                                    <input
+                                      type="file"
+                                      className="form-control form-control-sm mb-1"
+                                      onChange={(e) => handleFileChange(residuo.id_residuo, e)}
+                                      accept=".pdf,image/*"
+                                      disabled={isUploading[residuo.id_residuo]}
+                                    />
+                                    <button
+                                      className="btn btn-sm btn-success w-100"
+                                      onClick={() => handleUploadCertificate(residuo.id_residuo)}
+                                      disabled={!selectedFile[residuo.id_residuo] || isUploading[residuo.id_residuo]}
+                                    >
+                                      {isUploading[residuo.id_residuo] ? 'Subiendo...' : 'Subir Certificado'}
+                                    </button>
+                                  </div>
+                                )
+                              ) : (
+                                <span className="text-muted">N/A</span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           )
         )}
