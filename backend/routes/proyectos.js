@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db');
 const asyncHandler = require('../utils/asyncHandler');
+const exceljs = require('exceljs');
 const { projectValidationRules, validateRequest } = require('../middleware/validators');
 const { authMiddleware, adminOnly } = require('../middleware/auth');
 const { geocodeAddressWithFallbacks, getDefaultCoordinates } = require('../services/geocoding');
@@ -81,10 +82,74 @@ router.post('/', projectValidationRules(), validateRequest, asyncHandler(async (
   res.status(201).json(result);
 }));
 
+router.get('/export-excel', asyncHandler(async (req, res) => {
+  const { empresa_rut } = req.user;
+
+  const query = `
+    SELECT
+      p.nombre AS nombre_proyecto,
+      r.tipo AS tipo_residuo,
+      r.cantidad,
+      r.unidad,
+      r.fecha_creacion,
+      r.estado,
+      t.fecha_evento AS fecha_recoleccion
+    FROM
+      proyectos p
+    JOIN
+      residuos r ON p.id_proyecto = r.id_proyecto
+    LEFT JOIN (
+      SELECT
+        id_residuo,
+        MAX(fecha_evento) AS fecha_evento
+      FROM
+        trazabilidad
+      GROUP BY
+        id_residuo
+    ) t ON r.id_residuo = t.id_residuo
+    WHERE
+      p.empresa_rut = $1
+    ORDER BY
+      p.nombre, r.fecha_creacion DESC
+  `;
+
+  const { rows } = await pool.query(query, [empresa_rut]);
+
+  const workbook = new exceljs.Workbook();
+  const worksheet = workbook.addWorksheet('Proyectos');
+
+  worksheet.columns = [
+    { header: 'Proyecto', key: 'proyecto', width: 30 },
+    { header: 'Tipo de Residuo', key: 'tipo_residuo', width: 30 },
+    { header: 'Cantidad', key: 'cantidad', width: 15 },
+    { header: 'Fecha de Creación', key: 'fecha_creacion', width: 20 },
+    { header: 'Fecha de Recolección', key: 'fecha_recoleccion', width: 20 },
+    { header: 'Estado', key: 'estado', width: 15 },
+  ];
+
+  rows.forEach(row => {
+    worksheet.addRow({
+      proyecto: row.nombre_proyecto,
+      tipo_residuo: row.tipo_residuo,
+      cantidad: `${row.cantidad} ${row.unidad}`,
+      fecha_creacion: row.fecha_creacion ? new Date(row.fecha_creacion).toLocaleDateString() : 'N/A',
+      fecha_recoleccion: row.fecha_recoleccion ? new Date(row.fecha_recoleccion).toLocaleDateString() : 'N/A',
+      estado: row.estado,
+    });
+  });
+
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  res.setHeader('Content-Disposition', 'attachment; filename=proyectos.xlsx');
+
+  await workbook.xlsx.write(res);
+  res.end();
+}));
+
 // Obtener un proyecto por ID
 router.get('/:id', asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { empresa_rut } = req.user;
+
   const proyecto = await pool.query('SELECT * FROM proyectos WHERE id_proyecto = $1 AND empresa_rut = $2', [id, empresa_rut]);
 
   if (proyecto.rows.length === 0) {

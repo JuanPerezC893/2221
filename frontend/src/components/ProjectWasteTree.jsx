@@ -134,7 +134,8 @@ const ProjectWasteTree = ({ projects, wastes, onFinishProject, onOpenLabelModal,
                               <div className="d-flex align-items-center">
                                 <span className="me-3" style={{width: '140px', flexShrink: 0}}>
                                   {waste.tipo} <br />
-                                  <small className="text-muted">{waste.nombre_creador || 'N/A'}</small>
+                                  <small className="text-muted">{waste.nombre_creador || 'N/A'}</small><br />
+                                  <small className="text-muted">{new Date(waste.fecha_creacion).toLocaleDateString()}</small>
                                 </span>
                                 {getStatusBadge(waste.estado)}
                               </div>

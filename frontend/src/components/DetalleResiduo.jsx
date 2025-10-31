@@ -95,6 +95,10 @@ const DetalleResiduo = () => {
                 <div><i className="bi bi-geo-alt me-2"></i><strong>Ubicación del Proyecto</strong></div>
                 <span className="ms-2">{residuo.ubicacion_proyecto}</span>
               </li>
+              <li className="list-group-item d-flex align-items-center">
+                <div><i className="bi bi-calendar-plus me-2"></i><strong>Fecha de Creación</strong></div>
+                <span className="ms-2">{new Date(residuo.fecha_creacion).toLocaleDateString()}</span>
+              </li>
             </ul>
           </div>
           <div className="card-footer text-center">

@@ -141,6 +141,7 @@ router.get('/detalle/:id', asyncHandler(async (req, res) => {
       r.reciclable,
       r.estado,
       r.url_certificado, -- Añadir url_certificado
+      r.fecha_creacion, -- Añadir fecha_creacion
       p.nombre AS nombre_proyecto,
       p.ubicacion AS ubicacion_proyecto,
       p.latitud,

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, useRef, useCallback } from 'react';
-import { getProyectos } from '../api/proyectos';
+import { getProyectos, exportProyectosToExcel } from '../api/proyectos';
 import { getSummaryByType, getSummaryOverTime, getEnvironmentalImpact, getLatest } from '../api/residuos';
 
 import { Pie, Bar } from 'react-chartjs-2';
@@ -405,6 +405,10 @@ const Dashboard = ({ isAddProjectModalOpen, closeAddProjectModal, isAddWasteModa
     setSelectedProject(e.target.value);
   };
 
+  const handleExport = async () => {
+    await exportProyectosToExcel();
+  };
+
   const currentProjectDetails = projects.find(p => p.id_proyecto === parseInt(selectedProject));
 
   const pieChartData = {
@@ -541,6 +545,12 @@ const Dashboard = ({ isAddProjectModalOpen, closeAddProjectModal, isAddWasteModa
                 <option key={p.id_proyecto} value={p.id_proyecto}>{p.nombre}</option>
               ))}
             </select>
+          </div>
+          <div className="col-auto">
+            <button className="btn btn-success d-flex align-items-center" onClick={handleExport}>
+              <i className="bi bi-file-earmark-excel me-2"></i>
+              Exportar a Excel
+            </button>
           </div>
         </div>
       </div>
