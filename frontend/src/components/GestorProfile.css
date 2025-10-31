@@ -152,3 +152,7 @@ body {
         flex: 1 1 100%;
     }
 }
+
+.residuos-solicitados-card {
+    width: 100%!important;
+}

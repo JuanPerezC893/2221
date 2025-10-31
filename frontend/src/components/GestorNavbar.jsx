@@ -34,7 +34,7 @@ const GestorNavbar = () => {
           <div className="collapse navbar-collapse justify-content-between" id="navbarNavGestor">
             <ul className="navbar-nav me-auto mb-2 mb-lg-0">
               <li className="nav-item">
-                <Link className="nav-link d-flex align-items-center" to="/gestor/dashboard"><i className="bi bi-grid-1x2 me-2"></i>Dashboard</Link>
+                <Link className="nav-link d-flex align-items-center" to="/gestor/dashboard"><i className="bi bi-grid-1x2 me-2"></i>Catalogo de Residuos</Link>
               </li>
               {/* Aquí se podrían añadir futuros enlaces para el gestor, como "Mis Recolecciones" */}
             </ul>

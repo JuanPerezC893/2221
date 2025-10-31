@@ -98,7 +98,7 @@ const GestorProfile = () => {
             <h2 className="h5"><i className="bi bi-bar-chart-line-fill"></i> Resumen de Actividad</h2>
             <div className="mt-3">
               <p className="d-flex justify-content-between align-items-center">
-                <span><i className="bi bi-journal-check"></i> Total Reclamados:</span>
+                <span><i className="bi bi-journal-check"></i> Total Solicitados:</span>
                 <strong className="fs-4">{totalReclamados}</strong>
               </p>
               <p className="d-flex justify-content-between align-items-center">
@@ -115,8 +115,8 @@ const GestorProfile = () => {
       </div>
 
       {/* Tarjeta de Residuos Reclamados (Tabla) */}
-      <div className="card">
-        <h2><i className="bi bi-truck"></i> Mis Residuos Reclamados</h2>
+      <div className="card residuos-solicitados-card">
+        <h2><i className="bi bi-truck"></i> Mis Residuos Solicitados</h2>
         {loading && <p>Cargando residuos...</p>}
         {error && <p className="text-danger">{error}</p>}
         {!loading && !error && (
@@ -124,9 +124,7 @@ const GestorProfile = () => {
             <p>Aún no has reclamado ningún residuo.</p>
           ) : (
             <div className="card mb-3">
-              <div className="card-header d-flex justify-content-between align-items-center project-card-header">
-                <strong>Mis Residuos Reclamados</strong>
-              </div>
+
               <div className="card-body">
                 <div className="table-responsive">
                   <table className="waste-table">
