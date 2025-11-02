@@ -69,8 +69,8 @@ const sendNewUserForApprovalEmail = async (adminEmail, adminName, newUserName, n
 
 const sendPasswordResetEmail = async (userEmail, token, userName) => {
   emailjs.init({
-    publicKey: process.env.EMAILJS_PUBLIC_KEY,
-    privateKey: process.env.EMAILJS_PRIVATE_KEY,
+    publicKey: process.env.EMAILJS_PUBLIC_KEY2,
+    privateKey: process.env.EMAILJS_PRIVATE_KEY2,
   });
 
   const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${token}`;
@@ -81,7 +81,7 @@ const sendPasswordResetEmail = async (userEmail, token, userName) => {
     email: userEmail.trim(),
   };
 
-  const serviceID = process.env.EMAILJS_SERVICE_ID;
+  const serviceID = process.env.EMAILJS_SERVICE_ID2;
   const templateID = process.env.EMAILJS_RESET_TEMPLATE_ID; // Nuevo template
 
   if (!serviceID || !templateID) {
