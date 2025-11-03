@@ -185,11 +185,10 @@ router.post('/forgot-password', asyncHandler(async (req, res) => {
     if (userResult.rows.length > 0) {
         const user = userResult.rows[0];
         const token = crypto.randomBytes(20).toString('hex');
-        const expires = new Date(Date.now() + 3600000); // 1 hora de expiración
 
         await pool.query(
-            'UPDATE usuarios SET reset_password_token = $1, reset_password_expires = $2 WHERE id_usuario = $3',
-            [token, expires, user.id_usuario]
+            'UPDATE usuarios SET reset_password_token = $1, reset_password_expires = NOW() + INTERVAL \'1 hour\' WHERE id_usuario = $2',
+            [token, user.id_usuario]
         );
 
         try {
